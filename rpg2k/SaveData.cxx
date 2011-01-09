@@ -2,7 +2,7 @@
 #include "SaveData.hxx"
 #include "Structure.hxx"
 
-#include <algorithm>
+#include <EASTL/algorithm.h>
 #include <sstream>
 
 
@@ -68,25 +68,25 @@ namespace rpg2k
 		// item
 			{
 				int itemTypeNum = status[11];
-				std::vector<uint16_t> id  = status[12].toBinary();
-				std::vector<uint8_t > num = status[13].toBinary();
-				std::vector<uint8_t > use = status[14].toBinary();
+				eastl::vector<uint16_t> id  = status[12].toBinary().toVector<uint16_t>();
+				eastl::vector<uint8_t > num = status[13].toBinary().toVector<uint8_t>();
+				eastl::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
 
 				for(int i = 0; i < itemTypeNum; i++) {
 					if( !num[i] ) continue;
 
 					Item info = { num[i], use[i] };
-					item_.insert( std::make_pair(id[i], info) );
+					item_.insert( eastl::make_pair(id[i], info) );
 				}
 			}
 		// switch and variable
-			switch_.resize( sys[31].to_int() );
-			switch_ = sys[32].toBinary();
-			variable_.resize( sys[33].to_int() );
-			variable_ = sys[34].toBinary();
+			// switch_.resize( sys[31].to_int() );
+			switch_ = sys[32].toBinary().toVector<uint8_t>();
+			// variable_.resize( sys[33].to_int() );
+			variable_ = sys[34].toBinary().toVector<int32_t>();
 		// member
 			member_.resize( status[1].to_int() );
-			member_ = status[2].toBinary();
+			member_ = status[2].toBinary().toFixedVector<uint16_t, MEMBER_MAX>();
 		// chip replace
 			chipReplace_.resize(ChipSet::END);
 			for(unsigned i = 0; i < ChipSet::END; i++) {
@@ -104,9 +104,9 @@ namespace rpg2k
 				int itemNum = item_.size();
 				status[11] = itemNum;
 
-				std::vector<uint16_t> id (itemNum);
-				std::vector<uint8_t > num(itemNum);
-				std::vector<uint8_t > use(itemNum);
+				eastl::vector<uint16_t> id (itemNum);
+				eastl::vector<uint8_t > num(itemNum);
+				eastl::vector<uint8_t > use(itemNum);
 
 				int i = 0;
 				for(ItemTable::const_iterator it = item_.begin(); it != item_.end(); ++it) {
@@ -145,7 +145,7 @@ namespace rpg2k
 		}
 		bool SaveData::removeMember(unsigned const charID)
 		{
-			std::vector<uint16_t>::iterator it = std::find( member_.begin(), member_.end(), charID );
+			eastl::vector<uint16_t>::iterator it = std::find( member_.begin(), member_.end(), charID );
 			if( it != member_.end() ) {
 				member_.erase(it);
 				return true;
@@ -196,7 +196,7 @@ namespace rpg2k
 
 			if( item_.find(id) == item_.end() ) {
 				Item const i = { validVal, 0 };
-				item_.insert( std::make_pair(id, i) );
+				item_.insert( eastl::make_pair(id, i) );
 			} else item_[id].num = validVal;
 
 			if( validVal == 0 ) item_.erase(id);

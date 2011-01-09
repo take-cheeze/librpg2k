@@ -1,7 +1,7 @@
 #ifndef _INC__RPG2K__MODEL__ELEMENT_HPP
 #define _INC__RPG2K__MODEL__ELEMENT_HPP
 
-#include <vector>
+#include <EASTL/vector.h>
 
 #include "Descriptor.hxx"
 #include "Structure.hxx"
@@ -118,7 +118,7 @@ namespace rpg2k
 		template< > inline
 		unsigned& Element::to<unsigned>() { return reinterpret_cast< unsigned& >( to<int>() ); }
 
-		class BerEnum : public std::vector<unsigned>
+		class BerEnum : public eastl::vector<unsigned>
 		{
 		protected:
 			void init(std::istream& s);

@@ -1,13 +1,14 @@
 #ifndef _INC__RPG2K__MODEL__ARRAY_1D_HPP
 #define _INC__RPG2K__MODEL__ARRAY_1D_HPP
 
-#include <map>
+#include <EASTL/map.h>
 #if RPG2K_DEBUG
 	#include <boost/ptr_container/ptr_map.hpp>
 #else
 	#include <boost/ptr_container/ptr_unordered_map.hpp>
 #endif
 #include "Descriptor.hxx"
+#include "Structure.hxx"
 
 
 namespace rpg2k
@@ -29,7 +30,7 @@ namespace rpg2k
 		class Array1D : public BaseOfArray1D
 		{
 		private:
-			std::map< unsigned, Binary > binBuf_;
+			eastl::map<unsigned, Binary> binBuf_;
 			ArrayDefine arrayDefine_;
 
 			Element* const this_;

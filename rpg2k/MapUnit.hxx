@@ -12,8 +12,8 @@ namespace rpg2k
 		private:
 			unsigned id_;
 
-			std::vector<uint16_t> upper_;
-			std::vector<uint16_t> lower_;
+			eastl::vector<uint16_t> upper_;
+			eastl::vector<uint16_t> lower_;
 
 			unsigned width_, height_;
 

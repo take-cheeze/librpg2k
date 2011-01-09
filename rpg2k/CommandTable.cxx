@@ -1,4 +1,4 @@
-#include <utility>
+#include <EASTL/utility.h>
 
 #include "Command.hxx"
 #include "CommandTable.hxx"
@@ -11,7 +11,7 @@ namespace rpg2k
 		CommandTable::CommandTable()
 		{
 			#define PP_insert(CODE) \
-				table_.insert( std::make_pair( CODE, &Context::command<CODE> ) );
+				table_.insert( Table::value_type( CODE, &Context::command<CODE> ) );
 			PP_enumAllContextCommand(PP_insert)
 			#undef PP_insert
 		}

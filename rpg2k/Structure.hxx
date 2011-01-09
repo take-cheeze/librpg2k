@@ -4,9 +4,12 @@
 #include "Define.hxx"
 
 #include <boost/array.hpp>
+
 #include <climits>
-#include <vector>
-#include <set>
+
+#include <EASTL/fixed_vector.h>
+#include <EASTL/set.h>
+#include <EASTL/vector.h>
 
 
 namespace rpg2k
@@ -21,7 +24,7 @@ namespace rpg2k
 		unsigned berSize(unsigned num);
 	} // namespace structure
 
-	class Binary : public std::vector<uint8_t>
+	class Binary : public eastl::vector<uint8_t>
 	{
 	private:
 		template<class SrcT>
@@ -58,10 +61,10 @@ namespace rpg2k
 		}
 	public:
 		Binary() {}
-		explicit Binary(unsigned size) : std::vector<uint8_t>(size) {}
-		explicit Binary(uint8_t* data, unsigned size) : std::vector<uint8_t>(data, data + size) {}
-		Binary(Binary const& b) : std::vector<uint8_t>(b) {}
-		Binary(std::string const& str) : std::vector<uint8_t>(str.begin(), str.end()) {}
+		explicit Binary(unsigned size) : eastl::vector<uint8_t>(size) {}
+		explicit Binary(uint8_t* data, unsigned size) : eastl::vector<uint8_t>(data, data + size) {}
+		Binary(Binary const& b) : eastl::vector<uint8_t>(b) {}
+		Binary(std::string const& str) : eastl::vector<uint8_t>(str.begin(), str.end()) {}
 
 		uint8_t const* data() const { return &( this->front() ); }
 		uint8_t* data() { return &( this->front() ); }
@@ -85,25 +88,38 @@ namespace rpg2k
 		size_t serializedSize() const;
 		std::ostream& serialize(std::ostream& s) const;
 
-		template<class T>
-		std::vector<T> convert() const
+		template<typename T>
+		eastl::vector<T> toVector() const
 		{
 			rpg2k_assert( ( this->size() % sizeof(T) ) == 0 );
 
-			std::vector<T> output( this->size() / sizeof(T) );
+			eastl::vector<T> output( this->size() / sizeof(T) );
 			exchangeEndianIfNeed( output, this->data() );
 			return output;
 		}
-		template<class T, size_t S>
-		boost::array<T, S> convert() const
+		template<typename T, size_t S>
+		boost::array<T, S> toArray() const
 		{
 			rpg2k_assert( ( this->size() % sizeof(T) ) == 0 );
-			rpg2k_assert( (this->size() / sizeof(T)) == S );
+			rpg2k_assert( ( this->size() / sizeof(T) ) == S );
 
 			boost::array<T, S> output;
 			exchangeEndianIfNeed( output, this->data() );
 			return output;
 		}
+		template<typename T>
+		eastl::set<T> toSet() const
+		{
+			eastl::vector<T> const v = this->toVector<T>();
+			return eastl::set<T>( v.begin(), v.end() );
+		}
+		template<typename T, size_t S>
+		eastl::fixed_vector<T, S> toFixedVector() const
+		{
+			eastl::vector<T> const v = this->toVector<T>();
+			return eastl::fixed_vector<T, S>( v.begin(), v.end() );
+		}
+
 		template<class T>
 		Binary& assign(T const& src)
 		{
@@ -116,16 +132,6 @@ namespace rpg2k
 		Binary(T const& src) { assign(src); }
 		template<class T>
 		Binary& operator =(T const& src) { return assign(src); }
-		template<typename T>
-		operator std::vector<T>() const { return convert<T>(); }
-		template<typename T, size_t S>
-		operator boost::array<T, S>() const { return convert<T, S>(); }
-		template<class T>
-		operator std::set<T>() const
-		{
-			std::vector<T> const& output = convert<T>();
-			return std::set<T>( output.begin(), output.end() );
-		}
 	}; // class Binary
 } // namespace rpg2k
 

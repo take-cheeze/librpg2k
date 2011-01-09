@@ -4,7 +4,8 @@
 #include <stdint.h>
 
 #include <ostream>
-#include <string>
+#include <EASTL/string.h>
+#include <EASTL/internal/config.h>
 
 #include "Config.hxx"
 #include "Vector.hxx"
@@ -12,6 +13,7 @@
 
 namespace rpg2k
 {
+	typedef eastl_size_t size_t;
 	class SystemString;
 	class String : public std::string
 	{

@@ -53,7 +53,7 @@ namespace rpg2k
 	std::string Encode::convertString(std::string const& src, iconv_t cd)
 	{
 		char iconvBuff[BUFF_SIZE];
-		size_t iconvOutSize = BUFF_SIZE, iconvInSize  = src.length();
+		::size_t iconvOutSize = BUFF_SIZE, iconvInSize  = src.length();
 		char* iconvOut = iconvBuff;
 		#if RPG2K_IS_PSP && !defined(_LIBICONV_H)
 			char const* iconvIn  = src.c_str();

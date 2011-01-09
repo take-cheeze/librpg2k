@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <EASTL/algorithm.h>
 
 #include "Debug.hxx"
 #include "Project.hxx"
@@ -154,7 +154,7 @@ namespace rpg2k
 			lastSaveDataID_ = id;
 			prev[1] = lastSaveDataStamp_;
 			{
-				std::vector<uint16_t> const& mem = lsd.member();
+				Member const& mem = lsd.member();
 				// set front character status
 				if( !mem.empty() ) {
 					Character const& c = character( mem.front() );
@@ -286,12 +286,10 @@ namespace rpg2k
 		{
 			SaveData& lsd = getLSD();
 
-			std::vector<uint16_t> vec = lsd.character()[charID][61].toBinary();
+			Character::Equip& equip = this->character(charID).equip();
 
-			lsd.setItemNum( vec[type], lsd.itemNum(vec[type]+1) );
-			vec[type] = 0;
-
-			lsd.character()[charID][61].toBinary() = vec;
+			lsd.setItemNum( equip[type], lsd.itemNum(equip[type]) + 1 );
+			equip[type] = 0;
 		}
 
 		String const& Project::systemGraphic() const
@@ -365,10 +363,10 @@ namespace rpg2k
 				charLSD[72] = c.basicParam(level, Param::MP); // current MP
 
 				charLSD[81] = conditioNum;
-				charLSD[82] = Binary( std::vector<uint16_t>(conditioNum) );
+				charLSD[82] = Binary( eastl::vector<uint16_t>(conditioNum) );
 			}
 		// set start member
-			lsd.member() = sysLDB[22].toBinary();
+			lsd.member() = sysLDB[22].toBinary().toFixedVector<uint16_t, MEMBER_MAX>();
 		// set party's char graphic
 			if( !lsd.member().empty() ) {
 				Character const& frontChar = this->character( lsd.member().front() );
@@ -440,11 +438,11 @@ namespace rpg2k
 		Project::Character::Character(unsigned const charID
 		, structure::Array1D const& ldb, structure::Array1D& lsd)
 		: charID_(charID), ldb_(ldb), lsd_(lsd)
-		, basicParam_(ldb_[31].toBinary().convert<uint16_t>())
-		, skill_( lsd_[52].toBinary() )
-		, condition_( lsd_[84].toBinary().convert<uint8_t>() )
-		, conditionStep_( lsd_[82].toBinary().convert<uint16_t>() )
-		, equip_( lsd_[61].toBinary() )
+		, basicParam_(ldb_[31].toBinary().toVector<uint16_t>())
+		, skill_( lsd_[52].toBinary().toSet<uint16_t>() )
+		, condition_( lsd_[84].toBinary().toVector<uint8_t>() )
+		, conditionStep_( lsd_[82].toBinary().toVector<uint16_t>() )
+		, equip_( lsd_[61].toBinary().toArray<uint16_t, rpg2k::Equip::END>() )
 		{
 		}
 		void Project::Character::sync()
@@ -456,8 +454,8 @@ namespace rpg2k
 
 			lsd_[81] = int( conditionStep_.size() );
 			lsd_[82] = Binary(conditionStep_);
-			std::vector<uint16_t> const conditionClean( condition_.begin()
-			, ++std::find( condition_.rbegin(), condition_.rend(), true ).base() );
+			eastl::vector<uint16_t> const conditionClean( condition_.begin()
+			, ( ++eastl::find( condition_.rbegin(), condition_.rend(), true ) ).base() );
 			lsd_[83] = int( conditionClean.size() );
 			lsd_[84] = Binary(conditionClean);
 		}
@@ -466,7 +464,7 @@ namespace rpg2k
 		{
 			if( getLSD().item().find(id) != getLSD().item().end() ) return true;
 			else {
-				std::vector<uint16_t> const& mem = getLSD().member();
+				Member const& mem = getLSD().member();
 				for(unsigned i = 0; i < mem.size(); i++) {
 					Character::Equip const& equip = this->character( mem[i] ).equip();
 
@@ -479,7 +477,7 @@ namespace rpg2k
 		unsigned Project::equipNum(unsigned const itemID) const
 		{
 			unsigned ret = 0;
-			std::vector<uint16_t> const& mem = getLSD().member();
+			Member const& mem = getLSD().member();
 			for(std::size_t i = 0; i < mem.size(); i++) {
 				Character::Equip const& equip = this->character( mem[i] ).equip();
 				ret += std::count( equip.begin(), equip.end(), itemID );
@@ -491,7 +489,7 @@ namespace rpg2k
 		{
 			int flags = term[1];
 
-			std::vector<uint16_t> const& mem = getLSD().member();
+			Member const& mem = getLSD().member();
 			return !(
 				( ( flags & (0x01 << 0) ) && !getLSD().flag(term[2]) ) ||
 				( ( flags & (0x01 << 1) ) && !getLSD().flag(term[3]) ) ||
@@ -561,7 +559,7 @@ namespace rpg2k
 					if(currentLv < nextLv) { continue; }
 					else if(prevLv < currentLv) { break; }
 					else {
-						std::set<uint16_t>::iterator er = skill_.find( (*it->second)[2].to<int>() );
+						eastl::set<uint16_t>::iterator er = skill_.find( (*it->second)[2].to<int>() );
 						if(er != skill_.end() ) { skill_.erase(er); }
 					}
 				}
@@ -731,14 +729,14 @@ namespace rpg2k
 			return true;
 		}
 
-		std::vector<unsigned> Project::sortLSD() const
+		eastl::vector<unsigned> Project::sortLSD() const
 		{
-			std::map<double, unsigned> tmp;
+			eastl::map<double, unsigned> tmp;
 			for(unsigned i = 0; i < SAVE_DATA_MAX; i++) {
-				tmp.insert( std::make_pair( i + 1, lsd_[i + 1][100].toArray1D()[1].to<double const&>() ) );
+				tmp.insert( eastl::make_pair( i + 1, lsd_[i + 1][100].toArray1D()[1].to<double const&>() ) );
 			}
-			std::vector<unsigned> ret;
-			for(std::map<double, unsigned>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+			eastl::vector<unsigned> ret;
+			for(eastl::map<double, unsigned>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
 				ret.push_back(i->second);
 			}
 

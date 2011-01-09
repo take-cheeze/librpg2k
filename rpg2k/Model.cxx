@@ -3,7 +3,7 @@
 #include "Stream.hxx"
 #include "define/Define.hxx"
 
-#include <algorithm>
+#include <EASTL/algorithm.h>
 #include <fstream>
 #include <sstream>
 #include <stack>
@@ -111,7 +111,7 @@ namespace rpg2k
 			isArray_.insert("Array2D");
 
 			#define PP_insert(arg) \
-				defineText_.insert( std::make_pair( String( #arg ), define::arg ) )
+				defineText_.insert( eastl::make_pair( String( #arg ), define::arg ) )
 			PP_insert(EventState);
 			PP_insert(LcfDataBase);
 			PP_insert(LcfMapTree);

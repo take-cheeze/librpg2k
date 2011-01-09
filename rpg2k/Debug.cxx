@@ -1,8 +1,8 @@
 #include <cstdlib>
 
-#include <algorithm>
-#include <functional>
-#include <iterator>
+#include <EASTL/algorithm.h>
+#include <EASTL/functional.h>
+#include <EASTL/iterator.h>
 #include <stack>
 
 #include <boost/scoped_ptr.hpp>
@@ -177,11 +177,11 @@ namespace rpg2k
 
 		std::ostream& Tracer::printArray1D(structure::Array1D const& val, std::ostream& ostrm)
 		{
-			std::map<unsigned, Element const*> buf;
+			eastl::map<unsigned, Element const*> buf;
 			for(Array1D::ConstIterator i = val.end(); i != val.end(); ++i) {
-				buf.insert( std::make_pair(i->first, i->second) );
+				buf.insert( eastl::make_pair(i->first, i->second) );
 			}
-			for(std::map<unsigned, Element const*>::const_iterator i = buf.begin(); i != buf.end(); ++i) {
+			for(eastl::map<unsigned, Element const*>::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 				printTrace( *(i->second), true, ostrm );
 			}
 			return ostrm;

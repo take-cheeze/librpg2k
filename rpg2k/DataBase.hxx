@@ -3,8 +3,8 @@
 
 #include "Model.hxx"
 
-#include <map>
-#include <vector>
+#include <EASTL/map.h>
+#include <EASTL/vector.h>
 
 
 namespace rpg2k
@@ -14,12 +14,12 @@ namespace rpg2k
 		class DataBase : public Base
 		{
 		private:
-			typedef std::map< unsigned, std::vector<uint16_t> > Terrain;
+			typedef eastl::map< unsigned, eastl::vector<uint16_t> > Terrain;
 			Terrain terrain_;
-			typedef std::map< unsigned, std::vector< std::vector<uint8_t> > > ChipFlag;
+			typedef eastl::map< unsigned, eastl::vector< eastl::vector<uint8_t> > > ChipFlag;
 			ChipFlag chipFlag_;
 
-			std::vector<String> vocabulary_;
+			eastl::vector<String> vocabulary_;
 
 			virtual void loadImpl();
 			virtual void saveImpl();
@@ -63,13 +63,13 @@ namespace rpg2k
 
 			String const& vocabulary(unsigned index) const;
 
-			std::vector<uint16_t> const& terrain(unsigned id) const;
-			std::vector<uint8_t> const& chipFlag(unsigned id, ChipSet::Type t) const;
-			std::vector<uint8_t> const& lowerChipFlag(unsigned id) const
+			eastl::vector<uint16_t> const& terrain(unsigned id) const;
+			eastl::vector<uint8_t> const& chipFlag(unsigned id, ChipSet::Type t) const;
+			eastl::vector<uint8_t> const& lowerChipFlag(unsigned id) const
 			{
 				return chipFlag(id, ChipSet::LOWER);
 			}
-			std::vector<uint8_t> const& upperChipFlag(unsigned id) const
+			eastl::vector<uint8_t> const& upperChipFlag(unsigned id) const
 			{
 				return chipFlag(id, ChipSet::UPPER);
 			}

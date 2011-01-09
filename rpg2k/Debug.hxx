@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stack>
-#include <string>
+#include <EASTL/string.h>
 #include <typeinfo>
 #include <exception>
 

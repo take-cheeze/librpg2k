@@ -1,29 +1,33 @@
 #ifndef _INC__RPG2K__MODEL__SAVE_DATA__HPP
 #define _INC__RPG2K__MODEL__SAVE_DATA__HPP
 
+#include <EASTL/fixed_vector.h>
+
 #include "Model.hxx"
 
 
 namespace rpg2k
 {
+	typedef eastl::fixed_vector<uint16_t, ::rpg2k::MEMBER_MAX> Member;
+
 	namespace model
 	{
 		class SaveData : public Base
 		{
 		public:
 			struct Item { uint8_t num; uint8_t use; };
-			typedef std::map<uint16_t, Item> ItemTable;
+			typedef eastl::map<uint16_t, Item> ItemTable;
 		private:
 			unsigned id_;
 
 			ItemTable item_;
 
-			std::vector<int32_t> variable_;
-			std::vector<uint8_t> switch_  ;
+			eastl::vector<int32_t> variable_;
+			eastl::vector<uint8_t> switch_  ;
 
-			std::vector<uint16_t> member_;
+			Member member_;
 
-			std::vector< std::vector<uint8_t> > chipReplace_;
+			eastl::vector< eastl::vector<uint8_t> > chipReplace_;
 
 			unsigned currentEventID_;
 
@@ -44,10 +48,10 @@ namespace rpg2k
 
 			unsigned id() const { return id_; }
 
-			std::vector<uint16_t> const& member() const { return member_; }
-			std::vector<uint16_t>& member() { return member_; }
+			Member const& member() const { return member_; }
+			Member& member() { return member_; }
 			unsigned member(unsigned index) const;
-			unsigned memberNum() const { return member_.size(); }
+			size_t memberNum() const { return member_.size(); }
 			bool addMember(unsigned charID);
 			bool removeMember(unsigned charID);
 

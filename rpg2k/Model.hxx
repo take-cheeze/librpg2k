@@ -1,11 +1,11 @@
 #ifndef _INC__RPG2K__MODEL_HPP
 #define _INC__RPG2K__MODEL_HPP
 
-#include <algorithm>
+#include <EASTL/algorithm.h>
 #include <deque>
 #include <fstream>
-#include <map>
-#include <set>
+#include <EASTL/map.h>
+#include <EASTL/set.h>
 
 #include "Array1D.hxx"
 #include "Array2D.hxx"
@@ -76,11 +76,11 @@ namespace rpg2k
 		class DefineLoader
 		{
 		private:
-			typedef std::map< String, boost::ptr_vector<structure::Descriptor> > DefineBuffer;
+			typedef eastl::map< String, boost::ptr_vector<structure::Descriptor> > DefineBuffer;
 			DefineBuffer defineBuff_;
-			typedef std::map<String, const char*> DefineText;
+			typedef eastl::map<String, const char*> DefineText;
 			DefineText defineText_;
-			std::set<String> isArray_;
+			eastl::set<String> isArray_;
 		protected:
 			void parse(boost::ptr_vector<structure::Descriptor>& dst, std::deque<String> const& token);
 			void load(boost::ptr_vector<structure::Descriptor>& dst, String const& name);

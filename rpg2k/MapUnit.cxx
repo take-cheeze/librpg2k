@@ -33,8 +33,8 @@ namespace rpg2k
 		{
 			rpg2k_assert( rpg2k::within<unsigned>(ID_MIN, id_, MAP_UNIT_MAX+1) );
 
-			lower_ = (*this)[71].toBinary().convert<uint16_t>();
-			upper_ = (*this)[72].toBinary().convert<uint16_t>();
+			lower_ = (*this)[71].toBinary().toVector<uint16_t>();
+			upper_ = (*this)[72].toBinary().toVector<uint16_t>();
 
 			width_  = (*this)[2];
 			height_ = (*this)[3];

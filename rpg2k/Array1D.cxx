@@ -4,7 +4,7 @@
 #include "Element.hxx"
 #include "Stream.hxx"
 
-#include <algorithm>
+#include <EASTL/algorithm.h>
 
 
 namespace rpg2k
@@ -23,7 +23,7 @@ namespace rpg2k
 
 		bool Array1D::createAt(unsigned const pos)
 		{
-			std::map<unsigned, Binary>::iterator it = binBuf_.find(pos);
+			eastl::map<unsigned, Binary>::iterator it = binBuf_.find(pos);
 			if( it == binBuf_.end() ) return false;
 
 			if( isArray2D() ) insert( pos, std::auto_ptr<Element>( new Element(owner(), index(), pos, it->second) ) );
@@ -46,7 +46,7 @@ namespace rpg2k
 				Binary bin = it->second->serialize();
 
 				if( bin.size() >= BIG_DATA_SIZE ) {
-					binBuf_.insert( std::make_pair( it->first, bin ) );
+					binBuf_.insert( eastl::make_pair( it->first, bin ) );
 				} else if( src.isArray2D() ) {
 					insert( it->first, std::auto_ptr<Element>( new Element(
 						src.owner(), src.index(), it->first, bin) ) );
@@ -113,7 +113,7 @@ namespace rpg2k
 				if(index2 == ARRAY_1D_END) break;
 
 				readWithSize(s, bin);
-				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( std::make_pair(index2, bin) );
+				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index2, bin) );
 				else insert( index2, std::auto_ptr<Element>( new Element(owner, index, index2, bin) ) );
 			}
 		}
@@ -129,7 +129,7 @@ namespace rpg2k
 				if(index == ARRAY_1D_END) break;
 
 				readWithSize(s, bin);
-				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( std::make_pair(index, bin) );
+				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index, bin) );
 				else insert( index, std::auto_ptr<Element>( new Element(*this, index, bin) ) );
 
 				if( !toElement().hasOwner() && s.eof() ) return;
@@ -201,7 +201,7 @@ namespace rpg2k
 				ret += berSize(size);
 				ret += size;
 			}
-			for(std::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
+			for(eastl::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
 				ret += berSize(it->first);
 				unsigned const size = it->second.size();
 				ret += berSize(size);
@@ -220,7 +220,7 @@ namespace rpg2k
 				writeBER( s, it->first );
 				writeWithSize( s, *(it->second) );
 			}
-			for(std::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
+			for(eastl::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
 				writeBER( s, it->first );
 				writeWithSize(s, it->second);
 			}
