@@ -1,2 +1,6 @@
 /librpg2kLib.a
 analyze.txt
+
+/test/encode
+/test/model
+/test/structure
