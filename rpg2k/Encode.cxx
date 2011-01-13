@@ -7,11 +7,11 @@
 namespace rpg2k
 {
 	#if RPG2K_IS_WINDOWS
-		std::string const Encode::SYSTEM_ENCODE = "Windows-31J";
+		char const* Encode::SYSTEM_ENCODE = "CP932"; // "Windows-31J"
 	#else
-		std::string const Encode::SYSTEM_ENCODE = "UTF-8";
+		char const* Encode::SYSTEM_ENCODE = "UTF-8";
 	#endif
-	std::string const Encode::RPG2K_ENCODE = "Windows-31J"; // "Shift_JIS";
+	char const* Encode::RPG2K_ENCODE = "CP932"; // "Shift_JIS";
 
 	Encode::Encode()
 	{
@@ -24,29 +24,29 @@ namespace rpg2k
 		#define getlang() getenv("LANG")
 		if( getlang() ) {
 			std::string const langStr = getlang();
-			std::size_t pos = langStr.find('.');
+			std::size_t const pos = langStr.find('.');
 			if( pos != std::string::npos ) {
 				sysEncode_ = langStr.substr( pos + 1 );
-				// clog << sysEncode_ << endl;
+				// std::cout << sysEncode_ << std::endl;
 			}
 		}
 		#undef getlang
 
-		toSystem_ = openConverter(sysEncode_, RPG2K_ENCODE);
-		toRPG2k_  = openConverter(RPG2K_ENCODE, sysEncode_);
+		toSystem_ = openConverter( sysEncode_.c_str(), RPG2K_ENCODE );
+		toRPG2k_  = openConverter( RPG2K_ENCODE, sysEncode_.c_str() );
 	}
 	Encode::~Encode()
 	{
-		rpg2k_assert( ::iconv_close(toSystem_) != -1 );
-		rpg2k_assert( ::iconv_close(toRPG2k_ ) != -1 );
+		if( ::iconv_close(toSystem_) == -1 ) rpg2k_assert(false);
+		if( ::iconv_close(toRPG2k_ ) == -1 ) rpg2k_assert(false);
 
 		toSystem_ = toRPG2k_ = NULL;
 	}
 
-	iconv_t Encode::openConverter(std::string const& to, std::string const& from)
+	iconv_t Encode::openConverter(char const* to, char const* from)
 	{
-		iconv_t ret = ::iconv_open( to.c_str(), from.c_str() );
-		rpg2k_assert( ret != (iconv_t)-1 );
+		::iconv_t ret = ::iconv_open(to, from);
+		rpg2k_assert( ret != ::iconv_t(-1) );
 		return ret;
 	}
 

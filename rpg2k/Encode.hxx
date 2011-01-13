@@ -5,7 +5,6 @@
 #include "Singleton.hxx"
 
 #include <iconv.h>
-#include <stdexcept>
 
 
 namespace rpg2k
@@ -16,8 +15,8 @@ namespace rpg2k
 	private:
 		enum { BUFF_SIZE = 1024, };
 
-		static std::string const SYSTEM_ENCODE;
-		static std::string const RPG2K_ENCODE;
+		static char const* SYSTEM_ENCODE;
+		static char const* RPG2K_ENCODE;
 
 		::iconv_t toSystem_, toRPG2k_;
 		std::string sysEncode_;
@@ -26,7 +25,7 @@ namespace rpg2k
 		~Encode();
 
 		static std::string convertString(std::string const& src, iconv_t cd);
-		static iconv_t openConverter(std::string const& to, std::string const& from);
+		static iconv_t openConverter(char const* to, char const* from);
 	public:
 		SystemString toSystem( String const& src) const { return convertString(src, toSystem_); }
 		 String toRPG2k (SystemString const& src) const { return convertString(src, toRPG2k_ ); }
