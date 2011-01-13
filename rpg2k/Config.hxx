@@ -127,8 +127,10 @@
 /*
  * set the allocator
  */
+/*
 #define RPG2K_USE_DLMALLOC 0
 #define RPG2K_USE_NEDMALLOC 1
+*/
 
 #include <cassert>
 #define rpg2k_assert(exp) assert(exp)
