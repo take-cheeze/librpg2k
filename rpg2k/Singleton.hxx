@@ -16,6 +16,11 @@ namespace rpg2k
 			return theInstance;
 		}
 	}; // class Singleton
+
+	/*
+	 * this class is basically same as rpg2k::Singleton
+	 * but the return type of instance() will be const reference
+	 */
 	template<class T>
 	class ConstSingleton : boost::noncopyable
 	{
@@ -25,7 +30,7 @@ namespace rpg2k
 			static T const theInstance;
 			return theInstance;
 		}
-	}; // class Singleton
+	}; // class ConstSingleton
 } // namespace rpg2k
 
 #endif // _INC_RPG2K__SINGLETON_
