@@ -2,6 +2,7 @@
 #define _INC__RPG2K__STRUCTURE__DESCRIPTOR_HPP
 
 #include "Define.hxx"
+#include "Singleton.hxx"
 
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
@@ -32,7 +33,8 @@ namespace rpg2k
 		#define PP_basicTypes(func) \
 			func(int) \
 			func(bool) \
-			func(double)
+			func(double) \
+
 		#define PP_rpg2kTypes(func) \
 			func(Array1D) \
 			func(Array2D) \
@@ -41,22 +43,24 @@ namespace rpg2k
 			func(String) \
 			func(Event) \
 
-		class ElementType : boost::noncopyable
-		{
-		public:
-			static ElementType const& instance();
+		#define PP_allTypes(func) \
+			PP_basicTypes(func) \
+			PP_rpg2kTypes(func) \
 
+		class ElementType : public ConstSingleton<ElementType>
+		{
+			friend class ConstSingleton<ElementType>;
+		public:
 			enum Enum {
 				#define PP_enum(TYPE) TYPE##_,
-				PP_basicTypes(PP_enum)
-				PP_rpg2kTypes(PP_enum)
+				PP_allTypes(PP_enum)
 				#undef PP_enum
 			};
 			Enum toEnum(String const& name) const;
 			String const& toString(Enum e) const;
-
-			ElementType();
 		private:
+			ElementType();
+
 			typedef boost::bimap<Enum, String> Table;
 			Table table_;
 		}; // class ElementType

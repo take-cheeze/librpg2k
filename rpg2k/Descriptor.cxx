@@ -1,3 +1,4 @@
+#include "Debug.hxx"
 #include "Descriptor.hxx"
 #include "Structure.hxx"
 
@@ -27,11 +28,6 @@ namespace rpg2k
 			rpg2k_assert( it != table_.left.end() );
 			return it->second;
 		}
-		ElementType const& ElementType::instance()
-		{
-			static ElementType theElementType;
-			return theElementType;
-		}
 
 		Descriptor::Descriptor(Descriptor const& src)
 		: type_(src.type_), hasDefault_(src.hasDefault_)
@@ -58,7 +54,7 @@ namespace rpg2k
 		Descriptor::Descriptor(String const& type, String const& val)
 		: type_( ElementType::instance().toEnum(type) ), hasDefault_(true)
 		{
-			switch(type_) {
+			switch(this->type_) {
 				case ElementType::String_:
 					if(
 						( val.size() > 2 ) &&
@@ -70,10 +66,10 @@ namespace rpg2k
 					case ElementType::TYPE##_: { \
 						std::istringstream iss(val); \
 						iss >> std::boolalpha >> (impl_.TYPE##_); \
-					} break; \
+					} break;
 				PP_basicTypes(PP_enum)
 				#undef PP_enum
-				default: rpg2k_assert(false); break;
+			default: rpg2k_assert(false); break;
 			}
 		}
 		Descriptor::Descriptor(String const& type, ArrayDefinePointer def)
