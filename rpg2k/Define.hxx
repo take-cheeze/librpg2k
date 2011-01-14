@@ -47,6 +47,11 @@ namespace rpg2k
 		String toRPG2k() const;
 	}; // class SystemString
 
+	inline std::ostream& operator <<(std::ostream& os, String const& str)
+	{
+		return( os << str.toSystem() );
+	}
+
 	namespace
 	{
 		Size2D const SCREEN_SIZE(320, 240);
