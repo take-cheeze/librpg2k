@@ -132,10 +132,10 @@ namespace rpg2k
 				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index, bin) );
 				else insert( index, std::auto_ptr<Element>( new Element(*this, index, bin) ) );
 
-				if( !toElement().hasOwner() && s.eof() ) return;
+				if( !toElement().hasOwner() && isEOF(s) ) return;
 			}
 
-			rpg2k_analyze_assert( s.eof() );
+			rpg2k_analyze_assert( isEOF(s) );
 		}
 
 		bool Array1D::isElement() const

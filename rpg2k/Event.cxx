@@ -61,7 +61,7 @@ namespace rpg2k
 
 		void Event::init(std::istream& s)
 		{
-			while( !s.eof() ) {
+			while( !isEOF(s) ) {
 				data_.push_back( Instruction(s) );
 				if(data_.back().code() == 12110) { // check for label
 					if( !label_.insert( eastl::make_pair(data_.back()[0], data_.size() - 1) ).second ) {

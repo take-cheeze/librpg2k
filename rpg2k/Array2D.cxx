@@ -62,7 +62,7 @@ namespace rpg2k
 				insert( index, std::auto_ptr<Array1D>( new Array1D(*this, index, s) ) );
 			}
 
-			if( toElement().hasOwner() ) rpg2k_analyze_assert( s.eof() );
+			if( toElement().hasOwner() ) rpg2k_analyze_assert( isEOF(s) );
 		}
 
 	/*

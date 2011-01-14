@@ -82,7 +82,7 @@ namespace rpg2k
 				data_.push_back( std::auto_ptr<Element>( new Element(info[i], ifs) ) );
 			}
 
-			rpg2k_assert( ifs.eof() );
+			rpg2k_assert( structure::isEOF(ifs) );
 
 			loadImpl();
 		}
@@ -120,12 +120,6 @@ namespace rpg2k
 			PP_insert(Music);
 			PP_insert(Sound);
 			#undef PP_insert
-		}
-
-		DefineLoader& DefineLoader::instance()
-		{
-			static DefineLoader theDefineLoader;
-			return theDefineLoader;
 		}
 
 		boost::ptr_vector<Descriptor> const& DefineLoader::get(String const& name)

@@ -48,7 +48,7 @@ namespace rpg2k
 		{
 			std::istringstream s( static_cast<std::string>(b), INPUT_FLAG );
 			init(s);
-			rpg2k_assert( s.eof() );
+			rpg2k_assert( isEOF(s) );
 		}
 
 		void BerEnum::init(std::istream& s)
@@ -424,14 +424,12 @@ namespace rpg2k
 			{ \
 				rpg2k_assert( this->isDefined() ); \
 				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
-				rpg2k_assert( impl_.TYPE##_ ); \
 				return impl_.TYPE##_; \
 			} \
 			Element::operator TYPE&() \
 			{ \
 				rpg2k_assert( this->isDefined() ); \
 				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
-				rpg2k_assert( impl_.TYPE##_ ); \
 				return impl_.TYPE##_; \
 			}
 		PP_basicTypes(PP_castOperator)

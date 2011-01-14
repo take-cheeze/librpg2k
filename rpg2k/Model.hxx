@@ -10,6 +10,7 @@
 #include "Array1D.hxx"
 #include "Array2D.hxx"
 #include "Element.hxx"
+#include "Singleton.hxx"
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -73,8 +74,9 @@ namespace rpg2k
 			void serialize(std::ostream& s);
 		}; // class Base
 
-		class DefineLoader
+		class DefineLoader : public Singleton<DefineLoader>
 		{
+			friend class Singleton<DefineLoader>;
 		private:
 			typedef eastl::map< String, boost::ptr_vector<structure::Descriptor> > DefineBuffer;
 			DefineBuffer defineBuff_;
@@ -88,8 +90,6 @@ namespace rpg2k
 			DefineLoader();
 			DefineLoader(DefineLoader const& dl);
 		public:
-			static DefineLoader& instance();
-
 			boost::ptr_vector<structure::Descriptor> const& get(String const& name);
 			structure::ArrayDefine arrayDefine(String const& name);
 

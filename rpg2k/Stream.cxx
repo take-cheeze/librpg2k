@@ -6,6 +6,14 @@ namespace rpg2k
 {
 	namespace structure
 	{
+		bool isEOF(std::istream& is)
+		{
+			bool const ret = ( is.get() == EOF );
+			is.unget();
+			is.clear();
+			return ret;
+		}
+
 		String readHeader(std::istream& is)
 		{
 			is.seekg(0, std::ios_base::beg);
@@ -28,7 +36,8 @@ namespace rpg2k
 		{
 			// BER output buffer
 			uint8_t buff[ ( sizeof(num) * CHAR_BIT ) / BER_BIT + 1];
-			unsigned size = berSize(num), index = size;
+			size_t const size = berSize(num);
+			int index = size;
 			// unsigned numBack = num;
 		// set data
 			buff[--index] = num & BER_MASK; // BER terminator

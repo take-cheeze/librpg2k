@@ -38,6 +38,8 @@ namespace rpg2k
 		{
 			return val.serialize( writeBER( os, val.serializedSize() ) );
 		}
+
+		bool isEOF(std::istream& is);
 	} // namespace structure
 } // namespace rpg2k
 
