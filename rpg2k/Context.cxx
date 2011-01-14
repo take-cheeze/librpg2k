@@ -11,5 +11,9 @@ namespace rpg2k
 		, eventID_(evID), type_(t)
 		{
 		}
-	}
-}
+		void Context::ret() 
+		{
+			event_.pop();
+		}
+	} // namespace model
+} // namespace rpg2k
