@@ -39,6 +39,8 @@ Array1D Grobal \n \
 				[6]: int itemID = 1; \n \
 				[7]: int charID = 1; \n \
 				[8]: int timerLeft = 0; \n \
+				[9]: int timerLeft2 = 0; \n \
+				[10]: int compareType = 0; \n \
 			}; \n \
  \n \
 			[21]: String charSet; \n \

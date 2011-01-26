@@ -1,9 +1,9 @@
 #ifndef _INC__RPG2K__MODEL_HPP
 #define _INC__RPG2K__MODEL_HPP
 
-#include <EASTL/algorithm.h>
 #include <deque>
-#include <fstream>
+
+#include <EASTL/algorithm.h>
 #include <EASTL/map.h>
 #include <EASTL/set.h>
 

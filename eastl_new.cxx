@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 /*
  * copy of new operator overload in "EASTL/example/example.cpp"
  */

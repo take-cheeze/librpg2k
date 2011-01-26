@@ -47,7 +47,7 @@ namespace rpg2k
 			int32_t& at(unsigned index);
 			int32_t& operator [](unsigned index);
 
-			unsigned argNum() const { return argument_.size(); }
+			size_t argNum() const { return argument_.size(); }
 			void addArg(int32_t arg) { argument_.push_back(arg); }
 
 			size_t serializedSize() const;
@@ -76,6 +76,8 @@ namespace rpg2k
 
 			typedef std::deque<Instruction> Data;
 			Data const& data() const { return data_; }
+
+			bool empty() const { return data_.empty(); }
 
 			typedef eastl::map<unsigned, unsigned> LabelTable;
 			LabelTable const& labelTable() const { return label_; }

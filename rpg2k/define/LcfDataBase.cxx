@@ -31,10 +31,13 @@ Array1D Grobal \n \
 		[43]: int expCorrection = 0; \n \
  \n \
 		[51]: Binary equipment; // std::array<uint16_t, 5> \n \
-		[56]: int    unarmedAttack = 1; // battle anime ID \n \
-		[57]: int    job = 0; \n \
-		[58]: int    battleAnime = 0; \n \
  \n \
+		[56]: int unarmedAttack = 1; // battle anime ID \n \
+		[57]: int job = 0; \n \
+		[58]: int battleAnime = 0; \n \
+ \n \
+		[60]: int battleX = 0; \n \
+		[61]: int battleY = 0; \n \
 		[62]: int attackAnime = 0; \n \
 		[63]: Array2D skill \n \
 		{ \n \
@@ -49,7 +52,7 @@ Array1D Grobal \n \
 		[73]: int    attribDataNum = 0; \n \
 		[74]: Binary attribData; \n \
  \n \
-		[80]: Binary battleCommand; \n \
+		[80]: Binary battleCommand; // std::array<uint32_t, 6> \n \
 	}; \n \
 	[12]: Array2D Skill \n \
 	{ \n \
@@ -507,6 +510,8 @@ Array1D Grobal \n \
 	}; \n \
 	[22]: Array1D System \n \
 	{ \n \
+		[10]: int version = 2000; \n \
+ \n \
 		[11]: String boat; \n \
 		[12]: String ship; \n \
 		[13]: String airship; \n \
@@ -516,9 +521,13 @@ Array1D Grobal \n \
 		[17]: String title; \n \
 		[18]: String gameOver; \n \
 		[19]: String system; \n \
+		[20]: String system2; \n \
  \n \
 		[21]: int memberNum = 0; \n \
 		[22]: Binary member; \n \
+ \n \
+		[26]: int menuCommandSize; \n \
+		[27]: Binary menuCommand; \n \
  \n \
 		[31]: Music titeBGM; \n \
 		[32]: Music battleBGM; \n \

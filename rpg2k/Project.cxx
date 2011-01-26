@@ -715,9 +715,9 @@ namespace rpg2k
 					break;
 				case Action::END_SLIP:
 					break;
-				case Action::BEGIN_ANIME:
+				case Action::STOP_ANIME:
 					break;
-				case Action::END_ANIME:
+				case Action::START_ANIME:
 					break;
 				case Action::TRANS_UP:
 					break;

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <ostream>
+#include <iosfwd>
 #include <EASTL/string.h>
 #include <EASTL/internal/config.h>
 
@@ -243,7 +243,7 @@ namespace rpg2k
 			SWITCH_ON, SWITCH_OFF,
 			CHANGE_CHAR_SET, PLAY_SOUND,
 			BEGIN_SLIP, END_SLIP,
-			BEGIN_ANIME, END_ANIME,
+			STOP_ANIME, START_ANIME,
 			TRANS_UP, TRANS_DOWN, // transparentcy
 		};
 	}; // struct Action
