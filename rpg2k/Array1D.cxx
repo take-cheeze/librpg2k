@@ -15,9 +15,9 @@ namespace rpg2k
 		{
 			// doesn't extract if the Element of Array1D is bigger than the next value
 			#if RPG2K_DEBUG // if debuging ALL Element will be extracted
-				static std::size_t const BIG_DATA_SIZE = ~0;
+				static size_t const BIG_DATA_SIZE = ~0;
 			#else
-				static std::size_t const BIG_DATA_SIZE = 512;
+				static size_t const BIG_DATA_SIZE = 512;
 			#endif
 		} // namespace
 

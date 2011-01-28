@@ -148,7 +148,7 @@ namespace rpg2k
 			// string
 				if( bin.isString() ) {
 					ostrm << endl << "string: ";
-					printString(bin, ostrm);
+					printString(static_cast<String>(bin), ostrm);
 				}
 			// Array1D
 				try {

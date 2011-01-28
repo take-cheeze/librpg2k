@@ -16,6 +16,9 @@ namespace rpg2k
 		std::ios_base::openmode const OUTPUT_FLAG
 		= std::ios_base::out | std::ios_base::binary | std::ios_base::trunc;
 
+		#pragma unused(INPUT_FLAG)
+		#pragma unused(OUTPUT_FLAG)
+
 		bool checkHeader(std::istream& is, String const& header);
 		String readHeader(std::istream& is);
 		std::ostream& writeHeader(std::ostream& os, String const& header);

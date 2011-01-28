@@ -380,7 +380,7 @@ namespace rpg2k
 
 		void Project::move(unsigned const mapID, int const x, int const y)
 		{
-			rpg2k_assert(mapID != 0);
+			rpg2k_assert(mapID >= ID_MIN);
 
 			SaveData& lsd = getLSD();
 		// set party position
@@ -733,7 +733,7 @@ namespace rpg2k
 		{
 			eastl::map<double, unsigned> tmp;
 			for(unsigned i = 0; i < SAVE_DATA_MAX; i++) {
-				tmp.insert( eastl::make_pair( i + 1, lsd_[i + 1][100].toArray1D()[1].to<double const&>() ) );
+				tmp.insert( eastl::make_pair( i + 1, lsd_[i + 1][100].toArray1D()[1].to<double>() ) );
 			}
 			eastl::vector<unsigned> ret;
 			for(eastl::map<double, unsigned>::iterator i = tmp.begin(); i != tmp.end(); ++i) {

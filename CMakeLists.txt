@@ -16,14 +16,13 @@ ADD_DEPENDENCIES(${PROJECT_NAME} "EASTL")
 
 # test
 ENABLE_TESTING()
-INCLUDE(CTest)
 
 FUNCTION(CXX_TEST target libs)
 	ADD_EXECUTABLE(test/${target} ${CMAKE_CURRENT_SOURCE_DIR}/test/${target}.cxx)
 	TARGET_LINK_LIBRARIES(test/${target}
 		${rpg2kLib_LIBRARIES}
-		"gtest"
 		${libs}
+		"gtest"
 	)
 	ADD_TEST(test/${target} test/${target})
 	ADD_DEPENDENCIES(test/${target} ${PROJECT_NAME})
@@ -31,6 +30,7 @@ FUNCTION(CXX_TEST target libs)
 	SET(TEST_TARGET "${TEST_TARGET};test/${target}" PARENT_SCOPE)
 ENDFUNCTION()
 
+LINK_DIRECTORIES(/opt/local/lib)
 CXX_TEST(encode "gtest_main")
 CXX_TEST(model "gtest_main")
 CXX_TEST(structure "gtest_main")

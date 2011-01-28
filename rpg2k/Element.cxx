@@ -161,12 +161,14 @@ namespace rpg2k
 				PP_enumNoDefault(BerEnum)
 				PP_enumNoDefault(Binary)
 				PP_enumNoDefault(Event)
+				PP_enumNoDefault(String)
 
 				default: rpg2k_analyze_assert(false); break;
 			} else switch( descriptor_->type() ) {
 				PP_enumNoDefault(BerEnum)
 				PP_enumNoDefault(Binary)
 				PP_enumNoDefault(Event)
+				PP_enumNoDefault(String)
 				#undef PP_enumNoDefault
 
 				#define PP_enum(TYPE) \
