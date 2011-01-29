@@ -154,18 +154,20 @@ namespace rpg2k
 				try {
 					boost::scoped_ptr<Element> p( new Element( Descriptor(
 						ElementType::instance().toString(ElementType::Array1D_),
-						ArrayDefinePointer(new ArrayDefineType) ), bin) );
+						ArrayDefinePointer(new ArrayDefineType),
+						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable()) ), bin) );
 					ostrm << endl << "---Array1D check start---" << endl;
-					p.reset();
+					p.reset(); // trigger Element's destructor
 					ostrm << "---Array1D check end  ---";
 				} catch(...) {}
 			// Array2D
 				try {
 					boost::scoped_ptr<Element> p( new Element( Descriptor(
 						ElementType::instance().toString(ElementType::Array2D_),
-						ArrayDefinePointer(new ArrayDefineType) ), bin) );
+						ArrayDefinePointer(new ArrayDefineType),
+						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable()) ), bin) );
 					ostrm << endl << "---Array2D check start---" << endl;
-					p.reset();
+					p.reset(); // trigger Element's destructor
 					ostrm << "---Array2D check end  ---";
 				} catch(...) {}
 			}

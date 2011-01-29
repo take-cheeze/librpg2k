@@ -31,6 +31,7 @@ namespace rpg2k
 
 		Descriptor::Descriptor(Descriptor const& src)
 		: type_(src.type_), hasDefault_(src.hasDefault_)
+		, arrayTable_(src.arrayTable_.get() ? new ArrayTable(*src.arrayTable_) : NULL)
 		{
 			if(hasDefault_) switch(type_) {
 				#define PP_enum(TYPE) \
@@ -72,8 +73,10 @@ namespace rpg2k
 			default: rpg2k_assert(false); break;
 			}
 		}
-		Descriptor::Descriptor(String const& type, ArrayDefinePointer def)
+		Descriptor::Descriptor(String const& type
+		, ArrayDefinePointer def, std::auto_ptr<ArrayTable> table)
 		: type_( ElementType::instance().toEnum(type) ), hasDefault_(true)
+		, arrayTable_(table.release())
 		{
 			rpg2k_assert( (type_ == ElementType::Array1D_) || (type_ == ElementType::Array2D_) );
 			impl_.arrayDefine = def.release();
@@ -111,7 +114,7 @@ namespace rpg2k
 			rpg2k_assert(this->type_ == ElementType::String_);
 			return *impl_.String_;
 		}
-		Descriptor::operator ArrayDefine() const
+		ArrayDefine Descriptor::arrayDefine() const
 		{
 			rpg2k_assert( (this->type_ == ElementType::Array1D_)
 			|| (this->type_ == ElementType::Array2D_) );

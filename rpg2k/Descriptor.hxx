@@ -4,9 +4,12 @@
 #include "Define.hxx"
 #include "Singleton.hxx"
 
+#include <EASTL/map.h>
+
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
+#include <boost/scoped_ptr.hpp>
 
 
 namespace rpg2k
@@ -66,6 +69,32 @@ namespace rpg2k
 		}; // class ElementType
 		class Descriptor
 		{
+		public:
+			Descriptor(Descriptor const& src);
+			Descriptor(String const& type);
+			Descriptor(String const& type, String const& val);
+
+			typedef eastl::map<String, int> ArrayTable;
+			Descriptor(String const& type
+			, ArrayDefinePointer def, std::auto_ptr<ArrayTable> table);
+
+			~Descriptor();
+
+			#define PP_castOperator(type) operator type const&() const;
+			PP_basicTypes(PP_castOperator)
+			#undef PP_castOperator
+			operator String const&() const;
+			operator unsigned const&() const
+			{
+				return reinterpret_cast<unsigned const&>( static_cast<int const&>(*this) );
+			}
+			ArrayDefine arrayDefine() const;
+			ArrayTable const& arrayTable() const { return *arrayTable_; }
+
+			String const& typeName() const;
+			ElementType::Enum type() const { return type_; }
+
+			bool hasDefault() const { return hasDefault_; }
 		private:
 			ElementType::Enum const type_;
 			bool const hasDefault_;
@@ -78,30 +107,7 @@ namespace rpg2k
 				boost::ptr_unordered_map<unsigned, Descriptor>* arrayDefine;
 			} impl_;
 
-			operator ArrayDefine() const;
-		public:
-			Descriptor(Descriptor const& src);
-			Descriptor(String const& type);
-			Descriptor(String const& type, String const& val);
-			Descriptor(String const& type, ArrayDefinePointer def);
-
-			~Descriptor();
-
-			#define PP_castOperator(type) operator type const&() const;
-			PP_basicTypes(PP_castOperator)
-			#undef PP_castOperator
-			operator String const&() const;
-			ArrayDefine arrayDefine() const { return static_cast<ArrayDefine>(*this); }
-
-			operator unsigned const&() const
-			{
-				return reinterpret_cast<unsigned const&>( static_cast<int const&>(*this) );
-			}
-
-			String const& typeName() const;
-			ElementType::Enum type() const { return type_; }
-
-			bool hasDefault() const { return hasDefault_; }
+			boost::scoped_ptr<ArrayTable> const arrayTable_;
 		}; // class Descriptor
 	} // namespace structure
 } // namespace rpg2k

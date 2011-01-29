@@ -1,6 +1,7 @@
 #include "Define.hxx"
 
 const char* rpg2k::define::LcfDataBase =
+#line 1
 "Array1D Grobal\n"
 "{\n"
 "	[11]: Array2D Character\n"
@@ -386,7 +387,7 @@ const char* rpg2k::define::LcfDataBase =
 "		[11]:String normalAttack;\n"
 "		[12]:String criticalAttackParty;\n"
 "		[13]:String criticalAttackEnemy;\n"
-"		[14]:String defend;\n"
+"		[14]:String defended;\n"
 "		[15]:String doNothing;\n"
 "		[16]:String chargePower;\n"
 "		[17]:String selfDestruct;\n"
@@ -450,8 +451,8 @@ const char* rpg2k::define::LcfDataBase =
 "		[80]:String mes0; // hotel A\n"
 "		[81]:String mes1;\n"
 "		[82]:String mes2;\n"
-"		[83]:String yes;\n"
-"		[84]:String no;\n"
+"		[83]:String hotelYes;\n"
+"		[84]:String hotelNo;\n"
 "		[85]:String v85 ; // hotel B\n"
 "		[86]:String v86 ;\n"
 "		[87]:String v87 ;\n"
@@ -466,7 +467,7 @@ const char* rpg2k::define::LcfDataBase =
 "		[101]:String battle;\n"
 "		[102]:String autoAction;\n"
 "		[103]:String escape;\n"
-"		[104]:String attack;\n"
+"		[104]:String attackCommand;\n"
 "		[105]:String defend;\n"
 "		[106]:String useItem;\n"
 "		[107]:String useSkill;\n"

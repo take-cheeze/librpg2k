@@ -34,8 +34,7 @@ namespace rpg2k
 		}
 
 		Array1D::Array1D(Array1D const& src)
-		: BaseOfArray1D(src)
-		, binBuf_(src.binBuf_)
+		: binBuf_(src.binBuf_)
 		, arrayDefine_(src.arrayDefine_), this_(src.this_)
 		, exists_(src.exists_), owner_(src.owner_), index_(src.index_)
 		{
@@ -180,6 +179,29 @@ namespace rpg2k
 		{
 			return const_cast<Array1D&>(*this)[index];
 		}
+		Element& Array1D::operator [](char const* index)
+		{
+			Descriptor::ArrayTable const& table = this->toElement().descriptor().arrayTable();
+			Descriptor::ArrayTable::const_iterator tableIt = table.find(index);
+			rpg2k_assert(tableIt != table.end());
+
+			iterator it = this->find(tableIt->second);
+			if( it != end() ) { return *it->second; }
+			else if( createAt(tableIt->second) ) { return *this->find(tableIt->second)->second; }
+			else {
+				if( isArray2D() ) {
+					return *insert( tableIt->second, std::auto_ptr<Element>(
+						new Element(*owner_, index_, tableIt->second) ) ).first->second;
+				} else {
+					return *insert( tableIt->second, std::auto_ptr<Element>(
+						new Element(*this, tableIt->second) ) ).first->second;
+				}
+			}
+		}
+		Element const& Array1D::operator [](char const* index) const
+		{
+			return const_cast<Array1D&>(*this)[index];
+		}
 
 		unsigned Array1D::count() const
 		{
@@ -214,13 +236,11 @@ namespace rpg2k
 		}
 		std::ostream& Array1D::serialize(std::ostream& s) const
 		{
+			eastl::map<unsigned, Binary> result = binBuf_;
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( !it->second->exists() ) continue;
-
-				writeBER( s, it->first );
-				writeWithSize( s, *(it->second) );
+				if( it->second->exists() ) { result.insert(eastl::make_pair(it->first, structure::serialize(*it->second))); }
 			}
-			for(eastl::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
+			for(eastl::map<unsigned, Binary>::const_iterator it = result.begin(); it != result.end(); ++it) {
 				writeBER( s, it->first );
 				writeWithSize(s, it->second);
 			}

@@ -67,8 +67,7 @@ namespace rpg2k
 			if( fileName_.empty() ) fileName_ = defaultName();
 			rpg2k_assert( exists() );
 
-			std::ifstream ifs( fullPath().c_str()
-			, structure::INPUT_FLAG );
+			std::ifstream ifs( fullPath().c_str(), structure::INPUT_FLAG );
 
 			if( !structure::checkHeader( ifs, this->header() ) ) rpg2k_assert(false);
 			/*
@@ -165,8 +164,9 @@ namespace rpg2k
 				EXP_END,
 			} prev = EXP_END;
 
-			using structure::ArrayDefineType;
-			std::stack< ArrayDefineType* > nest;
+			using namespace structure;
+			std::stack<ArrayDefineType*> nest;
+			std::stack<Descriptor::ArrayTable*> tableNest;
 
 			// if success continue else error
 			for(std::deque<String>::const_iterator it = token.begin(); it < token.end(); ++it) {
@@ -186,12 +186,12 @@ namespace rpg2k
 							dst.push_back( std::auto_ptr<Descriptor>( new Descriptor(typeName) ) );
 							nextToken(EXP_END);
 						} else if( isArray(typeName) && (*it == "{") ) {
-							structure::ArrayDefinePointer arrayDef(new ArrayDefineType);
-							ArrayDefineType* p = arrayDef.get();
+							ArrayDefinePointer arrayDef(new ArrayDefineType());
+							nest.push(arrayDef.get());
+							std::auto_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable());
+							tableNest.push(arrayTable.get());
 
-							dst.push_back(
-								std::auto_ptr<Descriptor>( new Descriptor(typeName, arrayDef) ) );
-							nest.push(p);
+							dst.push_back(std::auto_ptr<Descriptor>(new Descriptor(typeName, arrayDef, arrayTable)));
 
 							nextToken(OPEN_STRUCT);
 						}
@@ -200,15 +200,14 @@ namespace rpg2k
 						if(*it == ";") { nextToken(EXP_END); } else break;
 					case EXP_END:
 						typeName = *it;
-						// cout << typeName << endl;
 						nextToken(TYPE);
 					default: break;
 				} else switch(prev) {
 					case OPEN_INDEX: {
 						std::istringstream ss(*it);
 						ss >> col;
-						rpg2k_assert( nest.top()->find(col) == nest.top()->end() );
-						nextToken(INDEX);
+						if(nest.top()->find(col) != nest.top()->end()) { break; }
+						else { nextToken(INDEX); }
 					}
 					case INDEX:
 						if(*it == "]") { nextToken(CLOSE_INDEX1); } else break;
@@ -218,51 +217,58 @@ namespace rpg2k
 						typeName = *it;
 						nextToken(TYPE);
 					case TYPE:
-						nextToken(NAME);
+						if((*it == "dummy")
+						|| tableNest.top()->insert(eastl::make_pair(*it, col)).second) { nextToken(NAME); }
+						else { break; }
 					case NAME:
 						if(*it == "=") { nextToken(EQUALS);
 						} else if(*it == ";") {
 							if( isArray(typeName) ) {
-								boost::ptr_vector<Descriptor> const& def = get(typeName);
-								nest.top()->insert( col,
-									std::auto_ptr<Descriptor>( new Descriptor(
-										structure::ElementType::instance().toString( def[0].type() ),
-										structure::ArrayDefinePointer( new ArrayDefineType( def[0].arrayDefine() ) ) ) ) );
+								Descriptor const& def = this->get(typeName)[0];
+								nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(
+									ElementType::instance().toString(def.type()),
+									ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
+									std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable())))));
 							} else nest.top()->insert( col, std::auto_ptr<Descriptor>( new Descriptor(typeName) ) );
 
 							nextToken(EXP_END);
 						} else if( (*it == "{") && isArray(typeName) ) {
-							structure::ArrayDefinePointer arrayDef(new ArrayDefineType);
+							ArrayDefinePointer arrayDef(new ArrayDefineType());
 							ArrayDefineType* p = arrayDef.get();
+							std::auto_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable());
+							tableNest.push(arrayTable.get());
 
-							nest.top()->insert( col, std::auto_ptr<Descriptor>( new  Descriptor(typeName, arrayDef) ) );
+							nest.top()->insert(col, std::auto_ptr<Descriptor>(new  Descriptor(typeName, arrayDef, arrayTable)));
 							nest.push(p);
 
 							nextToken(OPEN_STRUCT);
 						} else break;
 					case EQUALS:
-						if( isArray(typeName) )
-							nest.top()->insert( col,
-								std::auto_ptr<Descriptor>( new Descriptor( typeName,
-								structure::ArrayDefinePointer( new ArrayDefineType( arrayDefine(*it) ) ) ) ) );
-						else nest.top()->insert( col, std::auto_ptr<Descriptor>( new Descriptor(typeName, *it) ) );
+						if( isArray(typeName) ) {
+							Descriptor const& def = this->get(*it)[0];
+							nest.top()->insert(col,
+								std::auto_ptr<Descriptor>(new Descriptor(typeName,
+								ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
+								std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable())))));
+						} else nest.top()->insert( col, std::auto_ptr<Descriptor>( new Descriptor(typeName, *it) ) );
 						nextToken(DEFAULT);
 					case DEFAULT:
 						if(*it == ";") { nextToken(EXP_END); } else break;
 					case OPEN_STRUCT:
 						if(*it == "[") { nextToken(OPEN_INDEX); }
-						else if(*it == "}") { nest.pop(); nextToken(CLOSE_STRUCT); }
+						else if(*it == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
 						else break;
 					case CLOSE_STRUCT:
 						if(*it == ";") { nextToken(EXP_END); } else break;
 					case EXP_END:
 						if(*it == "[") { nextToken(OPEN_INDEX); }
-						else if(*it == "}") { nest.pop(); nextToken(CLOSE_STRUCT); }
+						else if(*it == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
 						else break;
 					default: break;
 				}
 
-				cerr << "Error at line: " << line << endl;
+				cout << "Error at line: " << line << endl;
+				cout << "\tToken: " << *it << endl;
 				rpg2k_assert(false);
 			}
 

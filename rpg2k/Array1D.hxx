@@ -2,11 +2,7 @@
 #define _INC__RPG2K__MODEL__ARRAY_1D_HPP
 
 #include <EASTL/map.h>
-#if RPG2K_DEBUG
-	#include <boost/ptr_container/ptr_map.hpp>
-#else
-	#include <boost/ptr_container/ptr_unordered_map.hpp>
-#endif
+#include <boost/ptr_container/ptr_map.hpp>
 #include "Descriptor.hxx"
 #include "Structure.hxx"
 
@@ -21,11 +17,7 @@ namespace rpg2k
 		class EventState;
 		class Sound;
 
-		#if RPG2K_DEBUG
-			typedef boost::ptr_map<unsigned, Element> BaseOfArray1D;
-		#else
-			typedef boost::ptr_unordered_map<unsigned, Element> BaseOfArray1D;
-		#endif
+		typedef boost::ptr_map<unsigned, Element> BaseOfArray1D;
 
 		class Array1D : public BaseOfArray1D
 		{
@@ -73,6 +65,9 @@ namespace rpg2k
 
 			Element& operator [](unsigned index);
 			Element const& operator [](unsigned index) const;
+
+			Element& operator [](char const* index);
+			Element const& operator [](char const* index) const;
 
 			bool exists() const;
 			bool exists(unsigned index) const;
