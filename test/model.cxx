@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+
+#include <rpg2k/DataBase.hxx>
+#include <rpg2k/MapTree.hxx>
 #include <rpg2k/Model.hxx>
 #include <rpg2k/Project.hxx>
 
@@ -10,6 +13,17 @@
 
 using namespace rpg2k::model;
 
+
+TEST(MapTree, OpenAndClose)
+{
+	MapTree("./test/TestGame");
+}
+/*
+TEST(DataBase, OpenAndClose)
+{
+	DataBase("./test/TestGame");
+}
+*/
 
 TEST(DefineLoader, CheckDefines)
 {
@@ -26,7 +40,7 @@ TEST(DefineLoader, CheckDefines)
 	#undef PP_test
 }
 
-TEST(Project, Open)
+TEST(Project, OpenAndClose)
 {
 	Project("./test/TestGame");
 }

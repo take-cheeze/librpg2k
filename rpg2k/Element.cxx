@@ -53,10 +53,10 @@ namespace rpg2k
 
 		void BerEnum::init(std::istream& s)
 		{
-			unsigned length = readBER(s);
+			unsigned const length = readBER(s) + 1;
 
-			resize(length+1);
-			for(unsigned i = 0; i <= length; i++) (*this)[i] = readBER(s);
+			this->resize(length);
+			for(unsigned i = 0; i < length; i++) { (*this)[i] = readBER(s); }
 		}
 
 		size_t BerEnum::serializedSize() const
@@ -196,7 +196,7 @@ namespace rpg2k
 
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = descriptor().hasDefault()? descriptor() : TYPE(); \
+						impl_.TYPE##_ = b; \
 						break;
 				PP_basicTypes(PP_enum)
 				#undef PP_enum
@@ -426,12 +426,14 @@ namespace rpg2k
 			{ \
 				rpg2k_assert( this->isDefined() ); \
 				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
+				rpg2k_assert( this->exists_ || descriptor_->hasDefault() ); \
 				return impl_.TYPE##_; \
 			} \
 			Element::operator TYPE&() \
 			{ \
 				rpg2k_assert( this->isDefined() ); \
 				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
+				rpg2k_assert( this->exists_ || descriptor_->hasDefault() ); \
 				return impl_.TYPE##_; \
 			}
 		PP_basicTypes(PP_castOperator)

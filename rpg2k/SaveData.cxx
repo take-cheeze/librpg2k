@@ -154,7 +154,7 @@ namespace rpg2k
 
 		bool SaveData::flag(unsigned const id) const
 		{
-			return ( id < switch_.size() ) ? switch_[id - ID_MIN] : SWITCH_DEF_VAL;
+			return ( id < switch_.size() ) ? switch_[id - ID_MIN] : bool(SWITCH_DEF_VAL);
 		}
 		void SaveData::setFlag(unsigned id, bool data)
 		{
@@ -168,7 +168,7 @@ namespace rpg2k
 		}
 		void SaveData::setVar(unsigned const id, int32_t const data)
 		{
-			if( id >= variable_.size() ) variable_.resize(id, VAR_DEF_VAL);
+			if( id >= variable_.size() ) variable_.resize(id, int32_t(VAR_DEF_VAL));
 			variable_[id - ID_MIN] = data;
 		}
 
@@ -186,26 +186,24 @@ namespace rpg2k
 		unsigned SaveData::itemNum(unsigned const id) const
 		{
 			ItemTable::const_iterator it = item_.find(id);
-			return ( it == item_.end() )? ITEM_MIN : it->second.num;
+			return ( it == item_.end() )? unsigned(ITEM_MIN) : it->second.num;
 		}
 		void SaveData::setItemNum(unsigned const id, unsigned const val)
 		{
-			unsigned validVal = val;
-			if(validVal < ITEM_MIN) validVal = ITEM_MIN;
-			else if(ITEM_MAX < validVal) validVal = ITEM_MAX;
+			unsigned const validVal = eastl::min(unsigned(ITEM_MAX), val);
 
 			if( item_.find(id) == item_.end() ) {
 				Item const i = { validVal, 0 };
 				item_.insert( eastl::make_pair(id, i) );
 			} else item_[id].num = validVal;
 
-			if( validVal == 0 ) item_.erase(id);
+			if(validVal == ITEM_MIN) item_.erase(id);
 		}
 
 		unsigned SaveData::itemUse(unsigned const id) const
 		{
 			ItemTable::const_iterator it = item_.find(id);
-			return ( it == item_.end() ) ? ITEM_MIN : it->second.use;
+			return ( it == item_.end() ) ? unsigned(ITEM_MIN) : it->second.use;
 		}
 		void SaveData::setItemUse(unsigned const id, unsigned const val)
 		{

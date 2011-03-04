@@ -246,10 +246,10 @@ namespace rpg2k
 			return ldb_.terrain( chipSetID() )[ chipID2chipIndex(getLSD(), chipID) ];
 		}
 
-		int Project::currentPageID(unsigned eventID)
+		int Project::currentPageID(unsigned const eventID)
 		{
 			Array1D const* res = currentPage( getLMU()[81].toArray2D()[eventID][5] );
-			return (res == NULL) ? INVALID_PAGE_ID : res->index();
+			return (res == NULL)? int(INVALID_PAGE_ID) : int(res->index());
 		}
 		Array1D const* Project::currentPage(Array2D const& pages) const
 		{

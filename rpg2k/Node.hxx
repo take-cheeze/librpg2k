@@ -37,7 +37,7 @@ namespace rpg2k
 		Node* parent_;
 		boost::scoped_ptr<Children> children_;
 		virtual void updateThis() = 0;
-		virtual void drawThis(Graphics2D& g) const {}
+		virtual void drawThis(Graphics2D&) const {}
 	}; // class BasicNode
 
 	class NodeSwitcher : public Node

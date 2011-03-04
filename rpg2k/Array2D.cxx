@@ -10,7 +10,7 @@ namespace rpg2k
 	namespace structure
 	{
 		Array2D::Array2D(Array2D const& src)
-		: arrayDefine_(src.arrayDefine_)
+		: BaseOfArray2D(), arrayDefine_(src.arrayDefine_)
 		, this_(src.this_)
 		{
 			for(const_iterator it = src.begin(); it != src.end(); ++it) {

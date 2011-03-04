@@ -96,8 +96,8 @@ namespace rpg2k
 			template<typename T>
 			void assign(T const& src) 
 			{
-				static_cast<T&>(*this) = src;
 				this->substantiate();
+				static_cast<T&>(*this) = src;
 			}
 			template<typename T>
 			T const& operator =(T const& src) { this->assign(src); return static_cast<T&>(*this); }
