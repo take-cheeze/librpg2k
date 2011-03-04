@@ -218,7 +218,7 @@ namespace rpg2k
 						nextToken(TYPE);
 					case TYPE:
 						if((*it == "dummy")
-						|| tableNest.top()->insert(eastl::make_pair(*it, col)).second) { nextToken(NAME); }
+						|| tableNest.top()->insert(std::make_pair(*it, col)).second) { nextToken(NAME); }
 						else { break; }
 					case NAME:
 						if(*it == "=") { nextToken(EQUALS);
