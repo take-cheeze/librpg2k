@@ -66,9 +66,6 @@ namespace rpg2k
 		Binary(Binary const& b) : eastl::vector<uint8_t>(b) {}
 		Binary(std::string const& str) : eastl::vector<uint8_t>(str.begin(), str.end()) {}
 
-		uint8_t const* data() const { return &( this->front() ); }
-		uint8_t* data() { return &( this->front() ); }
-
 		operator std::string() const
 		{
 			return std::string( this->begin(), this->end() ); 
