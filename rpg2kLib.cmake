@@ -28,15 +28,18 @@ SET(rpg2kLib_DEFINITIONS
 SET(rpg2kLib_INCLUDE_DIRS
 	"${Boost_INCLUDE_DIRS}"
 	"${EASTL_INCLUDE_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/src"
 	"${rpg2kLib_PATH}"
 )
 SET(rpg2kLib_LIBRARIES
 	"${Boost_LIBRARIES}"
 	"${EASTL_LIBRARY}"
+	"pugixml"
 	"rpg2kLib"
 )
 SET(rpg2kLib_LIBRARY_DIRS
 	"${EASTL_LIBRARY_DIR}"
+	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/scripts"
 	"${rpg2kLib_PATH}"
 )
 IF(${APPLE})
