@@ -1,3 +1,6 @@
 [submodule "EASTL"]
 	path = EASTL
 	url = git@github.com:take-cheeze/EASTL.git
+[submodule "pugixml"]
+	path = pugixml
+	url = git@github.com:take-cheeze/pugixml.git
