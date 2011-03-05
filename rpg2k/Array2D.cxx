@@ -13,10 +13,9 @@ namespace rpg2k
 		: BaseOfArray2D(), arrayDefine_(src.arrayDefine_)
 		, this_(src.this_)
 		{
-			for(const_iterator it = src.begin(); it != src.end(); ++it) {
-				std::istringstream s( structure::serialize(*it->second), INPUT_FLAG );
-				this->insert( it->first, std::auto_ptr<Array1D>( new Array1D(*this, it->first, s) ) );
-			}
+			Binary const b = structure::serialize(src);
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			this->init(s);
 		}
 
 		Array2D::Array2D(ArrayDefine info)
@@ -31,7 +30,7 @@ namespace rpg2k
 		Array2D::Array2D(ArrayDefine info, Binary const& b)
 		: arrayDefine_(info), this_(NULL)
 		{
-			std::istringstream s(b, INPUT_FLAG);
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 
 			if( isInvalidArray2D(b) ) { return; } // s.seek(PARTICULAR_DATA_SIZE);
 			else { this->init(s); }
@@ -49,20 +48,20 @@ namespace rpg2k
 		Array2D::Array2D(Element& e, Binary const& b)
 		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
 		{
-			std::istringstream s(b, INPUT_FLAG );
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 
 			if( isInvalidArray2D(b) ) return; // s.seek(PARTICULAR_DATA_SIZE);
 			init(s);
 		}
 		void Array2D::init(std::istream& s)
 		{
-			size_t const length = readBER(s);
+			size_t const length = stream::readBER(s);
 			for(size_t i = 0; i < length; i++) {
-				size_t index = readBER(s);
+				size_t index = stream::readBER(s);
 				insert( index, std::auto_ptr<Array1D>( new Array1D(*this, index, s) ) );
 			}
 
-			if( toElement().hasOwner() ) rpg2k_analyze_assert( isEOF(s) );
+			if( toElement().hasOwner() ) rpg2k_analyze_assert( stream::isEOF(s) );
 		}
 
 	/*
@@ -125,11 +124,11 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 
-			ret += berSize( count() );
+			ret += stream::berSize( count() );
 			for(const_iterator it = begin(); it != end(); ++it) {
 				if( !it->second->exists() ) continue;
 
-				ret += berSize( it->first );
+				ret += stream::berSize( it->first );
 				ret += it->second->serializedSize();
 			}
 
@@ -137,11 +136,11 @@ namespace rpg2k
 		}
 		std::ostream& Array2D::serialize(std::ostream& s) const
 		{
-			writeBER( s, count() );
+			stream::writeBER( s, count() );
 			for(const_iterator it = begin(); it != end(); ++it) {
 				if( !it->second->exists() ) continue;
 
-				writeBER( s, it->first );
+				stream::writeBER(s, it->first);
 				it->second->serialize(s);
 			}
 			return s;

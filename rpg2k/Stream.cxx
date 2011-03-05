@@ -4,7 +4,7 @@
 
 namespace rpg2k
 {
-	namespace structure
+	namespace stream
 	{
 		bool isEOF(std::istream& is)
 		{

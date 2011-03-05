@@ -1,5 +1,6 @@
 #include "Debug.hxx"
 #include "Descriptor.hxx"
+#include "Stream.hxx"
 #include "Structure.hxx"
 
 #include <sstream>
@@ -42,8 +43,8 @@ namespace rpg2k
 				#undef PP_enum
 				case ElementType::Array1D_:
 				case ElementType::Array2D_:
-					impl_.arrayDefine =
-						new boost::ptr_unordered_map<unsigned, Descriptor>(*src.impl_.arrayDefine);
+					impl_.arrayDefine
+					= new boost::ptr_unordered_map<unsigned, Descriptor>(*src.impl_.arrayDefine);
 					break;
 				default: rpg2k_assert(false); break;
 			}
@@ -60,13 +61,13 @@ namespace rpg2k
 					if(
 						( val.size() > 2 ) &&
 						( *val.begin() == '\"' ) && ( *val.rbegin() == '\"' )
-					) impl_.String_ = new String( ++val.begin(), --val.end() );
+					) impl_.String_ = new String(val.data() + 1, val.size() - 2);
 					else impl_.String_ = new String(val);
 					break;
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: { \
-						std::istringstream iss(val); \
-						iss >> std::boolalpha >> (impl_.TYPE##_); \
+						io::stream<io::array_source> s(io::array_source(val.data(), val.size())); \
+						s >> std::boolalpha >> (impl_.TYPE##_); \
 					} break;
 				PP_basicTypes(PP_enum)
 				#undef PP_enum

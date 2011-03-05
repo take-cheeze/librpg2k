@@ -1,8 +1,6 @@
 #include "Debug.hxx"
 #include "MapUnit.hxx"
 
-#include <sstream>
-
 
 namespace rpg2k
 {
@@ -18,12 +16,10 @@ namespace rpg2k
 		{
 			load();
 		}
-		MapUnit::MapUnit(SystemString const& dir, unsigned id)
+		MapUnit::MapUnit(SystemString const& dir, unsigned const id)
 		: Base( dir, SystemString() ), id_(id)
 		{
-			std::ostringstream ss;
-			ss << "Map" << std::setfill('0') << std::setw(4) << id << ".lmu";
-			setFileName( ss.str() );
+			setFileName(eastl::string(CtorSprintf(), "Map%04d.lmu", int(id)));
 
 			checkExists();
 

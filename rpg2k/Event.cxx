@@ -12,17 +12,17 @@ namespace rpg2k
 		}
 		Instruction::Instruction(std::istream& s)
 		{
-			code_ = readBER(s);
-			nest_ = readBER(s);
+			code_ = stream::readBER(s);
+			nest_ = stream::readBER(s);
 
 			Binary b;
-			readWithSize(s, b);
-			stringArgument_ = static_cast<String>(b);
+			stream::readWithSize(s, b);
+			stringArgument_.assign(reinterpret_cast<char const*>(b.data()), b.size());
 
-			int argNum = readBER(s);
+			int const argNum = stream::readBER(s);
 
 			argument_.resize(argNum, VAR_DEF_VAL);
-			for(int i = 0; i < argNum; i++) argument_[i] = readBER(s);
+			for(int i = 0; i < argNum; i++) argument_[i] = stream::readBER(s);
 		}
 
 		int32_t Instruction::at(unsigned index) const
@@ -37,31 +37,31 @@ namespace rpg2k
 		size_t Instruction::serializedSize() const
 		{
 			unsigned ret =
-				berSize(code_) + berSize(nest_) +
-				berSize( stringArgument_.size() ) + stringArgument_.size() +
-				berSize( argument_.size() );
-			for(unsigned i = 0; i < argument_.size(); i++) ret += berSize(argument_[i]);
+				stream::berSize(code_) + stream::berSize(nest_) +
+				stream::berSize( stringArgument_.size() ) + stringArgument_.size() +
+				stream::berSize( argument_.size() );
+			for(unsigned i = 0; i < argument_.size(); i++) ret += stream::berSize(argument_[i]);
 			return ret;
 		}
 		std::ostream& Instruction::serialize(std::ostream& s) const
 		{
-			writeBER(s, code_);
-			writeBER(s, nest_);
-			writeWithSize(s, stringArgument_);
-			writeBER( s, argument_.size() );
-			for(unsigned i = 0; i < argument_.size(); i++) writeBER(s, argument_[i]);
+			stream::writeBER(s, code_);
+			stream::writeBER(s, nest_);
+			stream::writeWithSize(s, stringArgument_);
+			stream::writeBER(s, argument_.size());
+			for(unsigned i = 0; i < argument_.size(); i++) stream::writeBER(s, argument_[i]);
 			return s;
 		}
 
 		Event::Event(Binary const& b)
 		{
-			std::istringstream s( static_cast<std::string>(b), INPUT_FLAG );
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 			init(s);
 		}
 
 		void Event::init(std::istream& s)
 		{
-			while( !isEOF(s) ) {
+			while(!stream::isEOF(s)) {
 				data_.push_back( Instruction(s) );
 				if(data_.back().code() == 12110) { // check for label
 					if( !label_.insert( eastl::make_pair(data_.back()[0], data_.size() - 1) ).second ) {

@@ -3,14 +3,46 @@
 
 #include "Structure.hxx"
 
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/array.hpp>
+
 #include <iosfwd>
-#include <sstream>
 
 
 namespace rpg2k
 {
 	namespace structure
 	{
+		namespace io = boost::iostreams;
+
+		template<class T>
+		Binary serialize(T const& src)
+		{
+			Binary ret(src.serializedSize());
+			io::stream<io::array_sink> s(io::array_sink(reinterpret_cast<char*>(ret.data()), ret.size()));
+			src.serialize(s);
+
+			return ret;
+		}
+	}
+
+	namespace stream
+	{
+		enum {
+			BER_BIT  = (CHAR_BIT-1),
+			BER_SIGN = 0x01 << BER_BIT,
+			BER_MASK = BER_SIGN - 1,
+		};
+		inline unsigned berSize(unsigned num)
+		{
+			unsigned ret = 0;
+			do {
+				ret++;
+				num >>= BER_BIT;
+			} while(num);
+			return ret;
+		}
+
 		std::ios_base::openmode const INPUT_FLAG
 		= std::ios_base::in  | std::ios_base::binary;
 		std::ios_base::openmode const OUTPUT_FLAG
@@ -20,15 +52,6 @@ namespace rpg2k
 		String readHeader(std::istream& is);
 		std::ostream& writeHeader(std::ostream& os, String const& header);
 
-		template<class T>
-		Binary serialize(T const& src)
-		{
-			std::ostringstream s(OUTPUT_FLAG);
-			src.serialize(s);
-
-			return Binary( s.str() );
-		}
-
 		unsigned readBER(std::istream& is);
 		std::ostream& writeBER(std::ostream& os, unsigned val);
 
@@ -36,7 +59,7 @@ namespace rpg2k
 		template<class T>
 		std::ostream& writeWithSize(std::ostream& os, T const& val)
 		{
-			return val.serialize( writeBER( os, val.serializedSize() ) );
+			return val.serialize(writeBER(os, val.serializedSize()));
 		}
 
 		bool isEOF(std::istream& is);

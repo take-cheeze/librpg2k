@@ -3,7 +3,6 @@
 #include "Structure.hxx"
 
 #include <EASTL/algorithm.h>
-#include <sstream>
 
 
 namespace rpg2k
@@ -26,9 +25,7 @@ namespace rpg2k
 		SaveData::SaveData(SystemString const& dir, unsigned const id)
 		: Base(dir, ""), id_(id)
 		{
-			std::ostringstream ss;
-			ss << "Save" << std::setfill('0') << std::setw(2) << id << ".lsd";
-			setFileName( ss.str() );
+			setFileName(eastl::string(CtorSprintf(), "Save%02d.lsd", int(id)));
 
 			checkExists();
 

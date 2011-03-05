@@ -4,11 +4,12 @@
 #include "Define.hxx"
 #include "Singleton.hxx"
 
+#include <EASTL/hash_map.h>
+
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/unordered_map.hpp>
 
 
 namespace rpg2k
@@ -73,7 +74,7 @@ namespace rpg2k
 			Descriptor(String const& type);
 			Descriptor(String const& type, String const& val);
 
-			typedef boost::unordered_map<String, int> ArrayTable;
+			typedef eastl::hash_map<String, int> ArrayTable;
 			Descriptor(String const& type
 			, ArrayDefinePointer def, std::auto_ptr<ArrayTable> table);
 

@@ -68,7 +68,7 @@ namespace rpg2k
 		Array1D::Array1D(ArrayDefine info, Binary const& b)
 		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
 		{
-			std::istringstream s(b, INPUT_FLAG);
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 			init(s);
 		}
 
@@ -88,7 +88,7 @@ namespace rpg2k
 		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
 		, owner_(NULL), index_(-1)
 		{
-			std::istringstream s(b, INPUT_FLAG);
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 			init(s);
 		}
 		Array1D::Array1D(Array2D& owner, unsigned index)
@@ -106,11 +106,11 @@ namespace rpg2k
 			Binary bin;
 
 			while(true) {
-				unsigned index2 = readBER(s);
+				unsigned const index2 = stream::readBER(s);
 
 				if(index2 == ARRAY_1D_END) break;
 
-				readWithSize(s, bin);
+				stream::readWithSize(s, bin);
 				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index2, bin) );
 				else insert( index2, std::auto_ptr<Element>( new Element(owner, index, index2, bin) ) );
 			}
@@ -122,18 +122,18 @@ namespace rpg2k
 			Binary bin;
 
 			while(true) {
-				unsigned index = readBER(s);
+				unsigned const index = stream::readBER(s);
 
 				if(index == ARRAY_1D_END) break;
 
-				readWithSize(s, bin);
+				stream::readWithSize(s, bin);
 				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index, bin) );
 				else insert( index, std::auto_ptr<Element>( new Element(*this, index, bin) ) );
 
-				if( !toElement().hasOwner() && isEOF(s) ) return;
+				if(!toElement().hasOwner() && stream::isEOF(s)) return;
 			}
 
-			rpg2k_analyze_assert( isEOF(s) );
+			rpg2k_analyze_assert(stream::isEOF(s));
 		}
 
 		bool Array1D::isElement() const
@@ -217,19 +217,19 @@ namespace rpg2k
 			for(const_iterator it = begin(); it != end(); ++it) {
 				if( !it->second->exists() ) continue;
 
-				ret += berSize(it->first);
+				ret += stream::berSize(it->first);
 				size_t const size = it->second->serializedSize();
-				ret += berSize(size);
+				ret += stream::berSize(size);
 				ret += size;
 			}
 			for(eastl::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
-				ret += berSize(it->first);
+				ret += stream::berSize(it->first);
 				unsigned const size = it->second.size();
-				ret += berSize(size);
+				ret += stream::berSize(size);
 				ret += size;
 			}
 
-			if( toElement().hasOwner() ) ret += berSize(ARRAY_1D_END);
+			if( toElement().hasOwner() ) ret += stream::berSize(ARRAY_1D_END);
 
 			return ret;
 		}
@@ -240,11 +240,11 @@ namespace rpg2k
 				if( it->second->exists() ) { result.insert(eastl::make_pair(it->first, structure::serialize(*it->second))); }
 			}
 			for(eastl::map<unsigned, Binary>::const_iterator it = result.begin(); it != result.end(); ++it) {
-				writeBER( s, it->first );
-				writeWithSize(s, it->second);
+				stream::writeBER(s, it->first);
+				stream::writeWithSize(s, it->second);
 			}
 
-			if( toElement().hasOwner() ) writeBER(s, ARRAY_1D_END);
+			if(toElement().hasOwner()) stream::writeBER(s, ARRAY_1D_END);
 
 			return s;
 		}

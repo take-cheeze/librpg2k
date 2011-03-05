@@ -14,6 +14,15 @@ namespace
 
 namespace rpg2k
 {
+	std::ostream& operator <<(std::ostream& os, String const& str)
+	{
+		return(os << str.toSystem().c_str());
+	}
+	std::ostream& operator <<(std::ostream& os, SystemString const& str)
+	{
+		return(os << str.c_str());
+	}
+
 	CharSet::Dir::Type toCharSetDir(EventDir::Type const dir)
 	{
 		switch(dir) {
@@ -66,38 +75,25 @@ namespace rpg2k
 	}
 	String SystemString::toRPG2k () const
 	{
-		return Encode::instance().toRPG2k (*this);
+		return Encode::instance().toRPG2k(*this);
 	}
-
-	namespace structure
-	{
-		unsigned berSize(uint32_t num)
-		{
-			unsigned ret = 0;
-			do {
-				ret++;
-				num >>= BER_BIT;
-			} while(num);
-			return ret;
-		}
-	} // namespace structure
 
 	bool Binary::isBER() const
 	{
-		if( !size() || ( ( size() > ( sizeof(uint32_t) * CHAR_BIT ) / structure::BER_BIT + 1) ) ) return false;
+		if( !size() || ( ( size() > ( sizeof(uint32_t) * CHAR_BIT ) / stream::BER_BIT + 1) ) ) return false;
 
 		const_reverse_iterator it = eastl::vector<uint8_t>::rbegin();
-		if( *it > structure::BER_SIGN ) return false;
+		if( *it > stream::BER_SIGN ) return false;
 
-		while( ++it < eastl::vector<uint8_t>::rend() ) if( *it < structure::BER_SIGN ) return false;
+		while( ++it < eastl::vector<uint8_t>::rend() ) if( *it < stream::BER_SIGN ) return false;
 
 		return true;
 	}
 	bool Binary::isString() const
 	{
-		for(const_iterator i = begin(); i < end(); i++) if( std::iscntrl(*i) ) return false;
+		for(const_iterator i = begin(); i < end(); i++) if(std::iscntrl(*i)) return false;
 		try {
-			static_cast<String>(*this).toSystem();
+			String(reinterpret_cast<char const*>(this->data()), this->size()).toSystem();
 			return true;
 		} catch(debug::AnalyzeException const&) { return false; }
 	}
@@ -106,8 +102,9 @@ namespace rpg2k
 	{
 		rpg2k_assert( isBER() );
 
-		std::istringstream iss( static_cast<std::string>(*this), structure::INPUT_FLAG );
-		return rpg2k_integer( structure::readBER(iss) );
+		namespace io = boost::iostreams;
+		io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(this->data()), this->size()));
+		return rpg2k_integer(stream::readBER(s));
 	}
 	Binary::operator bool() const
 	{
@@ -122,14 +119,15 @@ namespace rpg2k
 	Binary::operator double() const
 	{
 		rpg2k_assert( size() == sizeof(double) );
-		return *( (double*)this->data() );
+		return *(reinterpret_cast<double const*>(this->data()));
 	}
 
 	Binary& Binary::operator =(int const num)
 	{
-		std::ostringstream s;
-		structure::writeBER(s, rpg2k_integer(num) );
-		this->assign( s.str() );
+		this->resize(stream::berSize(num));
+		namespace io = boost::iostreams;
+		io::stream<io::array_sink> s(io::array_sink(reinterpret_cast<char*>(this->data()), this->size()));
+		stream::writeBER(s, rpg2k_integer(num));
 		return *this;
 	}
 	Binary& Binary::operator =(bool const b)

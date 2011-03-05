@@ -23,9 +23,9 @@ namespace rpg2k
 		 */
 		#define getlang() getenv("LANG")
 		if( getlang() ) {
-			std::string const langStr = getlang();
+			eastl::string const langStr = getlang();
 			std::size_t const pos = langStr.find('.');
-			if( pos != std::string::npos ) {
+			if( pos != eastl::string::npos ) {
 				sysEncode_ = langStr.substr( pos + 1 );
 				// std::cout << sysEncode_ << std::endl;
 			}
@@ -50,10 +50,10 @@ namespace rpg2k
 		return ret;
 	}
 
-	std::string Encode::convertString(std::string const& src, iconv_t cd)
+	eastl::string Encode::convertString(eastl::string const& src, iconv_t cd)
 	{
 		char iconvBuff[BUFF_SIZE];
-		::size_t iconvOutSize = BUFF_SIZE, iconvInSize  = src.length();
+		::size_t iconvOutSize = BUFF_SIZE, iconvInSize  = src.size();
 		char* iconvOut = iconvBuff;
 		#if RPG2K_IS_PSP && !defined(_LIBICONV_H)
 			char const* iconvIn  = src.c_str();
@@ -61,9 +61,9 @@ namespace rpg2k
 			char* iconvIn  = const_cast< char* >( src.c_str() );
 		#endif
 
-		std::string ret;
-		while(iconvInSize) {
-			if( ::iconv(cd, &iconvIn, &iconvInSize, &iconvOut, &iconvOutSize) == (size_t) -1 ) {
+		eastl::string ret;
+		while(iconvInSize > 0) {
+			if( ::iconv(cd, &iconvIn, &iconvInSize, &iconvOut, &iconvOutSize) == (::size_t) -1 ) {
 				rpg2k_analyze_assert(false);
 			}
 			ret.append(iconvBuff, BUFF_SIZE-iconvOutSize);

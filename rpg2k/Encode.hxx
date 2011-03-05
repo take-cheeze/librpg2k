@@ -19,18 +19,18 @@ namespace rpg2k
 		static char const* RPG2K_ENCODE;
 
 		::iconv_t toSystem_, toRPG2k_;
-		std::string sysEncode_;
+		eastl::string sysEncode_;
 	protected:
 		Encode();
 		~Encode();
 
-		static std::string convertString(std::string const& src, iconv_t cd);
+		static eastl::string convertString(eastl::string const& src, iconv_t cd);
 		static iconv_t openConverter(char const* to, char const* from);
 	public:
 		SystemString toSystem( String const& src) const { return convertString(src, toSystem_); }
 		 String toRPG2k (SystemString const& src) const { return convertString(src, toRPG2k_ ); }
 
-		std::string const& systemEncoding() const { return sysEncode_; }
+		eastl::string const& systemEncoding() const { return sysEncode_; }
 	}; // class Encode
 } // namespace rpg2k
 

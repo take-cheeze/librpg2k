@@ -5,7 +5,6 @@
 
 #include <EASTL/algorithm.h>
 #include <fstream>
-#include <sstream>
 #include <stack>
 
 #include <cctype>
@@ -67,11 +66,11 @@ namespace rpg2k
 			if( fileName_.empty() ) fileName_ = defaultName();
 			rpg2k_assert( exists() );
 
-			std::ifstream ifs( fullPath().c_str(), structure::INPUT_FLAG );
+			std::ifstream ifs(fullPath().c_str(), stream::INPUT_FLAG);
 
-			if( !structure::checkHeader( ifs, this->header() ) ) rpg2k_assert(false);
+			if(!stream::checkHeader(ifs, this->header())) rpg2k_assert(false);
 			/*
-			if( this->header() == std::string("LcfMapTree") ) {
+			if( this->header() == eastl::string("LcfMapTree") ) {
 				// TODO
 			}
 			*/
@@ -81,7 +80,7 @@ namespace rpg2k
 				data_.push_back( std::auto_ptr<Element>( new Element(info[i], ifs) ) );
 			}
 
-			rpg2k_assert( structure::isEOF(ifs) );
+			rpg2k_assert(stream::isEOF(ifs));
 
 			loadImpl();
 		}
@@ -89,12 +88,12 @@ namespace rpg2k
 		{
 			exists_ = true;
 			saveImpl();
-			std::ofstream ofs( filename.c_str(), structure::OUTPUT_FLAG );
+			std::ofstream ofs(filename.c_str(), stream::OUTPUT_FLAG);
 			serialize(ofs);
 		}
 		void Base::serialize(std::ostream& s)
 		{
-			structure::writeHeader( s, header() );
+			stream::writeHeader( s, header() );
 			for(boost::ptr_vector<Element>::const_iterator it = data_.begin(); it < data_.end(); ++it) {
 				it->serialize(s);
 			}
@@ -139,7 +138,9 @@ namespace rpg2k
 		{
 			DefineText::const_iterator it = defineText_.find(name);
 			rpg2k_assert( it != defineText_.end() );
-			std::istringstream stream(it->second);
+
+			namespace io = boost::iostreams;
+			io::stream<io::array_source> stream(io::array_source(it->second, std::strlen(it->second)));
 			std::deque<String> token;
 			toToken(token, stream);
 			parse(dst, token);
@@ -204,7 +205,7 @@ namespace rpg2k
 					default: break;
 				} else switch(prev) {
 					case OPEN_INDEX: {
-						std::istringstream ss(*it);
+						io::stream<io::array_source> ss(io::array_source(it->data(), it->size()));
 						ss >> col;
 						if(nest.top()->find(col) != nest.top()->end()) { break; }
 						else { nextToken(INDEX); }
@@ -218,7 +219,7 @@ namespace rpg2k
 						nextToken(TYPE);
 					case TYPE:
 						if((*it == "dummy")
-						|| tableNest.top()->insert(std::make_pair(*it, col)).second) { nextToken(NAME); }
+						|| tableNest.top()->insert(eastl::make_pair(*it, col)).second) { nextToken(NAME); }
 						else { break; }
 					case NAME:
 						if(*it == "=") { nextToken(EQUALS);

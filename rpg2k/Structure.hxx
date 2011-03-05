@@ -14,16 +14,6 @@
 
 namespace rpg2k
 {
-	namespace structure
-	{
-		enum {
-			BER_BIT  = (CHAR_BIT-1),
-			BER_SIGN = 0x01 << BER_BIT,
-			BER_MASK = BER_SIGN - 1,
-		};
-		unsigned berSize(unsigned num);
-	} // namespace structure
-
 	class Binary : public eastl::vector<uint8_t>
 	{
 	private:
@@ -64,11 +54,11 @@ namespace rpg2k
 		explicit Binary(unsigned size) : eastl::vector<uint8_t>(size) {}
 		explicit Binary(uint8_t* data, unsigned size) : eastl::vector<uint8_t>(data, data + size) {}
 		Binary(Binary const& b) : eastl::vector<uint8_t>(b) {}
-		Binary(std::string const& str) : eastl::vector<uint8_t>(str.begin(), str.end()) {}
+		Binary(eastl::string const& str) : eastl::vector<uint8_t>(str.begin(), str.end()) {}
 
-		operator std::string() const
+		operator eastl::string() const
 		{
-			return std::string( this->begin(), this->end() ); 
+			return eastl::string(reinterpret_cast<char const*>(this->data()), this->size()); 
 		}
 
 		bool isBER() const;

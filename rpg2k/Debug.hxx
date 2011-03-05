@@ -34,15 +34,15 @@ namespace rpg2k
 	namespace debug
 	{
 
-		std::string error(int errNo);
+		eastl::string error(int errNo);
 		void addAtExitFunction( void (*func)(void) );
 
-		std::string demangleTypeInfo(std::type_info const& info);
+		eastl::string demangleTypeInfo(std::type_info const& info);
 		#if RPG2K_USE_RTTI
 			template<typename T>
-			inline std::string demangle() { return demangleTypeInfo( typeid(T) ); }
+			inline eastl::string demangle() { return demangleTypeInfo( typeid(T) ); }
 			template<typename T>
-			inline std::string demangle(T& src) { return demangleTypeInfo( typeid(src) ); }
+			inline eastl::string demangle(T& src) { return demangleTypeInfo( typeid(src) ); }
 		#endif
 
 		extern std::ofstream ANALYZE_RESULT; // usually analyze.txt

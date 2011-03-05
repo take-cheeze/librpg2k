@@ -46,30 +46,30 @@ namespace rpg2k
 		}
 		BerEnum::BerEnum(Binary const& b)
 		{
-			std::istringstream s( static_cast<std::string>(b), INPUT_FLAG );
+			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 			init(s);
-			rpg2k_assert( isEOF(s) );
+			rpg2k_assert(stream::isEOF(s));
 		}
 
 		void BerEnum::init(std::istream& s)
 		{
-			unsigned const length = readBER(s) + 1;
+			unsigned const length = stream::readBER(s) + 1;
 
 			this->resize(length);
-			for(unsigned i = 0; i < length; i++) { (*this)[i] = readBER(s); }
+			for(unsigned i = 0; i < length; i++) { (*this)[i] = stream::readBER(s); }
 		}
 
 		size_t BerEnum::serializedSize() const
 		{
-			unsigned ret = berSize( size() - 1 );
-			for(unsigned i = 0; i < size(); i++) ret += berSize( (*this)[i] );
+			unsigned ret = stream::berSize( size() - 1 );
+			for(unsigned i = 0; i < size(); i++) ret += stream::berSize( (*this)[i] );
 
 			return ret;
 		}
 		std::ostream& BerEnum::serialize(std::ostream& s) const
 		{
-			writeBER( s, this->size() - 1 );
-			for(unsigned i = 0; i < size(); i++) writeBER( s, (*this)[i] );
+			stream::writeBER(s, this->size() - 1);
+			for(unsigned i = 0; i < size(); i++) stream::writeBER(s, (*this)[i]);
 			return s;
 		}
 

@@ -696,18 +696,18 @@ namespace rpg2k
 				case Action::FREQ_DOWN:
 					break;
 				case Action::SWITCH_ON:
-					getLSD().setFlag( structure::readBER(s), true );
+					getLSD().setFlag(stream::readBER(s), true);
 					break;
 				case Action::SWITCH_OFF:
-					getLSD().setFlag( structure::readBER(s), false );
+					getLSD().setFlag(stream::readBER(s), false);
 					break;
 				case Action::CHANGE_CHAR_SET: {
-					String charSet( structure::readBER(s), '\0' );
+					String charSet(stream::readBER(s), '\0');
 					for(String::iterator it = charSet.begin(); it < charSet.end(); ++it) {
-						*it = structure::readBER(s);
+						*it = stream::readBER(s);
 					}
 					ev[73] = charSet;
-					ev[74] = structure::readBER(s);
+					ev[74] = stream::readBER(s);
 				} break;
 				case Action::PLAY_SOUND:
 					break;

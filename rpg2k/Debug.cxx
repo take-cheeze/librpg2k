@@ -41,7 +41,7 @@ namespace rpg2k
 {
 	namespace debug
 	{
-		std::string error(int const errNo)
+		eastl::string error(int const errNo)
 		{
 			char const* message = strerror(errNo);
 			switch(errno) {
@@ -54,7 +54,7 @@ namespace rpg2k
 			if( atexit(func) != 0 ) rpg2k_assert(false);
 		}
 
-		std::string demangleTypeInfo(std::type_info const& info)
+		eastl::string demangleTypeInfo(std::type_info const& info)
 		{
 			#if (RPG2K_IS_GCC || RPG2K_IS_CLANG)
 				int status;
@@ -67,12 +67,12 @@ namespace rpg2k
 					case -3: rpg2k_assert(!"Argument was invalid");
 					default: break;
 				}
-				std::string ret = readable; // char* to string
+				eastl::string ret = readable; // char* to string
 				std::free(readable);
 			#elif RPG2K_IS_MSVC
 				char* const readable = _unDName( 0, info.name(), 0, std::malloc, std::free, 0x2800 );
 				rpg2k_assert(readable);
-				std::string ret = readable; // char* to string
+				eastl::string ret = readable; // char* to string
 				std::free(readabl);
 			#endif
 
@@ -212,7 +212,7 @@ namespace rpg2k
 		}
 		std::ostream& Tracer::printString(String const& val, std::ostream& ostrm)
 		{
-			ostrm << "\"" << val.toSystem() << "\"";
+			ostrm << "\"" << val << "\"";
 			return ostrm;
 		}
 		std::ostream& Tracer::printEvent(structure::Event const& val, std::ostream& ostrm)
@@ -236,7 +236,7 @@ namespace rpg2k
 			ostrm << "{ "
 				<< "nest: " << std::setw(4) << std::dec << inst.nest() << ", "
 				<< "code: " << std::setw(5) << std::dec << inst.code() << ", "
-				<< "string: \"" << inst.string().toSystem() << "\", "
+				<< "string: \"" << inst.string() << "\", "
 				<< "integer[" << inst.argNum() << "]: "
 				;
 				ostrm << "{ ";
