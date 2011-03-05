@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 #include <rpg2k/Descriptor.hxx>
 
-#include "eastl_new.cxx"
-
 
 TEST(ElementType, Compare)
 {

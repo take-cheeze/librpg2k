@@ -9,8 +9,6 @@
 #include <cstdlib>
 #include <string>
 
-#include "eastl_new.cxx"
-
 using namespace rpg2k::model;
 
 
