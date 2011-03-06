@@ -86,7 +86,7 @@ namespace rpg2k
 			operator String const&() const;
 			operator unsigned const&() const
 			{
-				return reinterpret_cast<unsigned const&>( static_cast<int const&>(*this) );
+				return reinterpret_cast<unsigned const&>(static_cast<int const&>(*this));
 			}
 			ArrayDefine arrayDefine() const;
 			ArrayTable const& arrayTable() const { return *arrayTable_; }

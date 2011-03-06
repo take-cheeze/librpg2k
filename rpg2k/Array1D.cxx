@@ -24,10 +24,10 @@ namespace rpg2k
 		bool Array1D::createAt(unsigned const pos)
 		{
 			eastl::map<unsigned, Binary>::iterator it = binBuf_.find(pos);
-			if( it == binBuf_.end() ) return false;
+			if(it == binBuf_.end()) return false;
 
-			if( isArray2D() ) insert( pos, std::auto_ptr<Element>( new Element(owner(), index(), pos, it->second) ) );
-			else insert( pos, std::auto_ptr<Element>( new Element(*this, pos, it->second) ) );
+			if(isArray2D()) insert(pos, std::auto_ptr<Element>(new Element(owner(), index(), pos, it->second)));
+			else insert(pos, std::auto_ptr<Element>(new Element(*this, pos, it->second)));
 			binBuf_.erase(it);
 
 			return true;
@@ -39,18 +39,18 @@ namespace rpg2k
 		, exists_(src.exists_), owner_(src.owner_), index_(src.index_)
 		{
 			for(const_iterator it = src.begin(); it != src.end(); ++it) {
-				if( !it->second->exists() ) continue;
+				if(!it->second->exists()) continue;
 
 				Binary bin = it->second->serialize();
 
-				if( bin.size() >= BIG_DATA_SIZE ) {
-					binBuf_.insert( eastl::make_pair( it->first, bin ) );
-				} else if( src.isArray2D() ) {
-					insert( it->first, std::auto_ptr<Element>( new Element(
-						src.owner(), src.index(), it->first, bin) ) );
+				if(bin.size() >= BIG_DATA_SIZE) {
+					binBuf_.insert(eastl::make_pair(it->first, bin));
+				} else if(src.isArray2D()) {
+					insert(it->first, std::auto_ptr<Element>(new Element(
+						src.owner(), src.index(), it->first, bin)));
 				} else {
-					insert( it->first, std::auto_ptr<Element>(
-						new Element(*this, it->first, bin) ) );
+					insert(it->first, std::auto_ptr<Element>(
+						new Element(*this, it->first, bin)));
 				}
 			}
 		}
@@ -73,32 +73,32 @@ namespace rpg2k
 		}
 
 		Array1D::Array1D(Element& e)
-		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		, owner_(NULL), index_(-1)
 		{
 			exists_ = false;
 		}
 		Array1D::Array1D(Element& e, std::istream& s)
-		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		, owner_(NULL), index_(-1)
 		{
 			init(s);
 		}
 		Array1D::Array1D(Element& e, Binary const& b)
-		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		, owner_(NULL), index_(-1)
 		{
 			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 			init(s);
 		}
 		Array1D::Array1D(Array2D& owner, unsigned index)
-		: arrayDefine_( owner.arrayDefine() ), this_(NULL)
+		: arrayDefine_(owner.arrayDefine()), this_(NULL)
 		, owner_(&owner), index_(index)
 		{
 			exists_ = false;
 		}
 		Array1D::Array1D(Array2D& owner, unsigned const index, std::istream& s)
-		: arrayDefine_( owner.arrayDefine() ), this_(NULL)
+		: arrayDefine_(owner.arrayDefine()), this_(NULL)
 		, owner_(&owner), index_(index)
 		{
 			exists_ = true;
@@ -111,8 +111,8 @@ namespace rpg2k
 				if(index2 == ARRAY_1D_END) break;
 
 				stream::readWithSize(s, bin);
-				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index2, bin) );
-				else insert( index2, std::auto_ptr<Element>( new Element(owner, index, index2, bin) ) );
+				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(eastl::make_pair(index2, bin));
+				else insert(index2, std::auto_ptr<Element>(new Element(owner, index, index2, bin)));
 			}
 		}
 		void Array1D::init(std::istream& s)
@@ -127,8 +127,8 @@ namespace rpg2k
 				if(index == ARRAY_1D_END) break;
 
 				stream::readWithSize(s, bin);
-				if( bin.size() >= BIG_DATA_SIZE ) binBuf_.insert( eastl::make_pair(index, bin) );
-				else insert( index, std::auto_ptr<Element>( new Element(*this, index, bin) ) );
+				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(eastl::make_pair(index, bin));
+				else insert(index, std::auto_ptr<Element>(new Element(*this, index, bin)));
 
 				if(!toElement().hasOwner() && stream::isEOF(s)) return;
 			}
@@ -138,14 +138,14 @@ namespace rpg2k
 
 		bool Array1D::isElement() const
 		{
-			return (this_ != NULL) || ( isArray2D() && owner_->isElement() );
+			return (this_ != NULL) || (isArray2D() && owner_->isElement());
 		}
 
 		Element& Array1D::toElement() const
 		{
-			rpg2k_assert( isElement() );
+			rpg2k_assert(isElement());
 
-			if( isArray2D() ) return owner_->toElement();
+			if(isArray2D()) return owner_->toElement();
 			else return *this_;
 		}
 
@@ -160,17 +160,17 @@ namespace rpg2k
 		Element& Array1D::operator [](unsigned const index)
 		{
 			iterator it = find(index);
-			if( it != end() ) {
+			if(it != end()) {
 				return *it->second;
-			} else if( createAt(index) ) {
+			} else if(createAt(index)) {
 				return *this->find(index)->second;
 			} else {
-				if( isArray2D() ) {
-					return *insert( index, std::auto_ptr<Element>(
-						new Element(*owner_, index_, index) ) ).first->second;
+				if(isArray2D()) {
+					return *insert(index, std::auto_ptr<Element>(
+						new Element(*owner_, index_, index))).first->second;
 				} else {
-					return *insert( index, std::auto_ptr<Element>(
-						new Element(*this, index) ) ).first->second;
+					return *insert(index, std::auto_ptr<Element>(
+						new Element(*this, index))).first->second;
 				}
 			}
 		}
@@ -185,15 +185,15 @@ namespace rpg2k
 			rpg2k_assert(tableIt != table.end());
 
 			iterator it = this->find(tableIt->second);
-			if( it != end() ) { return *it->second; }
-			else if( createAt(tableIt->second) ) { return *this->find(tableIt->second)->second; }
+			if(it != end()) { return *it->second; }
+			else if(createAt(tableIt->second)) { return *this->find(tableIt->second)->second; }
 			else {
-				if( isArray2D() ) {
-					return *insert( tableIt->second, std::auto_ptr<Element>(
-						new Element(*owner_, index_, tableIt->second) ) ).first->second;
+				if(isArray2D()) {
+					return *insert(tableIt->second, std::auto_ptr<Element>(
+						new Element(*owner_, index_, tableIt->second))).first->second;
 				} else {
-					return *insert( tableIt->second, std::auto_ptr<Element>(
-						new Element(*this, tableIt->second) ) ).first->second;
+					return *insert(tableIt->second, std::auto_ptr<Element>(
+						new Element(*this, tableIt->second))).first->second;
 				}
 			}
 		}
@@ -206,7 +206,7 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( it->second->exists() ) ret++;
+				if(it->second->exists()) ret++;
 			}
 			return ret;
 		}
@@ -215,7 +215,7 @@ namespace rpg2k
 			unsigned ret = 0;
 
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( !it->second->exists() ) continue;
+				if(!it->second->exists()) continue;
 
 				ret += stream::berSize(it->first);
 				size_t const size = it->second->serializedSize();
@@ -229,7 +229,7 @@ namespace rpg2k
 				ret += size;
 			}
 
-			if( toElement().hasOwner() ) ret += stream::berSize(ARRAY_1D_END);
+			if(toElement().hasOwner()) ret += stream::berSize(ARRAY_1D_END);
 
 			return ret;
 		}
@@ -237,7 +237,7 @@ namespace rpg2k
 		{
 			eastl::map<unsigned, Binary> result = binBuf_;
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( it->second->exists() ) { result.insert(eastl::make_pair(it->first, structure::serialize(*it->second))); }
+				if(it->second->exists()) { result.insert(eastl::make_pair(it->first, structure::serialize(*it->second))); }
 			}
 			for(eastl::map<unsigned, Binary>::const_iterator it = result.begin(); it != result.end(); ++it) {
 				stream::writeBER(s, it->first);
@@ -249,14 +249,14 @@ namespace rpg2k
 			return s;
 		}
 
-		unsigned const& Array1D::index() const { rpg2k_assert( isArray2D() ); return index_; }
-		bool Array1D::exists() const { rpg2k_assert( isArray2D() ); return exists_; }
-		Array2D& Array1D::owner() { rpg2k_assert( isArray2D() ); return *owner_; }
-		Array2D const& Array1D::owner() const { rpg2k_assert( isArray2D() ); return *owner_; }
+		unsigned const& Array1D::index() const { rpg2k_assert(isArray2D()); return index_; }
+		bool Array1D::exists() const { rpg2k_assert(isArray2D()); return exists_; }
+		Array2D& Array1D::owner() { rpg2k_assert(isArray2D()); return *owner_; }
+		Array2D const& Array1D::owner() const { rpg2k_assert(isArray2D()); return *owner_; }
 
 		void Array1D::substantiate()
 		{
-			rpg2k_assert( isArray2D() );
+			rpg2k_assert(isArray2D());
 
 			toElement().substantiate();
 			exists_ = true;
@@ -264,8 +264,8 @@ namespace rpg2k
 		bool Array1D::exists(unsigned index) const
 		{
 			const_iterator it = find(index);
-			return ( ( it != end() ) && it->second->exists() ) ||
-				( binBuf_.find(index) != binBuf_.end() );
+			return ((it != end()) && it->second->exists()) ||
+				(binBuf_.find(index) != binBuf_.end());
 		}
 	} // namespace structure
 } // namespace rpg2k

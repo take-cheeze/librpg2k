@@ -68,13 +68,13 @@ namespace rpg2k
 
 				int level() const { return get<int, 31, 7>(); }
 				void setLevel(unsigned val);
-				void addLevel(int const val = 1) { setLevel( level() + val ); }
+				void addLevel(int const val = 1) { setLevel(level() + val); }
 				int exp(unsigned level) const;
 				int exp() const { return lsd_[32]; }
 				bool setExp(unsigned val);
-				bool addExp(int const val) { return setExp( exp() + val ); }
-				int nextLevelExp() const { return exp( this->level() + 1 ); }
-				int levelExp() const { return exp( this->level() ); }
+				bool addExp(int const val) { return setExp(exp() + val); }
+				int nextLevelExp() const { return exp(this->level() + 1); }
+				int levelExp() const { return exp(this->level()); }
 
 				void cure();
 
@@ -86,7 +86,7 @@ namespace rpg2k
 
 				void sync();
 			private:
-				bool canLevelUp() const { return( exp() > nextLevelExp() ); }
+				bool canLevelUp() const { return(exp() > nextLevelExp()); }
 			}; // class Character
 		private:
 			SystemString baseDir_, rtpDir_;
@@ -123,7 +123,7 @@ namespace rpg2k
 
 			DataBase& getLDB() { return ldb_; }
 			 MapTree& getLMT() { return lmt_; }
-			 MapUnit& getLMU() { return getLMU( currentMapID() ); }
+			 MapUnit& getLMU() { return getLMU(currentMapID()); }
 			SaveData& getLSD() { return lsd_.front(); }
 
 			int lastLSD() const { return lastSaveDataID_; }

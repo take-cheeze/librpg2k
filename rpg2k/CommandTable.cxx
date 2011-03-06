@@ -11,7 +11,7 @@ namespace rpg2k
 		CommandTable::CommandTable()
 		{
 			#define PP_insert(CODE) \
-				table_.insert( Table::value_type( CODE, &Context::command<CODE> ) );
+				table_.insert(Table::value_type(CODE, &Context::command<CODE>));
 			PP_enumAllContextCommand(PP_insert)
 			#undef PP_insert
 		}
@@ -19,7 +19,7 @@ namespace rpg2k
 		Context::Command CommandTable::operator [](size_t const code) const
 		{
 			Table::const_iterator it = table_.find(code);
-			rpg2k_assert( it != table_.end() );
+			rpg2k_assert(it != table_.end());
 			return it ->second;
 		}
 	} // namespace model

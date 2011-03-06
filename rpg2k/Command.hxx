@@ -9,7 +9,7 @@ namespace rpg2k
 	namespace model
 	{
 		#define PP_enumAllContextCommand(FUNC) \
-			FUNC( 0) \
+			FUNC(0) \
 			FUNC(10) \
 			\
 			FUNC(11210) \

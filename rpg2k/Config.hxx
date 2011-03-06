@@ -2,7 +2,7 @@
 #define _INC__RPG2K__CONFIG_HPP_
 
 // environment things
-#if defined(__GNUC__) && ( defined(__APPLE_CPP__) || defined(__APPLE_CC__) )
+#if defined(__GNUC__) && (defined(__APPLE_CPP__) || defined(__APPLE_CC__))
 	#include <TargetConditionals.h>
 
 	#define RPG2K_IS_MAC_OS_X (defined(TARGET_OS_MAC) && TARGET_OS_MAC)
@@ -23,12 +23,12 @@
 	#define RPG2K_IS_IPHONE_SIMULATOR 0
 #endif
 #define RPG2K_IS_PSP defined(PSP)
-#define RPG2K_IS_WINDOWS ( \
+#define RPG2K_IS_WINDOWS (\
 		defined(WIN32) || defined(_WIN32) || \
 		defined(WIN64) || defined(_WIN64) \
 	)
 #define RPG2K_IS_LINUX defined(__linux)
-#define RPG2K_IS_UNIX  defined(__unix )
+#define RPG2K_IS_UNIX  defined(__unix)
 
 // compiler things
 #define RPG2K_IS_GCC defined(__GNUC__)
@@ -36,9 +36,9 @@
 #if (RPG2K_IS_GCC || RPG2K_IS_CLANG)
 	#define RPG2K_USE_RTTI defined(__GXX_RTTI)
 
-	#if ( \
+	#if (\
 		!defined(RPG2K_IS_BIG_ENDIAN) && !defined(RPG2K_IS_LITTLE_ENDIAN) && \
-		( defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__) ) \
+		(defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__)) \
 	)
 		#define RPG2K_IS_BIG_ENDIAN defined(__BIG_ENDIAN__)
 		#define RPG2K_IS_LITTLE_ENDIAN defined(__LITTLE_ENDIAN__)
@@ -77,7 +77,7 @@
 /*
  * set rpg maker version
  */
-#if !( defined(RPG2000) || defined(RPG2000_VALUE) || defined(RPG2003) )
+#if !(defined(RPG2000) || defined(RPG2000_VALUE) || defined(RPG2003))
 	// #define RPG2000
 	#define RPG2000_VALUE
 	// #define RPG2003
@@ -90,7 +90,7 @@
 	#define RPG2K_ANALYZE_AT_DESTRUCTOR 1
 	/*
 	 * only analyze non defined rpg2k::structure::Element
-	 * ( checking with rpg2k::structure::Element::isDefined() )
+	 * (checking with rpg2k::structure::Element::isDefined())
 	 */
 	#define RPG2K_ONLY_ANALYZE_NON_DEFINED_ELEMENT 0
 	/*
@@ -105,7 +105,7 @@
 	#define RPG2K_ANALYZE_AT_DESTRUCTOR 0
 	/*
 	 * only analyze non defined rpg2k::structure::Element
-	 * ( checking with rpg2k::structure::Element::isDefined() )
+	 * (checking with rpg2k::structure::Element::isDefined())
 	 */
 	#define RPG2K_ONLY_ANALYZE_NON_DEFINED_ELEMENT 0
 	/*

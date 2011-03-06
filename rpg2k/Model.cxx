@@ -38,7 +38,7 @@ namespace rpg2k
 		{
 			boost::ptr_vector<Descriptor> const& info = descriptor();
 			for(unsigned int i = 0; i < info.size(); i++) {
-				data_.push_back( std::auto_ptr<Element>( new Element( info[i] ) ) );
+				data_.push_back(std::auto_ptr<Element>(new Element(info[i])));
 			}
 		}
 
@@ -53,31 +53,31 @@ namespace rpg2k
 
 		boost::ptr_vector<Descriptor> const& Base::descriptor() const
 		{
-			return DefineLoader::instance().get( header() );
+			return DefineLoader::instance().get(header());
 		}
 
 		void Base::checkExists()
 		{
-			exists_ = fileExists( fullPath() );
+			exists_ = fileExists(fullPath());
 		}
 
 		void Base::load()
 		{
-			if( fileName_.empty() ) fileName_ = defaultName();
-			rpg2k_assert( exists() );
+			if(fileName_.empty()) fileName_ = defaultName();
+			rpg2k_assert(exists());
 
 			std::ifstream ifs(fullPath().c_str(), stream::INPUT_FLAG);
 
 			if(!stream::checkHeader(ifs, this->header())) rpg2k_assert(false);
 			/*
-			if( this->header() == eastl::string("LcfMapTree") ) {
+			if(this->header() == eastl::string("LcfMapTree")) {
 				// TODO
 			}
 			*/
 
 			boost::ptr_vector<Descriptor> const& info = descriptor();
 			for(unsigned int i = 0; i < info.size(); i++) {
-				data_.push_back( std::auto_ptr<Element>( new Element(info[i], ifs) ) );
+				data_.push_back(std::auto_ptr<Element>(new Element(info[i], ifs)));
 			}
 
 			rpg2k_assert(stream::isEOF(ifs));
@@ -109,7 +109,7 @@ namespace rpg2k
 			isArray_.insert("Array2D");
 
 			#define PP_insert(arg) \
-				defineText_.insert( eastl::make_pair( String( #arg ), define::arg ) )
+				defineText_.insert(eastl::make_pair(String(#arg), define::arg))
 			PP_insert(EventState);
 			PP_insert(LcfDataBase);
 			PP_insert(LcfMapTree);
@@ -123,7 +123,7 @@ namespace rpg2k
 		boost::ptr_vector<Descriptor> const& DefineLoader::get(String const& name)
 		{
 			DefineBuffer::const_iterator it = defineBuff_.find(name);
-			if( it == defineBuff_.end() ) {
+			if(it == defineBuff_.end()) {
 				boost::ptr_vector<Descriptor>& ret = defineBuff_[name];
 				load(ret, name);
 				return ret;
@@ -137,7 +137,7 @@ namespace rpg2k
 		void DefineLoader::load(boost::ptr_vector<structure::Descriptor>& dst, String const& name)
 		{
 			DefineText::const_iterator it = defineText_.find(name);
-			rpg2k_assert( it != defineText_.end() );
+			rpg2k_assert(it != defineText_.end());
 
 			namespace io = boost::iostreams;
 			io::stream<io::array_source> stream(io::array_source(it->second, std::strlen(it->second)));
@@ -174,19 +174,19 @@ namespace rpg2k
 				if(*it == "\n") { blockComment = false; line++; continue;
 				} else if(blockComment) { continue;
 				} else if(streamComment) {
-					if( (*it == "*") && ( *(++it) == "/" ) ) { streamComment--; }
+					if((*it == "*") && (*(++it) == "/")) { streamComment--; }
 					continue;
 				} else if(*it == "/") {
 					++it;
 					if(*it == "*") { streamComment++; continue; }
 					else if(*it == "/") { blockComment = true; continue; }
-				} else if( nest.empty() ) switch(prev) {
+				} else if(nest.empty()) switch(prev) {
 					case TYPE: nextToken(NAME);
 					case NAME:
 						if(*it == ";") {
-							dst.push_back( std::auto_ptr<Descriptor>( new Descriptor(typeName) ) );
+							dst.push_back(std::auto_ptr<Descriptor>(new Descriptor(typeName)));
 							nextToken(EXP_END);
-						} else if( isArray(typeName) && (*it == "{") ) {
+						} else if(isArray(typeName) && (*it == "{")) {
 							ArrayDefinePointer arrayDef(new ArrayDefineType());
 							nest.push(arrayDef.get());
 							std::auto_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable());
@@ -224,16 +224,16 @@ namespace rpg2k
 					case NAME:
 						if(*it == "=") { nextToken(EQUALS);
 						} else if(*it == ";") {
-							if( isArray(typeName) ) {
+							if(isArray(typeName)) {
 								Descriptor const& def = this->get(typeName)[0];
 								nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(
 									ElementType::instance().toString(def.type()),
 									ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
 									std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable())))));
-							} else nest.top()->insert( col, std::auto_ptr<Descriptor>( new Descriptor(typeName) ) );
+							} else nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(typeName)));
 
 							nextToken(EXP_END);
-						} else if( (*it == "{") && isArray(typeName) ) {
+						} else if((*it == "{") && isArray(typeName)) {
 							ArrayDefinePointer arrayDef(new ArrayDefineType());
 							ArrayDefineType* p = arrayDef.get();
 							std::auto_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable());
@@ -245,13 +245,13 @@ namespace rpg2k
 							nextToken(OPEN_STRUCT);
 						} else break;
 					case EQUALS:
-						if( isArray(typeName) ) {
+						if(isArray(typeName)) {
 							Descriptor const& def = this->get(*it)[0];
 							nest.top()->insert(col,
 								std::auto_ptr<Descriptor>(new Descriptor(typeName,
 								ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
 								std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable())))));
-						} else nest.top()->insert( col, std::auto_ptr<Descriptor>( new Descriptor(typeName, *it) ) );
+						} else nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(typeName, *it)));
 						nextToken(DEFAULT);
 					case DEFAULT:
 						if(*it == ";") { nextToken(EXP_END); } else break;
@@ -286,32 +286,32 @@ namespace rpg2k
 				int buf = stream.get();
 
 				if(buf == -1) {
-					if( !strBuf.empty() ) token.push_back(strBuf);
+					if(!strBuf.empty()) token.push_back(strBuf);
 					break;
 				} else if(buf == '\"') {
-					if( !strBuf.empty() && (*strBuf.begin() == '\"') ) {
+					if(!strBuf.empty() && (*strBuf.begin() == '\"')) {
 						strBuf.push_back(buf);
 						token.push_back(strBuf);
 						strBuf.clear();
 					} else {
-						if( !strBuf.empty() ) {
+						if(!strBuf.empty()) {
 							token.push_back(strBuf);
 							strBuf.clear();
 						}
 						strBuf.push_back(buf);
 					}
-				} else if( !strBuf.empty() && (*strBuf.begin() == '\"') ) { strBuf.push_back(buf);
-				} else if( std::isalpha(buf) || std::isdigit(buf) || (buf == '_') ) {
+				} else if(!strBuf.empty() && (*strBuf.begin() == '\"')) { strBuf.push_back(buf);
+				} else if(std::isalpha(buf) || std::isdigit(buf) || (buf == '_')) {
 					strBuf.push_back(buf);
 				} else {
-					if( !strBuf.empty() ) {
+					if(!strBuf.empty()) {
 						token.push_back(strBuf);
 						strBuf.clear();
 					}
 					switch(buf) {
 						case ' ': case '\t': case '\r': break;
 						default:
-							token.push_back( String(1, buf) );
+							token.push_back(String(1, buf));
 							break;
 					}
 				}

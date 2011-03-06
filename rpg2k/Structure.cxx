@@ -52,17 +52,17 @@ namespace rpg2k
 	{
 		static unsigned x=123456789, y=362436069, z=521288629, w=88675123;
 
-		unsigned t = ( x^(x << 11) );
+		unsigned t = (x^(x << 11));
 		x=y; y=z; z=w;
-		return ( w = ( w^(w >> 19) ) ^ ( t^(t >> 8) ) );
+		return (w = (w^(w >> 19)) ^ (t^(t >> 8)));
 	}
 	unsigned random(unsigned const max)
 	{
-		return ( random() % max );
+		return (random() % max);
 	}
 	int random(int const min, int const max)
 	{
-		return ( random(max - min + 1) + min );
+		return (random(max - min + 1) + min);
 	}
 
 	SystemString String::toSystem() const
@@ -71,7 +71,7 @@ namespace rpg2k
 	}
 	std::ostream& String::serialize(std::ostream& os) const
 	{
-		return os.write( this->c_str(), this->size() );
+		return os.write(this->c_str(), this->size());
 	}
 	String SystemString::toRPG2k () const
 	{
@@ -80,12 +80,12 @@ namespace rpg2k
 
 	bool Binary::isBER() const
 	{
-		if( !size() || ( ( size() > ( sizeof(uint32_t) * CHAR_BIT ) / stream::BER_BIT + 1) ) ) return false;
+		if(!size() || ((size() > (sizeof(uint32_t) * CHAR_BIT) / stream::BER_BIT + 1))) return false;
 
 		const_reverse_iterator it = eastl::vector<uint8_t>::rbegin();
-		if( *it > stream::BER_SIGN ) return false;
+		if(*it > stream::BER_SIGN) return false;
 
-		while( ++it < eastl::vector<uint8_t>::rend() ) if( *it < stream::BER_SIGN ) return false;
+		while(++it < eastl::vector<uint8_t>::rend()) if(*it < stream::BER_SIGN) return false;
 
 		return true;
 	}
@@ -100,7 +100,7 @@ namespace rpg2k
 
 	Binary::operator int() const
 	{
-		rpg2k_assert( isBER() );
+		rpg2k_assert(isBER());
 
 		namespace io = boost::iostreams;
 		io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(this->data()), this->size()));
@@ -108,8 +108,8 @@ namespace rpg2k
 	}
 	Binary::operator bool() const
 	{
-		rpg2k_assert( size() == sizeof(bool) );
-		switch( static_cast<int>(*this) ) {
+		rpg2k_assert(size() == sizeof(bool));
+		switch(static_cast<int>(*this)) {
 			case false: return false;
 			case true : return true ;
 			default: rpg2k_assert(false);
@@ -118,7 +118,7 @@ namespace rpg2k
 	}
 	Binary::operator double() const
 	{
-		rpg2k_assert( size() == sizeof(double) );
+		rpg2k_assert(size() == sizeof(double));
 		return *(reinterpret_cast<double const*>(this->data()));
 	}
 
@@ -132,20 +132,20 @@ namespace rpg2k
 	}
 	Binary& Binary::operator =(bool const b)
 	{
-		resize( sizeof(bool) );
+		resize(sizeof(bool));
 		(*this)[0] = b;
 		return *this;
 	}
 	Binary& Binary::operator =(double const d)
 	{
-		resize( sizeof(double) );
-		*( (double*)this->data() ) = d;
+		resize(sizeof(double));
+		*((double*)this->data()) = d;
 		return *this;
 	}
 
 	size_t Binary::serializedSize() const { return this->size(); }
 	std::ostream& Binary::serialize(std::ostream& s) const
 	{
-		return s.write( reinterpret_cast<char const*>( this->data() ), this->size() );
+		return s.write(reinterpret_cast<char const*>(this->data()), this->size());
 	}
 } // namespace rpg2k

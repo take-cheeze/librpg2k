@@ -10,7 +10,7 @@ namespace rpg2k
 	namespace model
 	{
 		SaveData::SaveData()
-		: Base( SystemString(), SystemString() ), id_(-1)
+		: Base(SystemString(), SystemString()), id_(-1)
 		{
 			Base::reset();
 
@@ -29,7 +29,7 @@ namespace rpg2k
 
 			checkExists();
 
-			if( !exists() ) return;
+			if(!exists()) return;
 
 			load();
 		}
@@ -70,19 +70,19 @@ namespace rpg2k
 				eastl::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
 
 				for(int i = 0; i < itemTypeNum; i++) {
-					if( !num[i] ) continue;
+					if(!num[i]) continue;
 
 					Item info = { num[i], use[i] };
-					item_.insert( eastl::make_pair(id[i], info) );
+					item_.insert(eastl::make_pair(id[i], info));
 				}
 			}
 		// switch and variable
-			// switch_.resize( sys[31].to_int() );
+			// switch_.resize(sys[31].to_int());
 			switch_ = sys[32].toBinary().toVector<uint8_t>();
-			// variable_.resize( sys[33].to_int() );
+			// variable_.resize(sys[33].to_int());
 			variable_ = sys[34].toBinary().toVector<int32_t>();
 		// member
-			member_.resize( status[1].to_int() );
+			member_.resize(status[1].to_int());
 			member_ = status[2].toBinary().toFixedVector<uint16_t, MEMBER_MAX>();
 		// chip replace
 			chipReplace_.resize(ChipSet::END);
@@ -113,17 +113,17 @@ namespace rpg2k
 
 					i++;
 				}
-				status[12] = Binary(id );
+				status[12] = Binary(id);
 				status[13] = Binary(num);
 				status[14] = Binary(use);
 			}
 		// switch and variable
-			sys[31] = int( switch_.size() );
+			sys[31] = int(switch_.size());
 			sys[32] = Binary(switch_);
-			sys[33] = int( variable_.size() );
+			sys[33] = int(variable_.size());
 			sys[34] = Binary(variable_);
 		// member
-			(*this)[109].toArray1D()[1] = int( member_.size() );
+			(*this)[109].toArray1D()[1] = int(member_.size());
 			(*this)[109].toArray1D()[2] = Binary(member_);
 		// chip replace
 			for(unsigned i = ChipSet::BEGIN; i < ChipSet::END; i++) {
@@ -133,8 +133,8 @@ namespace rpg2k
 
 		bool SaveData::addMember(unsigned const charID)
 		{
-			if( (member_.size() > rpg2k::MEMBER_MAX)
-			|| std::find( member_.begin(), member_.end(), charID ) == member_.end() ) return false;
+			if((member_.size() > rpg2k::MEMBER_MAX)
+			|| std::find(member_.begin(), member_.end(), charID) == member_.end()) return false;
 			else {
 				member_.push_back(charID);
 				return true;
@@ -142,8 +142,8 @@ namespace rpg2k
 		}
 		bool SaveData::removeMember(unsigned const charID)
 		{
-			eastl::vector<uint16_t>::iterator it = std::find( member_.begin(), member_.end(), charID );
-			if( it != member_.end() ) {
+			eastl::vector<uint16_t>::iterator it = std::find(member_.begin(), member_.end(), charID);
+			if(it != member_.end()) {
 				member_.erase(it);
 				return true;
 			} else return false;
@@ -151,21 +151,21 @@ namespace rpg2k
 
 		bool SaveData::flag(unsigned const id) const
 		{
-			return ( id < switch_.size() ) ? switch_[id - ID_MIN] : bool(SWITCH_DEF_VAL);
+			return (id < switch_.size()) ? switch_[id - ID_MIN] : bool(SWITCH_DEF_VAL);
 		}
 		void SaveData::setFlag(unsigned id, bool data)
 		{
-			if( id >= switch_.size() ) switch_.resize(id, SWITCH_DEF_VAL);
+			if(id >= switch_.size()) switch_.resize(id, SWITCH_DEF_VAL);
 			switch_[id - ID_MIN] = data;
 		}
 
 		int32_t SaveData::var(unsigned const id) const
 		{
-			return ( id < variable_.size() ) ? variable_[id - ID_MIN] : VAR_DEF_VAL;
+			return (id < variable_.size()) ? variable_[id - ID_MIN] : VAR_DEF_VAL;
 		}
 		void SaveData::setVar(unsigned const id, int32_t const data)
 		{
-			if( id >= variable_.size() ) variable_.resize(id, int32_t(VAR_DEF_VAL));
+			if(id >= variable_.size()) variable_.resize(id, int32_t(VAR_DEF_VAL));
 			variable_[id - ID_MIN] = data;
 		}
 
@@ -183,15 +183,15 @@ namespace rpg2k
 		unsigned SaveData::itemNum(unsigned const id) const
 		{
 			ItemTable::const_iterator it = item_.find(id);
-			return ( it == item_.end() )? unsigned(ITEM_MIN) : it->second.num;
+			return (it == item_.end())? unsigned(ITEM_MIN) : it->second.num;
 		}
 		void SaveData::setItemNum(unsigned const id, unsigned const val)
 		{
 			unsigned const validVal = eastl::min(unsigned(ITEM_MAX), val);
 
-			if( item_.find(id) == item_.end() ) {
+			if(item_.find(id) == item_.end()) {
 				Item const i = { validVal, 0 };
-				item_.insert( eastl::make_pair(id, i) );
+				item_.insert(eastl::make_pair(id, i));
 			} else item_[id].num = validVal;
 
 			if(validVal == ITEM_MIN) item_.erase(id);
@@ -200,17 +200,17 @@ namespace rpg2k
 		unsigned SaveData::itemUse(unsigned const id) const
 		{
 			ItemTable::const_iterator it = item_.find(id);
-			return ( it == item_.end() ) ? unsigned(ITEM_MIN) : it->second.use;
+			return (it == item_.end()) ? unsigned(ITEM_MIN) : it->second.use;
 		}
 		void SaveData::setItemUse(unsigned const id, unsigned const val)
 		{
 			ItemTable::iterator it = item_.find(id);
-			if( it != item_.end() ) it->second.use = val;
+			if(it != item_.end()) it->second.use = val;
 		}
 
 		unsigned SaveData::member(unsigned const index) const
 		{
-			rpg2k_assert( rpg2k::within<unsigned>( index, member_.size() ) );
+			rpg2k_assert(rpg2k::within<unsigned>(index, member_.size()));
 			return member_[index];
 		}
 
@@ -222,14 +222,14 @@ namespace rpg2k
 				case ID_THIS: id = currentEventID(); // TODO
 				default:
 					return reinterpret_cast< structure::EventState& >(
-						(*this)[111].toArray1D()[11].toArray2D()[id] );
+						(*this)[111].toArray1D()[11].toArray2D()[id]);
 			}
 		}
 
 		void SaveData::replace(ChipSet::Type const type, unsigned dstNo, unsigned const srcNo)
 		{
-			rpg2k_assert( rpg2k::within<unsigned>(dstNo, CHIP_REPLACE_MAX) );
-			rpg2k_assert( rpg2k::within<unsigned>(srcNo, CHIP_REPLACE_MAX) );
+			rpg2k_assert(rpg2k::within<unsigned>(dstNo, CHIP_REPLACE_MAX));
+			rpg2k_assert(rpg2k::within<unsigned>(srcNo, CHIP_REPLACE_MAX));
 
 			unsigned srcVal = chipReplace_[type][srcNo];
 			unsigned dstVal = chipReplace_[type][dstNo];

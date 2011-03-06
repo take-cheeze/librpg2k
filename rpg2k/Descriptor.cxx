@@ -12,7 +12,7 @@ namespace rpg2k
 	{
 		ElementType::ElementType()
 		{
-			#define PP_insert(TYPE) table_.insert( Table::value_type( TYPE##_, #TYPE ) );
+			#define PP_insert(TYPE) table_.insert(Table::value_type(TYPE##_, #TYPE));
 			PP_basicTypes(PP_insert)
 			PP_rpg2kTypes(PP_insert)
 			#undef PP_insert
@@ -20,13 +20,13 @@ namespace rpg2k
 		ElementType::Enum ElementType::toEnum(String const& name) const
 		{
 			Table::right_map::const_iterator it = table_.right.find(name);
-			rpg2k_assert( it != table_.right.end() );
+			rpg2k_assert(it != table_.right.end());
 			return it->second;
 		}
 		String const& ElementType::toString(ElementType::Enum const e) const
 		{
 			Table::left_map::const_iterator it = table_.left.find(e);
-			rpg2k_assert( it != table_.left.end() );
+			rpg2k_assert(it != table_.left.end());
 			return it->second;
 		}
 
@@ -50,17 +50,17 @@ namespace rpg2k
 			}
 		}
 		Descriptor::Descriptor(String const& type)
-		: type_( ElementType::instance().toEnum(type) ), hasDefault_(false)
+		: type_(ElementType::instance().toEnum(type)), hasDefault_(false)
 		{
 		}
 		Descriptor::Descriptor(String const& type, String const& val)
-		: type_( ElementType::instance().toEnum(type) ), hasDefault_(true)
+		: type_(ElementType::instance().toEnum(type)), hasDefault_(true)
 		{
 			switch(this->type_) {
 				case ElementType::String_:
 					if(
-						( val.size() > 2 ) &&
-						( *val.begin() == '\"' ) && ( *val.rbegin() == '\"' )
+						(val.size() > 2) &&
+						(*val.begin() == '\"') && (*val.rbegin() == '\"')
 					) impl_.String_ = new String(val.data() + 1, val.size() - 2);
 					else impl_.String_ = new String(val);
 					break;
@@ -76,10 +76,10 @@ namespace rpg2k
 		}
 		Descriptor::Descriptor(String const& type
 		, ArrayDefinePointer def, std::auto_ptr<ArrayTable> table)
-		: type_( ElementType::instance().toEnum(type) ), hasDefault_(true)
+		: type_(ElementType::instance().toEnum(type)), hasDefault_(true)
 		, arrayTable_(table.release())
 		{
-			rpg2k_assert( (type_ == ElementType::Array1D_) || (type_ == ElementType::Array2D_) );
+			rpg2k_assert((type_ == ElementType::Array1D_) || (type_ == ElementType::Array2D_));
 			impl_.arrayDefine = def.release();
 		}
 
@@ -117,8 +117,8 @@ namespace rpg2k
 		}
 		ArrayDefine Descriptor::arrayDefine() const
 		{
-			rpg2k_assert( (this->type_ == ElementType::Array1D_)
-			|| (this->type_ == ElementType::Array2D_) );
+			rpg2k_assert((this->type_ == ElementType::Array1D_)
+			|| (this->type_ == ElementType::Array2D_));
 			return *impl_.arrayDefine;
 		}
 

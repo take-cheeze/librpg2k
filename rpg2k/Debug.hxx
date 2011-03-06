@@ -35,21 +35,21 @@ namespace rpg2k
 	{
 
 		eastl::string error(int errNo);
-		void addAtExitFunction( void (*func)(void) );
+		void addAtExitFunction(void (*func)(void));
 
 		eastl::string demangleTypeInfo(std::type_info const& info);
 		#if RPG2K_USE_RTTI
 			template<typename T>
-			inline eastl::string demangle() { return demangleTypeInfo( typeid(T) ); }
+			inline eastl::string demangle() { return demangleTypeInfo(typeid(T)); }
 			template<typename T>
-			inline eastl::string demangle(T& src) { return demangleTypeInfo( typeid(src) ); }
+			inline eastl::string demangle(T& src) { return demangleTypeInfo(typeid(src)); }
 		#endif
 
 		extern std::ofstream ANALYZE_RESULT; // usually analyze.txt
 
 		class AnalyzeException : public std::exception {};
 		#if RPG2K_DEBUG
-			#define rpg2k_analyze_assert(EXP) if( !(EXP) ) throw debug::AnalyzeException()
+			#define rpg2k_analyze_assert(EXP) if(!(EXP)) throw debug::AnalyzeException()
 		#else
 			#define rpg2k_analyze_assert(EXP) rpg2k_assert(EXP)
 		#endif

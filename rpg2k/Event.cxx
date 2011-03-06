@@ -26,20 +26,20 @@ namespace rpg2k
 		}
 
 		int32_t Instruction::at(unsigned index) const
-		{ rpg2k_assert( index < argument_.size() ); return argument_[index]; }
+		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
 		int32_t Instruction::operator [](unsigned index) const
-		{ rpg2k_assert( index < argument_.size() ); return argument_[index]; }
+		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
 		int32_t& Instruction::at(unsigned index)
-		{ rpg2k_assert( index < argument_.size() ); return argument_[index]; }
+		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
 		int32_t& Instruction::operator [](unsigned index)
-		{ rpg2k_assert( index < argument_.size() ); return argument_[index]; }
+		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
 
 		size_t Instruction::serializedSize() const
 		{
 			unsigned ret =
 				stream::berSize(code_) + stream::berSize(nest_) +
-				stream::berSize( stringArgument_.size() ) + stringArgument_.size() +
-				stream::berSize( argument_.size() );
+				stream::berSize(stringArgument_.size()) + stringArgument_.size() +
+				stream::berSize(argument_.size());
 			for(unsigned i = 0; i < argument_.size(); i++) ret += stream::berSize(argument_[i]);
 			return ret;
 		}
@@ -62,9 +62,9 @@ namespace rpg2k
 		void Event::init(std::istream& s)
 		{
 			while(!stream::isEOF(s)) {
-				data_.push_back( Instruction(s) );
+				data_.push_back(Instruction(s));
 				if(data_.back().code() == 12110) { // check for label
-					if( !label_.insert( eastl::make_pair(data_.back()[0], data_.size() - 1) ).second ) {
+					if(!label_.insert(eastl::make_pair(data_.back()[0], data_.size() - 1)).second) {
 						rpg2k_assert(false);
 					}
 				}

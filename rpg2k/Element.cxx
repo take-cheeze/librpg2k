@@ -12,10 +12,10 @@
 #if RPG2K_ANALYZE_AT_DESTRUCTOR
 	#if RPG2K_ONLY_ANALYZE_NON_DEFINED_ELEMENT
 		#define ANALYZE_SELF() \
-			if( exists() && isDefined() ) debug::Tracer::printTrace(*this, true)
+			if(exists() && isDefined()) debug::Tracer::printTrace(*this, true)
 	#else
 		#define ANALYZE_SELF() \
-			if( exists() ) debug::Tracer::printTrace(*this, true)
+			if(exists()) debug::Tracer::printTrace(*this, true)
 	#endif
 #else
 	#define ANALYZE_SELF()
@@ -61,8 +61,8 @@ namespace rpg2k
 
 		size_t BerEnum::serializedSize() const
 		{
-			unsigned ret = stream::berSize( size() - 1 );
-			for(unsigned i = 0; i < size(); i++) ret += stream::berSize( (*this)[i] );
+			unsigned ret = stream::berSize(size() - 1);
+			for(unsigned i = 0; i < size(); i++) ret += stream::berSize((*this)[i]);
 
 			return ret;
 		}
@@ -75,7 +75,7 @@ namespace rpg2k
 
 		std::ostream& Element::serialize(std::ostream& s) const
 		{
-			if( isDefined() ) switch( descriptor_->type() ) {
+			if(isDefined()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
 						return impl_.TYPE##_->serialize(s);
@@ -93,7 +93,7 @@ namespace rpg2k
 		}
 		size_t Element::serializedSize() const
 		{
-			if( isDefined() ) switch( descriptor_->type() ) {
+			if(isDefined()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
 						return impl_.TYPE##_->serializedSize();
@@ -118,10 +118,10 @@ namespace rpg2k
 		, exists_(e.exists_), owner_(e.owner_)
 		, index1_(e.index1_), index2_(e.index2_)
 		{
-			if( isDefined() ) switch( descriptor_->type() ) {
+			if(isDefined()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE( *e.impl_.TYPE##_ ); \
+						impl_.TYPE##_ = new TYPE(*e.impl_.TYPE##_); \
 						break;
 				PP_rpg2kTypes(PP_enum)
 				#undef PP_enum
@@ -138,7 +138,7 @@ namespace rpg2k
 		{
 			exists_ = false;
 
-			if( descriptor_->hasDefault() ) switch( descriptor_->type() ) {
+			if(descriptor_->hasDefault()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
 						impl_.TYPE##_ = this->descriptor(); \
@@ -164,7 +164,7 @@ namespace rpg2k
 				PP_enumNoDefault(String)
 
 				default: rpg2k_analyze_assert(false); break;
-			} else switch( descriptor_->type() ) {
+			} else switch(descriptor_->type()) {
 				PP_enumNoDefault(BerEnum)
 				PP_enumNoDefault(Binary)
 				PP_enumNoDefault(Event)
@@ -185,7 +185,7 @@ namespace rpg2k
 		{
 			exists_ = true;
 
-			if( isDefined() ) switch( descriptor_->type() ) {
+			if(isDefined()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
 						impl_.TYPE##_ = new TYPE(*this, b); \
@@ -216,7 +216,7 @@ namespace rpg2k
 		{
 			exists_ = true;
 
-			switch( descriptor_->type() ) {
+			switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
 						impl_.TYPE##_ = new TYPE(*this, s); \
@@ -246,7 +246,7 @@ namespace rpg2k
 		: descriptor_(&info), owner_(NULL), index1_(-1), index2_(-1)
 		{
 			#if RPG2K_CHECK_AT_CONSTRUCTOR
-				rpg2k_analyze_assert( instance_.checkSerialize(b) );
+				rpg2k_analyze_assert(instance_.checkSerialize(b));
 			#endif
 
 			init(b);
@@ -260,8 +260,8 @@ namespace rpg2k
 		Element::Element(Array1D const& owner, unsigned index)
 		: descriptor_(
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
-				? owner.arrayDefine().find(index)->second : NULL )
-		, owner_( &owner.toElement() )
+				? owner.arrayDefine().find(index)->second : NULL)
+		, owner_(&owner.toElement())
 		, index1_(index), index2_(-1)
 		{
 			init();
@@ -269,12 +269,12 @@ namespace rpg2k
 		Element::Element(Array1D const& owner, unsigned index, Binary const& b)
 		: descriptor_(
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
-				? owner.arrayDefine().find(index)->second : NULL )
-		, owner_( &owner.toElement() )
+				? owner.arrayDefine().find(index)->second : NULL)
+		, owner_(&owner.toElement())
 		, index1_(index), index2_(-1)
 		{
 			#if RPG2K_CHECK_AT_CONSTRUCTOR
-				rpg2k_analyze_assert( instance_.checkSerialize(b) );
+				rpg2k_analyze_assert(instance_.checkSerialize(b));
 			#endif
 
 			init(b);
@@ -282,8 +282,8 @@ namespace rpg2k
 		Element::Element(Array2D const& owner, unsigned index1, unsigned index2)
 		: descriptor_(
 			owner.arrayDefine().find(index2) != owner.arrayDefine().end()
-				? owner.arrayDefine().find(index2)->second : NULL )
-		, owner_ (&owner.toElement() )
+				? owner.arrayDefine().find(index2)->second : NULL)
+		, owner_ (&owner.toElement())
 		, index1_(index1), index2_(index2)
 		{
 			init();
@@ -291,12 +291,12 @@ namespace rpg2k
 		Element::Element(Array2D const& owner, unsigned index1, unsigned index2, Binary const& b)
 		: descriptor_(
 			owner.arrayDefine().find(index2) != owner.arrayDefine().end()
-				? owner.arrayDefine().find(index2)->second : NULL )
-		, owner_ (&owner.toElement() )
+				? owner.arrayDefine().find(index2)->second : NULL)
+		, owner_ (&owner.toElement())
 		, index1_(index1), index2_(index2)
 		{
 			#if RPG2K_CHECK_AT_CONSTRUCTOR
-				rpg2k_analyze_assert( instance_.checkSerialize(b) );
+				rpg2k_analyze_assert(instance_.checkSerialize(b));
 			#endif
 
 			init(b);
@@ -306,7 +306,7 @@ namespace rpg2k
 		{
 			ANALYZE_SELF();
 
-			if( isDefined() ) switch( descriptor_->type() ) {
+			if(isDefined()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) case ElementType::TYPE##_: delete impl_.TYPE##_; break;
 				PP_rpg2kTypes(PP_enum)
 				#undef PP_enum
@@ -320,7 +320,7 @@ namespace rpg2k
 
 		Element& Element::operator =(Element const& src)
 		{
-			if( isDefined() ) switch( descriptor_->type() ) {
+			if(isDefined()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
 						(*impl_.TYPE##_) = (*src.impl_.TYPE##_); \
@@ -346,32 +346,32 @@ namespace rpg2k
 
 		unsigned Element::index1() const
 		{
-			rpg2k_assert( hasOwner() );
+			rpg2k_assert(hasOwner());
 			return index1_;
 		}
 		unsigned Element::index2() const
 		{
-			rpg2k_assert( owner().descriptor().type() == ElementType::Array2D_ );
+			rpg2k_assert(owner().descriptor().type() == ElementType::Array2D_);
 			return index2_;
 		}
 
 		Element const& Element::owner() const
 		{
-			rpg2k_assert( hasOwner() );
+			rpg2k_assert(hasOwner());
 			return *owner_;
 		}
 		Element& Element::owner()
 		{
-			rpg2k_assert( hasOwner() );
+			rpg2k_assert(hasOwner());
 			return *owner_;
 		}
 
 		void Element::substantiate()
 		{
-			if( descriptor_ && descriptor_->hasDefault() ) switch( descriptor_->type() ) {
+			if(descriptor_ && descriptor_->hasDefault()) switch(descriptor_->type()) {
 				#define PP_enum(TYPE) \
 					case ElementType::TYPE##_: \
-						if( (impl_.TYPE##_) == static_cast<TYPE const&>(*descriptor_) ) { \
+						if((impl_.TYPE##_) == static_cast<TYPE const&>(*descriptor_)) { \
 							exists_ = false; \
 							return; \
 						} \
@@ -388,34 +388,34 @@ namespace rpg2k
 
 			exists_ = true;
 
-			if( hasOwner() ) {
+			if(hasOwner()) {
 				owner_->substantiate();
 
-				if( owner().descriptor().type() == ElementType::Array2D_ ) {
-					( *owner().impl_.Array2D_ )[index1()].substantiate();
+				if(owner().descriptor().type() == ElementType::Array2D_) {
+					(*owner().impl_.Array2D_)[index1()].substantiate();
 				}
 			}
 		}
 
 		Descriptor const& Element::descriptor() const
 		{
-			rpg2k_assert( isDefined() );
+			rpg2k_assert(isDefined());
 			return *descriptor_;
 		}
 
 		#define PP_castOperator(TYPE) \
 			Element::operator TYPE const&() const \
 			{ \
-				rpg2k_assert( this->isDefined() ); \
-				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
-				rpg2k_assert( impl_.TYPE##_ ); \
+				rpg2k_assert(this->isDefined()); \
+				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
+				rpg2k_assert(impl_.TYPE##_); \
 				return *impl_.TYPE##_; \
 			} \
 			Element::operator TYPE&() \
 			{ \
-				rpg2k_assert( this->isDefined() ); \
-				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
-				rpg2k_assert( impl_.TYPE##_ ); \
+				rpg2k_assert(this->isDefined()); \
+				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
+				rpg2k_assert(impl_.TYPE##_); \
 				return *impl_.TYPE##_; \
 			}
 		PP_rpg2kTypes(PP_castOperator)
@@ -424,16 +424,16 @@ namespace rpg2k
 		#define PP_castOperator(TYPE) \
 			Element::operator TYPE const&() const \
 			{ \
-				rpg2k_assert( this->isDefined() ); \
-				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
-				rpg2k_assert( this->exists_ || descriptor_->hasDefault() ); \
+				rpg2k_assert(this->isDefined()); \
+				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
+				rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
 				return impl_.TYPE##_; \
 			} \
 			Element::operator TYPE&() \
 			{ \
-				rpg2k_assert( this->isDefined() ); \
-				rpg2k_assert( descriptor_->type() == ElementType::TYPE##_ ); \
-				rpg2k_assert( this->exists_ || descriptor_->hasDefault() ); \
+				rpg2k_assert(this->isDefined()); \
+				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
+				rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
 				return impl_.TYPE##_; \
 			}
 		PP_basicTypes(PP_castOperator)

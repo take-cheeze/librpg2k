@@ -17,7 +17,7 @@ namespace rpg2k
 			load();
 		}
 		MapUnit::MapUnit(SystemString const& dir, unsigned const id)
-		: Base( dir, SystemString() ), id_(id)
+		: Base(dir, SystemString()), id_(id)
 		{
 			setFileName(eastl::string(CtorSprintf(), "Map%04d.lmu", int(id)));
 
@@ -27,7 +27,7 @@ namespace rpg2k
 		}
 		void MapUnit::loadImpl()
 		{
-			rpg2k_assert( rpg2k::within<unsigned>(ID_MIN, id_, MAP_UNIT_MAX+1) );
+			rpg2k_assert(rpg2k::within<unsigned>(ID_MIN, id_, MAP_UNIT_MAX+1));
 
 			lower_ = (*this)[71].toBinary().toVector<uint16_t>();
 			upper_ = (*this)[72].toBinary().toVector<uint16_t>();
@@ -54,15 +54,15 @@ namespace rpg2k
 
 		int MapUnit::chipIDLw(unsigned const x, unsigned const y) const
 		{
-			rpg2k_assert( rpg2k::within( x, width () ) );
-			rpg2k_assert( rpg2k::within( y, height() ) );
+			rpg2k_assert(rpg2k::within(x, width ()));
+			rpg2k_assert(rpg2k::within(y, height()));
 
 			return lower_[width()*y + x];
 		}
 		int MapUnit::chipIDUp(unsigned const x, unsigned const y) const
 		{
-			rpg2k_assert( rpg2k::within( x, width () ) );
-			rpg2k_assert( rpg2k::within( y, height() ) );
+			rpg2k_assert(rpg2k::within(x, width ()));
+			rpg2k_assert(rpg2k::within(y, height()));
 
 			return upper_[width()*y + x];
 		}

@@ -47,8 +47,8 @@ namespace rpg2k
 
 		bool MapTree::canTeleport(unsigned const mapID) const
 		{
-			switch( (*this)[mapID][31].to<int>() ) {
-				case 0: return canTeleport( (*this)[mapID][2] );
+			switch((*this)[mapID][31].to<int>()) {
+				case 0: return canTeleport((*this)[mapID][2]);
 				case 1: return true ;
 				case 2: return false;
 				default: rpg2k_assert(false); return false;
@@ -56,8 +56,8 @@ namespace rpg2k
 		}
 		bool MapTree::canEscape(unsigned const mapID) const
 		{
-			switch( (*this)[mapID][32].to<int>() ) {
-				case 0: return canTeleport( (*this)[mapID][2] );
+			switch((*this)[mapID][32].to<int>()) {
+				case 0: return canTeleport((*this)[mapID][2]);
 				case 1: return true ;
 				case 2: return false;
 				default: rpg2k_assert(false); return false;
@@ -65,8 +65,8 @@ namespace rpg2k
 		}
 		bool MapTree::canSave(unsigned mapID) const
 		{
-			switch( (*this)[mapID][33].to<int>() ) {
-				case 0: return canTeleport( (*this)[mapID][2] );
+			switch((*this)[mapID][33].to<int>()) {
+				case 0: return canTeleport((*this)[mapID][2]);
 				case 1: return true ;
 				case 2: return false;
 				default: rpg2k_assert(false); return false;

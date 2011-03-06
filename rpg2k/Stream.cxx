@@ -20,7 +20,7 @@ namespace rpg2k
 
 		bool isEOF(std::istream& is)
 		{
-			bool const ret = ( is.get() == EOF );
+			bool const ret = (is.get() == EOF);
 			is.unget();
 			is.clear();
 			return ret;
@@ -41,7 +41,7 @@ namespace rpg2k
 
 		bool checkHeader(std::istream& is,  String const& header)
 		{
-			return( readHeader(is) == header );
+			return(readHeader(is) == header);
 		}
 
 		std::ostream& writeBER(std::ostream& os, unsigned num)
@@ -58,7 +58,7 @@ namespace rpg2k
 				num >>= BER_BIT;
 			}
 		// write data
-			return os.write( reinterpret_cast<char const*>(buff.data()), size);
+			return os.write(reinterpret_cast<char const*>(buff.data()), size);
 		}
 		unsigned readBER(std::istream& is)
 		{
@@ -75,8 +75,8 @@ namespace rpg2k
 
 		std::istream& readWithSize(std::istream& is, Binary& dst)
 		{
-			dst.resize( readBER(is) );
-			return is.read( reinterpret_cast<char*>( dst.data() ), dst.size() );
+			dst.resize(readBER(is));
+			return is.read(reinterpret_cast<char*>(dst.data()), dst.size());
 		}
 	} // namespace structure
 } // namespace rpg2k

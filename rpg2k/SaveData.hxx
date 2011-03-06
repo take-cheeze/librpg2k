@@ -60,7 +60,7 @@ namespace rpg2k
 			ItemTable& item() { return item_; }
 			unsigned itemNum(unsigned id) const;
 			void setItemNum(unsigned id, unsigned val);
-			void addItemNum(unsigned const id, int const val) { setItemNum( id, int(itemNum(id)) + val ); }
+			void addItemNum(unsigned const id, int const val) { setItemNum(id, int(itemNum(id)) + val); }
 			unsigned itemUse(unsigned id) const;
 			void setItemUse(unsigned id, unsigned val);
 		// flag and vals
@@ -71,7 +71,7 @@ namespace rpg2k
 
 			int money() const;
 			void setMoney(int data);
-			void addMoney(int val) { setMoney( money() + val ); }
+			void addMoney(int val) { setMoney(money() + val); }
 
 			unsigned timerLeft() const { return 0; } // TODO
 
@@ -90,11 +90,11 @@ namespace rpg2k
 
 			structure::EventState& party()
 			{
-				return reinterpret_cast<structure::EventState&>( (*this)[104].toArray1D() );
+				return reinterpret_cast<structure::EventState&>((*this)[104].toArray1D());
 			}
 			structure::EventState const& party() const
 			{
-				return reinterpret_cast<structure::EventState const&>( (*this)[104].toArray1D() );
+				return reinterpret_cast<structure::EventState const&>((*this)[104].toArray1D());
 			}
 
 			structure::Array2D& character() { return (*this)[108]; }

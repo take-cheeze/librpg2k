@@ -30,8 +30,8 @@ namespace rpg2k
 			}
 			va_end(ap);
 		}
-		Vector(T (&val)[D]) { std::memcpy( elm_, val, sizeof(T)*D ); }
-		Vector(Vector<D, T> const& src) { std::memcpy( this->elm_, src.elm_, sizeof(T)*D ); }
+		Vector(T (&val)[D]) { std::memcpy(elm_, val, sizeof(T)*D); }
+		Vector(Vector<D, T> const& src) { std::memcpy(this->elm_, src.elm_, sizeof(T)*D); }
 		template<typename OtherType>
 		Vector(Vector< D, OtherType > const& src)
 		{
@@ -57,7 +57,7 @@ namespace rpg2k
 
 		Vector<D, T> const& operator =(Vector<D, T> const& src)
 		{
-			memcpy( this->elm_, src.elm_, sizeof(T)*D );
+			memcpy(this->elm_, src.elm_, sizeof(T)*D);
 			return *this;
 		}
 		template<typename OtherType>
@@ -109,12 +109,12 @@ namespace rpg2k
 
 		bool operator ==(Vector<D, T> const& src)
 		{
-			for(unsigned i = 0; i < D; i++) if( (*this)[i] != src[i] ) return false;
+			for(unsigned i = 0; i < D; i++) if((*this)[i] != src[i]) return false;
 			return true;
 		}
 		bool operator !=(Vector<D, T> const& src)
 		{
-			for(unsigned i = 0; i < D; i++) if( (*this)[i] == src[i] ) return false;
+			for(unsigned i = 0; i < D; i++) if((*this)[i] == src[i]) return false;
 			return true;
 		}
 

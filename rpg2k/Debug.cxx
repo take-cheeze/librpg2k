@@ -23,8 +23,8 @@
 		char * outputString,
 		const char * name,
 		int maxStringLength,
-		void * (* pAlloc )(size_t),
-		void (* pFree )(void *),
+		void * (* pAlloc)(size_t),
+		void (* pFree)(void *),
 		unsigned short disableFlags
 	);
 #else
@@ -49,16 +49,16 @@ namespace rpg2k
 				default: return message;
 			}
 		}
-		void addAtExitFunction( void (*func)(void) )
+		void addAtExitFunction(void (*func)(void))
 		{
-			if( atexit(func) != 0 ) rpg2k_assert(false);
+			if(atexit(func) != 0) rpg2k_assert(false);
 		}
 
 		eastl::string demangleTypeInfo(std::type_info const& info)
 		{
 			#if (RPG2K_IS_GCC || RPG2K_IS_CLANG)
 				int status;
-				char* const readable = abi::__cxa_demangle( info.name(), NULL, NULL, &status );
+				char* const readable = abi::__cxa_demangle(info.name(), NULL, NULL, &status);
 
 				rpg2k_assert(readable);
 				switch(status) {
@@ -70,7 +70,7 @@ namespace rpg2k
 				eastl::string ret = readable; // char* to string
 				std::free(readable);
 			#elif RPG2K_IS_MSVC
-				char* const readable = _unDName( 0, info.name(), 0, std::malloc, std::free, 0x2800 );
+				char* const readable = _unDName(0, info.name(), 0, std::malloc, std::free, 0x2800);
 				rpg2k_assert(readable);
 				eastl::string ret = readable; // char* to string
 				std::free(readabl);
@@ -85,7 +85,7 @@ namespace rpg2k
 		{
 			std::stack<Element const*> st;
 
-			for( Element const* buf = &e; buf->hasOwner(); buf = &( buf->owner() ) ) {
+			for(Element const* buf = &e; buf->hasOwner(); buf = &(buf->owner())) {
 				st.push(buf);
 			}
 
@@ -97,7 +97,7 @@ namespace rpg2k
 				ostrm << std::dec << std::setfill(' ');
 				ostrm << ElementType::instance().toString(ownerType)
 					<< "[" << std::setw(4) << top.index1() << "]";
-				if( ownerType == ElementType::Array2D_ ) ostrm
+				if(ownerType == ElementType::Array2D_) ostrm
 					<< "[" << std::setw(4) << top.index2() << "]";
 				ostrm << ": ";
 			}
@@ -113,10 +113,10 @@ namespace rpg2k
 			using structure::ArrayDefineType;
 			using structure::Descriptor;
 
-			if( e.isDefined() ) {
+			if(e.isDefined()) {
 				ostrm << e.descriptor().typeName() << ": ";
 
-				switch( e.descriptor().type() ) {
+				switch(e.descriptor().type()) {
 					case ElementType::Binary_: printBinary(e, ostrm); break;
 					case ElementType::Event_ : printEvent (e, ostrm); break;
 					case ElementType::String_: printString(e, ostrm); break;
@@ -127,7 +127,7 @@ namespace rpg2k
 				}
 			} else {
 				Binary const bin = e.serialize();
-				if( bin.size() == 0 ) {
+				if(bin.size() == 0) {
 					ostrm << "This data is empty." << endl;
 					return ostrm;
 				}
@@ -141,31 +141,31 @@ namespace rpg2k
 					printEvent(event, ostrm);
 				} catch(...) {}
 			// BER number
-				if( bin.isBER() ) {
+				if(bin.isBER()) {
 					ostrm << endl << "BER: ";
 					printInt(bin, ostrm);
 				}
 			// string
-				if( bin.isString() ) {
+				if(bin.isString()) {
 					ostrm << endl << "string: ";
 					printString(static_cast<String>(bin), ostrm);
 				}
 			// Array1D
 				try {
-					boost::scoped_ptr<Element> p( new Element( Descriptor(
+					boost::scoped_ptr<Element> p(new Element(Descriptor(
 						ElementType::instance().toString(ElementType::Array1D_),
 						ArrayDefinePointer(new ArrayDefineType),
-						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable()) ), bin) );
+						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
 					ostrm << endl << "---Array1D check start---" << endl;
 					p.reset(); // trigger Element's destructor
 					ostrm << "---Array1D check end  ---";
 				} catch(...) {}
 			// Array2D
 				try {
-					boost::scoped_ptr<Element> p( new Element( Descriptor(
+					boost::scoped_ptr<Element> p(new Element(Descriptor(
 						ElementType::instance().toString(ElementType::Array2D_),
 						ArrayDefinePointer(new ArrayDefineType),
-						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable()) ), bin) );
+						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
 					ostrm << endl << "---Array2D check start---" << endl;
 					p.reset(); // trigger Element's destructor
 					ostrm << "---Array2D check end  ---";
@@ -181,10 +181,10 @@ namespace rpg2k
 		{
 			eastl::map<unsigned, Element const*> buf;
 			for(Array1D::ConstIterator i = val.end(); i != val.end(); ++i) {
-				buf.insert( eastl::make_pair(i->first, i->second) );
+				buf.insert(eastl::make_pair(i->first, i->second));
 			}
 			for(eastl::map<unsigned, Element const*>::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-				printTrace( *(i->second), true, ostrm );
+				printTrace(*(i->second), true, ostrm);
 			}
 			return ostrm;
 		}
@@ -240,8 +240,8 @@ namespace rpg2k
 				<< "integer[" << inst.argNum() << "]: "
 				;
 				ostrm << "{ ";
-					std::copy( inst.args().begin(), inst.args().end()
-					, std::ostream_iterator<int32_t>(ostrm, ", ") );
+					std::copy(inst.args().begin(), inst.args().end()
+					, std::ostream_iterator<int32_t>(ostrm, ", "));
 				ostrm << "}, ";
 			ostrm << "}";
 

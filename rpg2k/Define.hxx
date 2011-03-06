@@ -105,7 +105,7 @@ namespace rpg2k
 		VAR_DEF_VAL = 0,
 		SWITCH_DEF_VAL = false,
 
-		#if ( defined(RPG2000) || defined(RPG2000_VALUE) )
+		#if (defined(RPG2000) || defined(RPG2000_VALUE))
 			VAR_MAX =  999999, VAR_MIN = -999999,
 
 			EXP_MAX = 999999, EXP_MIN = 0,
@@ -209,9 +209,9 @@ namespace rpg2k
 	unsigned random(unsigned ax);
 	int random(int in, int ax);
 
-	template<typename T> bool within(T a, T v, T b) { return ( (a <= v) && (v < b) ); }
+	template<typename T> bool within(T a, T v, T b) { return ((a <= v) && (v < b)); }
 	template<typename T> bool within(T v, T b) { return ::rpg2k::within(T(0), v, b); }
-	template<typename T> T limit(T min, T v, T max) { return ( (v <= min)? min : (max < v)? max : v ); }
+	template<typename T> T limit(T min, T v, T max) { return ((v <= min)? min : (max < v)? max : v); }
 	template<typename T> T limit(T v, T max) { return ::rpg2k::limit(T(0), v, max); }
 
 	inline bool isEvent(unsigned const evID)
@@ -258,7 +258,7 @@ namespace rpg2k
 		};
 
 		static Size2D const FULL_SIZE(12, 12);
-		static Size2D const HALF_SIZE( 6, 12);
+		static Size2D const HALF_SIZE(6, 12);
 
 		typedef uint16_t const font_t;
 	} // namespace font

@@ -21,7 +21,7 @@ namespace rpg2k
 		static void exchangeEndianIfNeed(uint8_t* dst, SrcT const& src)
 		{
 			for(typename SrcT::const_iterator srcIt = src.begin(); srcIt != src.end(); ++srcIt) {
-				uint8_t const* srcCur = reinterpret_cast<uint8_t const*>( &(*srcIt) );
+				uint8_t const* srcCur = reinterpret_cast<uint8_t const*>(&(*srcIt));
 				for(unsigned i = 0; i < sizeof(typename SrcT::value_type); i++) {
 				#if RPG2K_IS_BIG_ENDIAN
 					*(dst++) = srcCur[sizeof(typename SrcT::value_type)-i-1];
@@ -37,7 +37,7 @@ namespace rpg2k
 		static void exchangeEndianIfNeed(DstT& dst, uint8_t const* src)
 		{
 			for(typename DstT::iterator dstIt = dst.begin(); dstIt != dst.end(); ++dstIt) {
-				uint8_t* dstCur = reinterpret_cast<uint8_t*>( &(*dstIt) );
+				uint8_t* dstCur = reinterpret_cast<uint8_t*>(&(*dstIt));
 				for(unsigned i = 0; i < sizeof(typename DstT::value_type); i++) {
 				#if RPG2K_IS_BIG_ENDIAN
 					dstCur[sizeof(typename SrcT::value_type)-i-1] = *(src++);
@@ -78,40 +78,40 @@ namespace rpg2k
 		template<typename T>
 		eastl::vector<T> toVector() const
 		{
-			rpg2k_assert( ( this->size() % sizeof(T) ) == 0 );
+			rpg2k_assert((this->size() % sizeof(T)) == 0);
 
-			eastl::vector<T> output( this->size() / sizeof(T) );
-			exchangeEndianIfNeed( output, this->data() );
+			eastl::vector<T> output(this->size() / sizeof(T));
+			exchangeEndianIfNeed(output, this->data());
 			return output;
 		}
 		template<typename T, size_t S>
 		boost::array<T, S> toArray() const
 		{
-			rpg2k_assert( ( this->size() % sizeof(T) ) == 0 );
-			rpg2k_assert( ( this->size() / sizeof(T) ) == S );
+			rpg2k_assert((this->size() % sizeof(T)) == 0);
+			rpg2k_assert((this->size() / sizeof(T)) == S);
 
 			boost::array<T, S> output;
-			exchangeEndianIfNeed( output, this->data() );
+			exchangeEndianIfNeed(output, this->data());
 			return output;
 		}
 		template<typename T>
 		eastl::set<T> toSet() const
 		{
 			eastl::vector<T> const v = this->toVector<T>();
-			return eastl::set<T>( v.begin(), v.end() );
+			return eastl::set<T>(v.begin(), v.end());
 		}
 		template<typename T, size_t S>
 		eastl::fixed_vector<T, S> toFixedVector() const
 		{
 			eastl::vector<T> const v = this->toVector<T>();
-			return eastl::fixed_vector<T, S>( v.begin(), v.end() );
+			return eastl::fixed_vector<T, S>(v.begin(), v.end());
 		}
 
 		template<class T>
 		Binary& assign(T const& src)
 		{
-			this->resize( sizeof(typename T::value_type) * src.size() );
-			exchangeEndianIfNeed( this->data(), src );
+			this->resize(sizeof(typename T::value_type) * src.size());
+			exchangeEndianIfNeed(this->data(), src);
 			return *this;
 		}
 

@@ -27,8 +27,8 @@ namespace rpg2k
 		static eastl::string convertString(eastl::string const& src, iconv_t cd);
 		static iconv_t openConverter(char const* to, char const* from);
 	public:
-		SystemString toSystem( String const& src) const { return convertString(src, toSystem_); }
-		 String toRPG2k (SystemString const& src) const { return convertString(src, toRPG2k_ ); }
+		SystemString toSystem(String const& src) const { return convertString(src, toSystem_); }
+		 String toRPG2k (SystemString const& src) const { return convertString(src, toRPG2k_); }
 
 		eastl::string const& systemEncoding() const { return sysEncode_; }
 	}; // class Encode

@@ -69,7 +69,7 @@ namespace rpg2k
 			} // not absolute
 
 			void saveAs(SystemString const& filename);
-			void save() { saveAs( fullPath() ); }
+			void save() { saveAs(fullPath()); }
 
 			void serialize(std::ostream& s);
 		}; // class Base

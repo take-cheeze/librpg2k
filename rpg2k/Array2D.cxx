@@ -32,25 +32,25 @@ namespace rpg2k
 		{
 			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 
-			if( isInvalidArray2D(b) ) { return; } // s.seek(PARTICULAR_DATA_SIZE);
+			if(isInvalidArray2D(b)) { return; } // s.seek(PARTICULAR_DATA_SIZE);
 			else { this->init(s); }
 		}
 
 		Array2D::Array2D(Element& e)
-		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		{
 		}
 		Array2D::Array2D(Element& e, std::istream& s)
-		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		{
 			init(s);
 		}
 		Array2D::Array2D(Element& e, Binary const& b)
-		: arrayDefine_( e.descriptor().arrayDefine() ), this_(&e)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		{
 			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
 
-			if( isInvalidArray2D(b) ) return; // s.seek(PARTICULAR_DATA_SIZE);
+			if(isInvalidArray2D(b)) return; // s.seek(PARTICULAR_DATA_SIZE);
 			init(s);
 		}
 		void Array2D::init(std::istream& s)
@@ -58,10 +58,10 @@ namespace rpg2k
 			size_t const length = stream::readBER(s);
 			for(size_t i = 0; i < length; i++) {
 				size_t index = stream::readBER(s);
-				insert( index, std::auto_ptr<Array1D>( new Array1D(*this, index, s) ) );
+				insert(index, std::auto_ptr<Array1D>(new Array1D(*this, index, s)));
 			}
 
-			if( toElement().hasOwner() ) rpg2k_analyze_assert( stream::isEOF(s) );
+			if(toElement().hasOwner()) rpg2k_analyze_assert(stream::isEOF(s));
 		}
 
 	/*
@@ -75,7 +75,7 @@ namespace rpg2k
 		{
 			static unsigned const PARTICULAR_DATA_SIZE = 512;
 		// check the data size
-			if( b.size() < PARTICULAR_DATA_SIZE ) return false;
+			if(b.size() < PARTICULAR_DATA_SIZE) return false;
 		// check the data inside Binary
 			for(unsigned i = 0; i < PARTICULAR_DATA_SIZE; i++) if(b[i] != 0xff) return false;
 
@@ -86,7 +86,7 @@ namespace rpg2k
 
 		Element& Array2D::toElement() const
 		{
-			rpg2k_assert( isElement() );
+			rpg2k_assert(isElement());
 			return *this_;
 		}
 
@@ -99,16 +99,16 @@ namespace rpg2k
 		Array1D& Array2D::operator [](unsigned const index)
 		{
 			iterator it = this->find(index);
-			if( it != this->end() ) return *it->second;
+			if(it != this->end()) return *it->second;
 			else {
-				return *insert( index, std::auto_ptr<Array1D>(
-					new Array1D(*this, index) ) )->second;
+				return *insert(index, std::auto_ptr<Array1D>(
+					new Array1D(*this, index)))->second;
 			}
 		}
 		Array1D const& Array2D::operator [](unsigned const index) const
 		{
 			const_iterator it = this->find(index);
-			rpg2k_assert( it != this->end() );
+			rpg2k_assert(it != this->end());
 			return *it->second;
 		}
 
@@ -116,7 +116,7 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( it->second->exists() ) ret++;
+				if(it->second->exists()) ret++;
 			}
 			return ret;
 		}
@@ -124,11 +124,11 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 
-			ret += stream::berSize( count() );
+			ret += stream::berSize(count());
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( !it->second->exists() ) continue;
+				if(!it->second->exists()) continue;
 
-				ret += stream::berSize( it->first );
+				ret += stream::berSize(it->first);
 				ret += it->second->serializedSize();
 			}
 
@@ -136,9 +136,9 @@ namespace rpg2k
 		}
 		std::ostream& Array2D::serialize(std::ostream& s) const
 		{
-			stream::writeBER( s, count() );
+			stream::writeBER(s, count());
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if( !it->second->exists() ) continue;
+				if(!it->second->exists()) continue;
 
 				stream::writeBER(s, it->first);
 				it->second->serialize(s);
@@ -149,14 +149,14 @@ namespace rpg2k
 		bool Array2D::exists(unsigned const index) const
 		{
 			const_iterator it = find(index);
-			return( ( it != end() ) && it->second->exists() );
+			return((it != end()) && it->second->exists());
 		}
 		bool Array2D::exists(unsigned index1, unsigned index2) const
 		{
 			Array2D::const_iterator it1 = find(index1);
-			if( ( it1 != end() ) && it1->second->exists() ) {
+			if((it1 != end()) && it1->second->exists()) {
 				Array1D::const_iterator it2 = it1->second->find(index2);
-				return( ( it2 != it1->second->end() ) && it2->second->exists() );
+				return((it2 != it1->second->end()) && it2->second->exists());
 			}
 			return false;
 		}

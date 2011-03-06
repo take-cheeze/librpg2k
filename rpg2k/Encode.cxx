@@ -24,23 +24,23 @@ namespace rpg2k
 		 * works only on unix systems(as I know)
 		 */
 		#define getlang() getenv("LANG")
-		if( getlang() ) {
+		if(getlang()) {
 			eastl::string const langStr = getlang();
 			std::size_t const pos = langStr.find('.');
-			if( pos != eastl::string::npos ) {
-				sysEncode_ = langStr.substr( pos + 1 );
+			if(pos != eastl::string::npos) {
+				sysEncode_ = langStr.substr(pos + 1);
 				// std::cout << sysEncode_ << std::endl;
 			}
 		}
 		#undef getlang
 
-		toSystem_ = openConverter( sysEncode_.c_str(), RPG2K_ENCODE );
-		toRPG2k_  = openConverter( RPG2K_ENCODE, sysEncode_.c_str() );
+		toSystem_ = openConverter(sysEncode_.c_str(), RPG2K_ENCODE);
+		toRPG2k_  = openConverter(RPG2K_ENCODE, sysEncode_.c_str());
 	}
 	Encode::~Encode()
 	{
-		if( ::iconv_close(toSystem_) == -1 ) rpg2k_assert(false);
-		if( ::iconv_close(toRPG2k_ ) == -1 ) rpg2k_assert(false);
+		if(::iconv_close(toSystem_) == -1) rpg2k_assert(false);
+		if(::iconv_close(toRPG2k_) == -1) rpg2k_assert(false);
 
 		toSystem_ = toRPG2k_ = NULL;
 	}
@@ -48,7 +48,7 @@ namespace rpg2k
 	iconv_t Encode::openConverter(char const* to, char const* from)
 	{
 		::iconv_t ret = ::iconv_open(to, from);
-		rpg2k_assert( ret != ::iconv_t(-1) );
+		rpg2k_assert(ret != ::iconv_t(-1));
 		return ret;
 	}
 
@@ -65,7 +65,7 @@ namespace rpg2k
 
 		eastl::string ret;
 		while(iconvInSize > 0) {
-			if( ::iconv(cd, &iconvIn, &iconvInSize, &iconvOut, &iconvOutSize) == (::size_t) -1 ) {
+			if(::iconv(cd, &iconvIn, &iconvInSize, &iconvOut, &iconvOutSize) == (::size_t) -1) {
 				rpg2k_analyze_assert(false);
 			}
 			ret.append(iconvBuff.data(), BUFF_SIZE-iconvOutSize);

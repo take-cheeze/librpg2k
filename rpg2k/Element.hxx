@@ -84,8 +84,8 @@ namespace rpg2k
 			PP_castOperator(EventState)
 			#undef PP_castOperator
 
-			operator unsigned&() { return reinterpret_cast<unsigned&>( to<int>() ); }
-			operator unsigned const&() const { return reinterpret_cast<unsigned const&>( to<int>() ); }
+			operator unsigned&() { return reinterpret_cast<unsigned&>(to<int>()); }
+			operator unsigned const&() const { return reinterpret_cast<unsigned const&>(to<int>()); }
 
 			void substantiate();
 
@@ -114,9 +114,9 @@ namespace rpg2k
 		template< > inline
 		unsigned const& Element::operator =(unsigned const& num) { (*this) = int(num); return *this; }
 		template< > inline
-		unsigned const& Element::to<unsigned>() const { return reinterpret_cast< unsigned const& >( to<int>() ); }
+		unsigned const& Element::to<unsigned>() const { return reinterpret_cast< unsigned const& >(to<int>()); }
 		template< > inline
-		unsigned& Element::to<unsigned>() { return reinterpret_cast< unsigned& >( to<int>() ); }
+		unsigned& Element::to<unsigned>() { return reinterpret_cast< unsigned& >(to<int>()); }
 
 		class BerEnum : public eastl::vector<unsigned>
 		{
