@@ -1,11 +1,23 @@
 #include "Debug.hxx"
 #include "Stream.hxx"
 
+#include <boost/array.hpp>
+
 
 namespace rpg2k
 {
 	namespace stream
 	{
+		unsigned berSize(unsigned num)
+		{
+			unsigned ret = 0;
+			do {
+				ret++;
+				num >>= BER_BIT;
+			} while(num);
+			return ret;
+		}
+
 		bool isEOF(std::istream& is)
 		{
 			bool const ret = ( is.get() == EOF );
@@ -35,10 +47,9 @@ namespace rpg2k
 		std::ostream& writeBER(std::ostream& os, unsigned num)
 		{
 			// BER output buffer
-			uint8_t buff[ ( sizeof(num) * CHAR_BIT ) / BER_BIT + 1];
+			boost::array<uint8_t, (sizeof(num) * CHAR_BIT) / BER_BIT + 1> buff;
 			size_t const size = berSize(num);
 			int index = size;
-			// unsigned numBack = num;
 		// set data
 			buff[--index] = num & BER_MASK; // BER terminator
 			num >>= BER_BIT;
@@ -46,15 +57,8 @@ namespace rpg2k
 				buff[--index] = (num & BER_MASK) | BER_SIGN;
 				num >>= BER_BIT;
 			}
-			/*
-			clog << numBack << " = " << size << " :";
-			clog << std::setfill('0') << std::hex;
-			for(unsigned i = 0; i < size; i++) { clog << " " << std::setw(2) << (buff[i] & 0xff); }
-			clog << std::setfill(' ') << std::dec;
-			clog << ";" << endl;
-			 */
 		// write data
-			return os.write( reinterpret_cast<char const*>(buff), size);
+			return os.write( reinterpret_cast<char const*>(buff.data()), size);
 		}
 		unsigned readBER(std::istream& is)
 		{
@@ -62,9 +66,9 @@ namespace rpg2k
 			uint8_t data;
 		// extract
 			do {
-				data = is.get();
+				is.read(reinterpret_cast<char*>(&data), 1);
 				ret = (ret << BER_BIT) | (data & BER_MASK);
-			} while(data > BER_SIGN);
+			} while(data >= BER_SIGN);
 		// result
 			return ret;
 		}

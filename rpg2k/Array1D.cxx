@@ -97,7 +97,7 @@ namespace rpg2k
 		{
 			exists_ = false;
 		}
-		Array1D::Array1D(Array2D& owner, unsigned index, std::istream& s)
+		Array1D::Array1D(Array2D& owner, unsigned const index, std::istream& s)
 		: arrayDefine_( owner.arrayDefine() ), this_(NULL)
 		, owner_(&owner), index_(index)
 		{
@@ -244,7 +244,7 @@ namespace rpg2k
 				stream::writeWithSize(s, it->second);
 			}
 
-			if(toElement().hasOwner()) stream::writeBER(s, ARRAY_1D_END);
+			if(this->toElement().hasOwner() || this->isArray2D()) stream::writeBER(s, ARRAY_1D_END);
 
 			return s;
 		}

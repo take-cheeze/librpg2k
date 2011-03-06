@@ -33,15 +33,7 @@ namespace rpg2k
 			BER_SIGN = 0x01 << BER_BIT,
 			BER_MASK = BER_SIGN - 1,
 		};
-		inline unsigned berSize(unsigned num)
-		{
-			unsigned ret = 0;
-			do {
-				ret++;
-				num >>= BER_BIT;
-			} while(num);
-			return ret;
-		}
+		unsigned berSize(unsigned num);
 
 		std::ios_base::openmode const INPUT_FLAG
 		= std::ios_base::in  | std::ios_base::binary;

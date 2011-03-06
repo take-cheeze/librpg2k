@@ -45,6 +45,7 @@ IF(${APPLE})
 ENDIF()
 CXX_TEST(encode "gtest_main")
 CXX_TEST(model "gtest_main")
+CXX_TEST(stream "gtest_main")
 CXX_TEST(structure "gtest_main")
 
 # borrowed from

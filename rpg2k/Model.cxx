@@ -93,7 +93,7 @@ namespace rpg2k
 		}
 		void Base::serialize(std::ostream& s)
 		{
-			stream::writeHeader( s, header() );
+			stream::writeHeader(s, this->header());
 			for(boost::ptr_vector<Element>::const_iterator it = data_.begin(); it < data_.end(); ++it) {
 				it->serialize(s);
 			}

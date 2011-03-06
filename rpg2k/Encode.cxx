@@ -3,6 +3,8 @@
 #include "Debug.hxx"
 #include "Encode.hxx"
 
+#include <boost/array.hpp>
+
 
 namespace rpg2k
 {
@@ -52,13 +54,13 @@ namespace rpg2k
 
 	eastl::string Encode::convertString(eastl::string const& src, iconv_t cd)
 	{
-		char iconvBuff[BUFF_SIZE];
+		boost::array<char, BUFF_SIZE> iconvBuff;
 		::size_t iconvOutSize = BUFF_SIZE, iconvInSize  = src.size();
-		char* iconvOut = iconvBuff;
+		char* iconvOut = iconvBuff.data();
 		#if RPG2K_IS_PSP && !defined(_LIBICONV_H)
 			char const* iconvIn  = src.c_str();
 		#else
-			char* iconvIn  = const_cast< char* >( src.c_str() );
+			char* iconvIn  = const_cast<char*>(src.c_str());
 		#endif
 
 		eastl::string ret;
@@ -66,7 +68,7 @@ namespace rpg2k
 			if( ::iconv(cd, &iconvIn, &iconvInSize, &iconvOut, &iconvOutSize) == (::size_t) -1 ) {
 				rpg2k_analyze_assert(false);
 			}
-			ret.append(iconvBuff, BUFF_SIZE-iconvOutSize);
+			ret.append(iconvBuff.data(), BUFF_SIZE-iconvOutSize);
 			iconvOutSize = BUFF_SIZE;
 		}
 		return ret;

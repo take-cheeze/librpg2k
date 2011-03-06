@@ -5,6 +5,8 @@
 #include <rpg2k/Model.hxx>
 #include <rpg2k/Project.hxx>
 
+#include <boost/scoped_ptr.hpp>
+
 #include <cassert>
 #include <cstdlib>
 #include <string>
@@ -14,7 +16,16 @@ using namespace rpg2k::model;
 
 TEST(MapTree, OpenAndClose)
 {
-	MapTree("./test/TestGame");
+	char const* const LMT_TEST_FILE = "./test/RPG_RT.lmt.test";
+	boost::scoped_ptr<MapTree> lmt;
+
+	lmt.reset(new MapTree("./test/TestGame"));
+	lmt->saveAs(LMT_TEST_FILE);
+
+	lmt.reset(new MapTree("./test", "RPG_RT.lmt.test"));
+	lmt.reset();
+
+	std::remove(LMT_TEST_FILE);
 }
 /*
 TEST(DataBase, OpenAndClose)
