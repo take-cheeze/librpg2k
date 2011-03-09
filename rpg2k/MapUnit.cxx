@@ -27,7 +27,7 @@ namespace rpg2k
 		}
 		void MapUnit::loadImpl()
 		{
-			rpg2k_assert(rpg2k::within<unsigned>(ID_MIN, id_, MAP_UNIT_MAX+1));
+			rpg2k_assert(rpg2k::within<unsigned>(0, id_, MAP_UNIT_MAX+1));
 
 			lower_ = (*this)[71].toBinary().toVector<uint16_t>();
 			upper_ = (*this)[72].toBinary().toVector<uint16_t>();
