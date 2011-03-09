@@ -3,9 +3,9 @@
 
 #include <EASTL/map.h>
 #ifdef NDEBUG
-	#include <boost/ptr_container/ptr_map.hpp>
-#else
 	#include <boost/ptr_container/ptr_unordered_map.hpp>
+#else
+	#include <boost/ptr_container/ptr_map.hpp>
 #endif
 #include "Descriptor.hxx"
 #include "Structure.hxx"
@@ -22,9 +22,9 @@ namespace rpg2k
 		class Sound;
 
 		#ifdef NDEBUG
-			typedef boost::ptr_map<unsigned, Element> BaseOfArray1D;
-		#else
 			typedef boost::ptr_unordered_map<unsigned, Element> BaseOfArray1D;
+		#else
+			typedef boost::ptr_map<unsigned, Element> BaseOfArray1D;
 		#endif
 
 		class Array1D : public BaseOfArray1D
