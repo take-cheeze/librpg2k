@@ -1,4 +1,4 @@
-#include "Graphics.hxx"
+#include "rpg2k/Graphics.hxx"
 
 namespace rpg2k
 {

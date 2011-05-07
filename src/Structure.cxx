@@ -1,8 +1,8 @@
-#include "Array1DWrapper.hxx"
-#include "Debug.hxx"
-#include "Element.hxx"
-#include "Encode.hxx"
-#include "Stream.hxx"
+#include "rpg2k/Array1DWrapper.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Element.hxx"
+#include "rpg2k/Encode.hxx"
+#include "rpg2k/Stream.hxx"
 
 #include <cctype>
 

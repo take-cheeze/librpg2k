@@ -1,8 +1,8 @@
 #include <algorithm>
 
-#include "Debug.hxx"
-#include "Project.hxx"
-#include "Stream.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Project.hxx"
+#include "rpg2k/Stream.hxx"
 
 
 namespace

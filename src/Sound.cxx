@@ -1,4 +1,4 @@
-#include "Define.hxx"
+#include "rpg2k/define/Define.hxx"
 
 const char* rpg2k::define::Sound =
 "Array1D Sound\n"

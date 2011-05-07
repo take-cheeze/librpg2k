@@ -1,5 +1,5 @@
-#include "Debug.hxx"
-#include "Stream.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Stream.hxx"
 
 #include <boost/array.hpp>
 

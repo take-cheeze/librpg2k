@@ -1,5 +1,5 @@
-#include "Event.hxx"
-#include "Stream.hxx"
+#include "rpg2k/Event.hxx"
+#include "rpg2k/Stream.hxx"
 
 
 namespace rpg2k

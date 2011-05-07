@@ -1,8 +1,8 @@
-#include "Array1D.hxx"
-#include "Array2D.hxx"
-#include "Debug.hxx"
-#include "Element.hxx"
-#include "Stream.hxx"
+#include "rpg2k/Array1D.hxx"
+#include "rpg2k/Array2D.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Element.hxx"
+#include "rpg2k/Stream.hxx"
 
 #include <algorithm>
 

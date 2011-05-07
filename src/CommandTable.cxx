@@ -1,7 +1,7 @@
 #include <utility>
 
-#include "Command.hxx"
-#include "CommandTable.hxx"
+#include "rpg2k/Command.hxx"
+#include "rpg2k/CommandTable.hxx"
 
 
 namespace rpg2k

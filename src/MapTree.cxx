@@ -1,5 +1,5 @@
-#include "Debug.hxx"
-#include "MapTree.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/MapTree.hxx"
 
 
 namespace rpg2k

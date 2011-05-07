@@ -1,7 +1,7 @@
 #include <cstdlib>
 
-#include "Debug.hxx"
-#include "Encode.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Encode.hxx"
 
 #include <boost/array.hpp>
 

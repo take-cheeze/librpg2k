@@ -1,7 +1,7 @@
-#include "Debug.hxx"
-#include "Model.hxx"
-#include "Stream.hxx"
-#include "define/Define.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Model.hxx"
+#include "rpg2k/Stream.hxx"
+#include "rpg2k/define/Define.hxx"
 
 #include <algorithm>
 #include <fstream>

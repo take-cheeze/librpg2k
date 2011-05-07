@@ -1,7 +1,7 @@
 #include <boost/format.hpp>
 
-#include "Debug.hxx"
-#include "MapUnit.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/MapUnit.hxx"
 
 
 namespace rpg2k

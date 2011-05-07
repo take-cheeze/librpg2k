@@ -24,7 +24,7 @@ LIST(APPEND rpg2kLib_DEFINITIONS
 SET(rpg2kLib_INCLUDE_DIRS
 	"${Boost_INCLUDE_DIRS}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/src"
-	"${rpg2kLib_PATH}"
+	"${rpg2kLib_PATH}/include"
 )
 SET(rpg2kLib_LIBRARIES
 	"${Boost_LIBRARIES}"

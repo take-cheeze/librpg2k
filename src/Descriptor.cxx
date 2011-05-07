@@ -1,7 +1,7 @@
-#include "Debug.hxx"
-#include "Descriptor.hxx"
-#include "Stream.hxx"
-#include "Structure.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/Descriptor.hxx"
+#include "rpg2k/Stream.hxx"
+#include "rpg2k/Structure.hxx"
 
 #include <sstream>
 

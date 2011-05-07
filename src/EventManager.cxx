@@ -1,5 +1,5 @@
-#include "EventManager.hxx"
-#include "Project.hxx"
+#include "rpg2k/EventManager.hxx"
+#include "rpg2k/Project.hxx"
 
 
 namespace rpg2k

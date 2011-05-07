@@ -1,6 +1,6 @@
-#include "Debug.hxx"
-#include "SaveData.hxx"
-#include "Structure.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/SaveData.hxx"
+#include "rpg2k/Structure.hxx"
 
 #include <boost/format.hpp>
 

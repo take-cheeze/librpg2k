@@ -1,4 +1,4 @@
-#include "Command.hxx"
+#include "rpg2k/Command.hxx"
 
 
 namespace rpg2k

@@ -1,5 +1,5 @@
-#include "Debug.hxx"
-#include "DataBase.hxx"
+#include "rpg2k/Debug.hxx"
+#include "rpg2k/DataBase.hxx"
 
 
 namespace rpg2k

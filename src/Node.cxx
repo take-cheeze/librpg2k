@@ -1,4 +1,4 @@
-#include "Node.hxx"
+#include "rpg2k/Node.hxx"
 
 namespace rpg2k
 {
