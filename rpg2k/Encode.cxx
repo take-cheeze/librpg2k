@@ -25,9 +25,9 @@ namespace rpg2k
 		 */
 		#define getlang() getenv("LANG")
 		if(getlang()) {
-			eastl::string const langStr = getlang();
+			std::string const langStr = getlang();
 			std::size_t const pos = langStr.find('.');
-			if(pos != eastl::string::npos) {
+			if(pos != std::string::npos) {
 				sysEncode_ = langStr.substr(pos + 1);
 				// std::cout << sysEncode_ << std::endl;
 			}
@@ -52,7 +52,7 @@ namespace rpg2k
 		return ret;
 	}
 
-	eastl::string Encode::convertString(eastl::string const& src, iconv_t cd)
+	std::string Encode::convertString(std::string const& src, iconv_t cd)
 	{
 		boost::array<char, BUFF_SIZE> iconvBuff;
 		::size_t iconvOutSize = BUFF_SIZE, iconvInSize  = src.size();
@@ -63,7 +63,7 @@ namespace rpg2k
 			char* iconvIn  = const_cast<char*>(src.c_str());
 		#endif
 
-		eastl::string ret;
+		std::string ret;
 		while(iconvInSize > 0) {
 			if(::iconv(cd, &iconvIn, &iconvInSize, &iconvOut, &iconvOutSize) == (::size_t) -1) {
 				rpg2k_analyze_assert(false);

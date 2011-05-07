@@ -3,9 +3,9 @@
 
 #include <deque>
 
-#include <EASTL/algorithm.h>
-#include <EASTL/map.h>
-#include <EASTL/set.h>
+#include <algorithm>
+#include <map>
+#include <set>
 
 #include "Array1D.hxx"
 #include "Array2D.hxx"
@@ -78,11 +78,11 @@ namespace rpg2k
 		{
 			friend class Singleton<DefineLoader>;
 		private:
-			typedef eastl::map< String, boost::ptr_vector<structure::Descriptor> > DefineBuffer;
+			typedef std::map< String, boost::ptr_vector<structure::Descriptor> > DefineBuffer;
 			DefineBuffer defineBuff_;
-			typedef eastl::map<String, const char*> DefineText;
+			typedef std::map<String, const char*> DefineText;
 			DefineText defineText_;
-			eastl::set<String> isArray_;
+			std::set<String> isArray_;
 		protected:
 			void parse(boost::ptr_vector<structure::Descriptor>& dst, std::deque<String> const& token);
 			void load(boost::ptr_vector<structure::Descriptor>& dst, String const& name);

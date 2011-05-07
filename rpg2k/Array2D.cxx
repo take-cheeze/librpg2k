@@ -57,8 +57,8 @@ namespace rpg2k
 		{
 			size_t const length = stream::readBER(s);
 			for(size_t i = 0; i < length; i++) {
-				size_t index = stream::readBER(s);
-				insert(index, std::auto_ptr<Array1D>(new Array1D(*this, index, s)));
+				unsigned index = stream::readBER(s);
+				this->insert(index, new Array1D(*this, index, s));
 			}
 
 			if(toElement().hasOwner()) rpg2k_analyze_assert(stream::isEOF(s));
@@ -96,13 +96,12 @@ namespace rpg2k
 			return *this;
 		}
 
-		Array1D& Array2D::operator [](unsigned const index)
+		Array1D& Array2D::operator [](unsigned index)
 		{
 			iterator it = this->find(index);
 			if(it != this->end()) return *it->second;
 			else {
-				return *insert(index, std::auto_ptr<Array1D>(
-					new Array1D(*this, index)))->second;
+				return *insert(index, new Array1D(*this, index))->second;
 			}
 		}
 		Array1D const& Array2D::operator [](unsigned const index) const

@@ -1,4 +1,4 @@
-#include <EASTL/algorithm.h>
+#include <algorithm>
 
 #include "Debug.hxx"
 #include "Project.hxx"
@@ -62,9 +62,9 @@ namespace rpg2k
 			lastSaveDataStamp_ = 0.0;
 			lastSaveDataID_ = ID_MIN;
 
-			lsd_.push_back(std::auto_ptr<SaveData>(new SaveData())); // set LcfSaveData buffer
+			lsd_.push_back(new SaveData()); // set LcfSaveData buffer
 			for(unsigned i = ID_MIN; i <= SAVE_DATA_MAX; i++) {
-				lsd_.push_back(std::auto_ptr<SaveData>(new SaveData(baseDir_, i)));
+				lsd_.push_back(new SaveData(baseDir_, i));
 
 				if(lsd_.back().exists()) {
 					// TODO: caclating current time
@@ -91,12 +91,11 @@ namespace rpg2k
 			return getLSD().eventState(ID_PARTY).mapID();
 		}
 
-		MapUnit& Project::getLMU(unsigned const id)
+		MapUnit& Project::getLMU(unsigned id)
 		{
 			MapUnitTable::iterator const it = lmu_.find(id);
 			if(it == lmu_.end()) {
-				return *lmu_.insert(id, std::auto_ptr<MapUnit>(
-					new MapUnit(gameDir(), id))).first->second;
+				return *lmu_.insert(id, new MapUnit(gameDir(), id)).first->second;
 			} else return *it->second;
 		}
 
@@ -136,8 +135,8 @@ namespace rpg2k
 			for(Array2D::ConstIterator it = charsLDB.begin(); it != charsLDB.end(); ++it) {
 				if(!it->second->exists()) continue;
 
-				charTable_.insert(it->first, std::auto_ptr<Character>(
-					new Character(it->first, *it->second, charsLSD[it->first])));
+				unsigned index = it->first;
+				charTable_.insert(index, new Character(it->first, *it->second, charsLSD[it->first]));
 			}
 		}
 
@@ -353,8 +352,8 @@ namespace rpg2k
 
 				charLSD[61] = charLDB[51].toBinary(); // equip
 
-				charTable_.insert(it->first, std::auto_ptr<Character>(
-					new Character(it->first, charLDB, charLSD)));
+				unsigned index = it->first;
+				charTable_.insert(index, new Character(it->first, charLDB, charLSD));
 				Character& c = this->character(it->first);
 
 				charLSD[32] = c.exp(level); // experience
@@ -363,10 +362,10 @@ namespace rpg2k
 				charLSD[72] = c.basicParam(level, Param::MP); // current MP
 
 				charLSD[81] = conditioNum;
-				charLSD[82] = Binary(eastl::vector<uint16_t>(conditioNum));
+				charLSD[82].toBinary().assign(std::vector<uint16_t>(conditioNum));
 			}
 		// set start member
-			lsd.member() = sysLDB[22].toBinary().toFixedVector<uint16_t, MEMBER_MAX>();
+			lsd.member() = sysLDB[22].toBinary().toVector<uint16_t>();
 		// set party's char graphic
 			if(!lsd.member().empty()) {
 				Character const& frontChar = this->character(lsd.member().front());
@@ -448,16 +447,16 @@ namespace rpg2k
 		void Project::Character::sync()
 		{
 			lsd_[51] = int(skill_.size());
-			lsd_[52] = Binary(skill_);
+			lsd_[52].toBinary().assign(skill_);
 
-			lsd_[61] = Binary(equip_);
+			lsd_[61].toBinary().assign(equip_);
 
 			lsd_[81] = int(conditionStep_.size());
-			lsd_[82] = Binary(conditionStep_);
-			eastl::vector<uint16_t> const conditionClean(condition_.begin()
-			, (++eastl::find(condition_.rbegin(), condition_.rend(), true)).base());
+			lsd_[82].toBinary().assign(conditionStep_);
+			std::vector<uint16_t> const conditionClean(condition_.begin()
+			, (++std::find(condition_.rbegin(), condition_.rend(), true)).base());
 			lsd_[83] = int(conditionClean.size());
-			lsd_[84] = Binary(conditionClean);
+			lsd_[84].toBinary().assign(conditionClean);
 		}
 
 		bool Project::hasItem(unsigned const id) const
@@ -559,7 +558,7 @@ namespace rpg2k
 					if(currentLv < nextLv) { continue; }
 					else if(prevLv < currentLv) { break; }
 					else {
-						eastl::set<uint16_t>::iterator er = skill_.find((*it->second)[2].to<int>());
+						std::set<uint16_t>::iterator er = skill_.find((*it->second)[2].to<int>());
 						if(er != skill_.end()) { skill_.erase(er); }
 					}
 				}
@@ -729,14 +728,14 @@ namespace rpg2k
 			return true;
 		}
 
-		eastl::vector<unsigned> Project::sortLSD() const
+		std::vector<unsigned> Project::sortLSD() const
 		{
-			eastl::map<double, unsigned> tmp;
+			std::map<double, unsigned> tmp;
 			for(unsigned i = 0; i < SAVE_DATA_MAX; i++) {
-				tmp.insert(eastl::make_pair(i + 1, lsd_[i + 1][100].toArray1D()[1].to<double>()));
+				tmp.insert(std::make_pair(i + 1, lsd_[i + 1][100].toArray1D()[1].to<double>()));
 			}
-			eastl::vector<unsigned> ret;
-			for(eastl::map<double, unsigned>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+			std::vector<unsigned> ret;
+			for(std::map<double, unsigned>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
 				ret.push_back(i->second);
 			}
 

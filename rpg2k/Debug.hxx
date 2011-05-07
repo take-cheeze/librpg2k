@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stack>
-#include <EASTL/string.h>
+#include <string>
 #include <typeinfo>
 #include <exception>
 
@@ -34,15 +34,15 @@ namespace rpg2k
 	namespace debug
 	{
 
-		eastl::string error(int errNo);
+		std::string error(int errNo);
 		void addAtExitFunction(void (*func)(void));
 
-		eastl::string demangleTypeInfo(std::type_info const& info);
+		std::string demangleTypeInfo(std::type_info const& info);
 		#if RPG2K_USE_RTTI
 			template<typename T>
-			inline eastl::string demangle() { return demangleTypeInfo(typeid(T)); }
+			inline std::string demangle() { return demangleTypeInfo(typeid(T)); }
 			template<typename T>
-			inline eastl::string demangle(T& src) { return demangleTypeInfo(typeid(src)); }
+			inline std::string demangle(T& src) { return demangleTypeInfo(typeid(src)); }
 		#endif
 
 		extern std::ofstream ANALYZE_RESULT; // usually analyze.txt

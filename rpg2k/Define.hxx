@@ -1,11 +1,10 @@
 #ifndef _INC__RPG2K__DEFINES_HPP
 #define _INC__RPG2K__DEFINES_HPP
 
-#include <stdint.h>
+#include <cstdint>
 #include <iosfwd>
 
-#include <EASTL/string.h>
-#include <EASTL/internal/config.h>
+#include <string>
 
 #include "Config.hxx"
 #include "Vector.hxx"
@@ -13,38 +12,35 @@
 
 namespace rpg2k
 {
-	typedef eastl_size_t size_t;
-	struct CtorSprintf : public eastl::string::CtorSprintf {};
-
 	class SystemString;
-	class String : public eastl::string
+	class String : public std::string
 	{
 	public:
-		explicit String() : eastl::string() {}
-		String(eastl::string const& str) : eastl::string(str) {}
-		String(eastl::string const& str, size_t pos, size_t n = npos) : eastl::string(str, pos, n) {}
-		String(char const* s, size_t n) : eastl::string(s, n) {}
-		String(char const* s) : eastl::string(s) {}
-		String(size_t n, char c) : eastl::string(n, c) {}
+		explicit String() : std::string() {}
+		String(std::string const& str) : std::string(str) {}
+		String(std::string const& str, size_t pos, size_t n = npos) : std::string(str, pos, n) {}
+		String(char const* s, size_t n) : std::string(s, n) {}
+		String(char const* s) : std::string(s) {}
+		String(size_t n, char c) : std::string(n, c) {}
 		template<class InputIterator>
-		String (InputIterator begin, InputIterator end) : eastl::string(begin, end) {}
+		String (InputIterator begin, InputIterator end) : std::string(begin, end) {}
 
 		SystemString toSystem() const;
 
 		std::ostream& serialize(std::ostream& os) const;
 		size_t serializedSize() const { return this->size(); }
 	}; // class String
-	class SystemString : public eastl::string
+	class SystemString : public std::string
 	{
 	public:
-		explicit SystemString() : eastl::string() {}
-		SystemString(eastl::string const& str) : eastl::string(str) {}
-		SystemString(eastl::string const& str, size_t pos, size_t n = npos) : eastl::string(str, pos, n) {}
-		SystemString(char const* s, size_t n) : eastl::string(s, n) {}
-		SystemString(char const* s) : eastl::string(s) {}
-		SystemString(size_t n, char c) : eastl::string(n, c) {}
+		explicit SystemString() : std::string() {}
+		SystemString(std::string const& str) : std::string(str) {}
+		SystemString(std::string const& str, size_t pos, size_t n = npos) : std::string(str, pos, n) {}
+		SystemString(char const* s, size_t n) : std::string(s, n) {}
+		SystemString(char const* s) : std::string(s) {}
+		SystemString(size_t n, char c) : std::string(n, c) {}
 		template<class InputIterator>
-		SystemString (InputIterator begin, InputIterator end) : eastl::string(begin, end) {}
+		SystemString (InputIterator begin, InputIterator end) : std::string(begin, end) {}
 
 		String toRPG2k() const;
 	}; // class SystemString
@@ -264,10 +260,10 @@ namespace rpg2k
 	} // namespace font
 } // namespace rpg2k
 
-namespace eastl
+namespace std
 {
 	template<>
-	struct hash<rpg2k::String> : public hash<eastl::string> {};
+	struct hash<rpg2k::String> : public hash<std::string> {};
 }
 
 #endif

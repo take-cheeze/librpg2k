@@ -4,7 +4,7 @@
 #include "Define.hxx"
 #include "Singleton.hxx"
 
-#include <EASTL/hash_map.h>
+#include <unordered_map>
 
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
@@ -31,7 +31,7 @@ namespace rpg2k
 		class Descriptor;
 		typedef boost::ptr_unordered_map<unsigned, Descriptor> ArrayDefineType;
 		typedef ArrayDefineType const& ArrayDefine;
-		typedef std::auto_ptr<ArrayDefineType> ArrayDefinePointer;
+		typedef std::unique_ptr<ArrayDefineType> ArrayDefinePointer;
 
 		#define PP_basicTypes(func) \
 			func(int) \
@@ -74,9 +74,9 @@ namespace rpg2k
 			Descriptor(String const& type);
 			Descriptor(String const& type, String const& val);
 
-			typedef eastl::hash_map<String, int> ArrayTable;
+			typedef std::unordered_map<String, int> ArrayTable;
 			Descriptor(String const& type
-			, ArrayDefinePointer def, std::auto_ptr<ArrayTable> table);
+			, ArrayDefinePointer def, std::unique_ptr<ArrayTable> table);
 
 			~Descriptor();
 

@@ -2,7 +2,9 @@
 #include "SaveData.hxx"
 #include "Structure.hxx"
 
-#include <EASTL/algorithm.h>
+#include <boost/format.hpp>
+
+#include <algorithm>
 
 
 namespace rpg2k
@@ -25,7 +27,7 @@ namespace rpg2k
 		SaveData::SaveData(SystemString const& dir, unsigned const id)
 		: Base(dir, ""), id_(id)
 		{
-			setFileName(eastl::string(CtorSprintf(), "Save%02d.lsd", int(id)));
+			setFileName((boost::format("Save%02d.lsd") % int(id)).str());
 
 			checkExists();
 
@@ -65,15 +67,15 @@ namespace rpg2k
 		// item
 			{
 				int itemTypeNum = status[11];
-				eastl::vector<uint16_t> id  = status[12].toBinary().toVector<uint16_t>();
-				eastl::vector<uint8_t > num = status[13].toBinary().toVector<uint8_t>();
-				eastl::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
+				std::vector<uint16_t> id  = status[12].toBinary().toVector<uint16_t>();
+				std::vector<uint8_t > num = status[13].toBinary().toVector<uint8_t>();
+				std::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
 
 				for(int i = 0; i < itemTypeNum; i++) {
 					if(!num[i]) continue;
 
 					Item info = { num[i], use[i] };
-					item_.insert(eastl::make_pair(id[i], info));
+					item_.insert(std::make_pair(id[i], info));
 				}
 			}
 		// switch and variable
@@ -83,7 +85,7 @@ namespace rpg2k
 			variable_ = sys[34].toBinary().toVector<int32_t>();
 		// member
 			member_.resize(status[1].to_int());
-			member_ = status[2].toBinary().toFixedVector<uint16_t, MEMBER_MAX>();
+			member_ = status[2].toBinary().toVector<uint16_t>();
 		// chip replace
 			chipReplace_.resize(ChipSet::END);
 			for(unsigned i = 0; i < ChipSet::END; i++) {
@@ -101,9 +103,9 @@ namespace rpg2k
 				int itemNum = item_.size();
 				status[11] = itemNum;
 
-				eastl::vector<uint16_t> id (itemNum);
-				eastl::vector<uint8_t > num(itemNum);
-				eastl::vector<uint8_t > use(itemNum);
+				std::vector<uint16_t> id (itemNum);
+				std::vector<uint8_t > num(itemNum);
+				std::vector<uint8_t > use(itemNum);
 
 				int i = 0;
 				for(ItemTable::const_iterator it = item_.begin(); it != item_.end(); ++it) {
@@ -113,21 +115,21 @@ namespace rpg2k
 
 					i++;
 				}
-				status[12] = Binary(id);
-				status[13] = Binary(num);
-				status[14] = Binary(use);
+				status[12].toBinary().assign(id);
+				status[13].toBinary().assign(num);
+				status[14].toBinary().assign(use);
 			}
 		// switch and variable
 			sys[31] = int(switch_.size());
-			sys[32] = Binary(switch_);
+			sys[32].toBinary().assign(switch_);
 			sys[33] = int(variable_.size());
-			sys[34] = Binary(variable_);
+			sys[34].toBinary().assign(variable_);
 		// member
 			(*this)[109].toArray1D()[1] = int(member_.size());
-			(*this)[109].toArray1D()[2] = Binary(member_);
+			(*this)[109].toArray1D()[2].toBinary().assign(member_);
 		// chip replace
 			for(unsigned i = ChipSet::BEGIN; i < ChipSet::END; i++) {
-				(*this)[111].toArray1D()[21+i] = Binary(chipReplace_[i]);
+				(*this)[111].toArray1D()[21+i].toBinary().assign(chipReplace_[i]);
 			}
 		}
 
@@ -142,7 +144,7 @@ namespace rpg2k
 		}
 		bool SaveData::removeMember(unsigned const charID)
 		{
-			eastl::vector<uint16_t>::iterator it = std::find(member_.begin(), member_.end(), charID);
+			std::vector<uint16_t>::iterator it = std::find(member_.begin(), member_.end(), charID);
 			if(it != member_.end()) {
 				member_.erase(it);
 				return true;
@@ -187,11 +189,11 @@ namespace rpg2k
 		}
 		void SaveData::setItemNum(unsigned const id, unsigned const val)
 		{
-			unsigned const validVal = eastl::min(unsigned(ITEM_MAX), val);
+			unsigned const validVal = std::min(unsigned(ITEM_MAX), val);
 
 			if(item_.find(id) == item_.end()) {
-				Item const i = { validVal, 0 };
-				item_.insert(eastl::make_pair(id, i));
+				Item const i = { uint8_t(validVal), 0 };
+				item_.insert(std::make_pair(id, i));
 			} else item_[id].num = validVal;
 
 			if(validVal == ITEM_MIN) item_.erase(id);

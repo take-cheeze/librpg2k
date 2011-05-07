@@ -4,9 +4,9 @@
 #include "Define.hxx"
 
 #include <deque>
-#include <EASTL/map.h>
-#include <EASTL/memory.h>
-#include <EASTL/vector.h>
+#include <map>
+#include <memory>
+#include <vector>
 
 
 namespace rpg2k
@@ -24,7 +24,7 @@ namespace rpg2k
 			unsigned code_, nest_;
 
 			String stringArgument_;
-			eastl::vector<int32_t> argument_;
+			std::vector<int32_t> argument_;
 		public:
 			Instruction();
 			Instruction(std::istream& s);
@@ -39,8 +39,8 @@ namespace rpg2k
 			void setString(String const& str) { stringArgument_ = str; }
 			operator String const&() const { return stringArgument_; }
 
-			eastl::vector<int32_t> const& args() const { return argument_; }
-			eastl::vector<int32_t> args() { return argument_; }
+			std::vector<int32_t> const& args() const { return argument_; }
+			std::vector<int32_t> args() { return argument_; }
 
 			int32_t at(unsigned index) const;
 			int32_t operator [](unsigned index) const;
@@ -79,7 +79,7 @@ namespace rpg2k
 
 			bool empty() const { return data_.empty(); }
 
-			typedef eastl::map<unsigned, unsigned> LabelTable;
+			typedef std::map<unsigned, unsigned> LabelTable;
 			LabelTable const& labelTable() const { return label_; }
 		private:
 			Data data_;

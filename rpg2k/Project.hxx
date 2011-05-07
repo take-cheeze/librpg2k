@@ -12,7 +12,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
 
-#include <EASTL/set.h>
+#include <set>
 
 
 namespace rpg2k
@@ -34,10 +34,10 @@ namespace rpg2k
 				structure::Array1D const& ldb_;
 				structure::Array1D& lsd_;
 
-				eastl::vector<uint16_t> const basicParam_;
-				eastl::set<uint16_t> skill_;
-				eastl::vector<uint8_t> condition_; // eastl::vector<bool>
-				eastl::vector<uint16_t> conditionStep_;
+				std::vector<uint16_t> const basicParam_;
+				std::set<uint16_t> skill_;
+				std::vector<uint8_t> condition_; // std::vector<bool>
+				std::vector<uint16_t> conditionStep_;
 				Equip equip_;
 
 				template<typename T, unsigned LsdID, unsigned LdbID>
@@ -55,8 +55,8 @@ namespace rpg2k
 				void setName(String const& val) { lsd_[1] = val; }
 				void setTitle(String const& val) { lsd_[2] = val; }
 
-				eastl::vector<uint8_t>& condition() { return condition_; }
-				eastl::vector<uint8_t> const& condition() const { return condition_; }
+				std::vector<uint8_t>& condition() { return condition_; }
+				std::vector<uint8_t> const& condition() const { return condition_; }
 
 				int hp() const { return lsd_[71]; }
 				int mp() const { return lsd_[72]; }
@@ -81,8 +81,8 @@ namespace rpg2k
 				Equip& equip() { return equip_; }
 				Equip const& equip() const { return equip_; }
 
-				eastl::set<uint16_t>& skill() { return skill_; }
-				eastl::set<uint16_t> const& skill() const { return skill_; }
+				std::set<uint16_t>& skill() { return skill_; }
+				std::set<uint16_t> const& skill() const { return skill_; }
 
 				void sync();
 			private:
@@ -171,7 +171,7 @@ namespace rpg2k
 
 			void move(unsigned mapID, int x, int y);
 
-			eastl::vector<unsigned> sortLSD() const;
+			std::vector<unsigned> sortLSD() const;
 
 			bool hasItem(unsigned id) const;
 		}; // class Project

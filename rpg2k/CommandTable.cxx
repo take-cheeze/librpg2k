@@ -1,4 +1,4 @@
-#include <EASTL/utility.h>
+#include <utility>
 
 #include "Command.hxx"
 #include "CommandTable.hxx"

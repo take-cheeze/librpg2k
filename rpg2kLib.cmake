@@ -4,44 +4,38 @@
 # - ${rpg2kLib_LIBRARIES}    - use it like "TARGET_LINK_LIBRARIES(${TARGET} ${rpg2kLib_LIBRARIES})"
 # - ${rpg2kLib_LIBRARY_DIRS} - use it like "LINK_DIRECTORIES(${rpg2kLib_LIBRARY_DIRS})"
 
-IF(!${rpg2kLib_PATH})
+IF(NOT DEFINED rpg2kLib_PATH)
 	SET(rpg2kLib_PATH ${CMAKE_CURRENT_SOURCE_DIR}/rpg2kLib)
 ENDIF()
 
 # DEBUG define
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-	SET(rpg2kLib_DEFINITIONS -DRPG2K_DEBUG=1)
+	SET(rpg2kLib_DEFINITIONS -D RPG2K_DEBUG=1)
 ELSE()
-	SET(rpg2kLib_DEFINITIONS -DRPG2K_DEBUG=0)
+	SET(rpg2kLib_DEFINITIONS -D RPG2K_DEBUG=0)
 ENDIF()
 
-# EASTL
-SET(EASTL_PATH ${rpg2kLib_PATH}/EASTL)
-INCLUDE(${rpg2kLib_PATH}/EASTL/EASTL.cmake)
 # Boost
 FIND_PACKAGE(Boost REQUIRED)
 
-SET(rpg2kLib_DEFINITIONS
-	"${EASTL_DEFINITIONS}"
-	"${rpg2kLib_DEFINITIONS}"
+LIST(APPEND rpg2kLib_DEFINITIONS
+	"-Wall" "-Wextra" "-Werror"
 )
 SET(rpg2kLib_INCLUDE_DIRS
 	"${Boost_INCLUDE_DIRS}"
-	"${EASTL_INCLUDE_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/src"
 	"${rpg2kLib_PATH}"
 )
 SET(rpg2kLib_LIBRARIES
 	"${Boost_LIBRARIES}"
-	"${EASTL_LIBRARY}"
 	"pugixml"
 	"rpg2kLib"
 )
 SET(rpg2kLib_LIBRARY_DIRS
-	"${EASTL_LIBRARY_DIR}"
 	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/scripts"
-	"${rpg2kLib_PATH}"
+	"${rpg2kLib_PATH}/lib"
 )
-IF(${APPLE})
-	SET(rpg2kLib_LIBRARIES "${rpg2kLib_LIBRARIES}" "iconv")
+IF(APPLE)
+	LIST(APPEND rpg2kLib_LIBRARY_DIRS "/opt/local/lib")
+	LIST(APPEND rpg2kLib_LIBRARIES "iconv")
 ENDIF()

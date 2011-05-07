@@ -64,7 +64,7 @@ namespace rpg2k
 			while(!stream::isEOF(s)) {
 				data_.push_back(Instruction(s));
 				if(data_.back().code() == 12110) { // check for label
-					if(!label_.insert(eastl::make_pair(data_.back()[0], data_.size() - 1)).second) {
+					if(!label_.insert(std::make_pair(data_.back()[0], data_.size() - 1)).second) {
 						rpg2k_assert(false);
 					}
 				}

@@ -2,7 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 PROJECT("rpg2kLib" CXX C)
 
-ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/EASTL)
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/pugixml/scripts)
 
 SET(rpg2kLib_PATH ${CMAKE_CURRENT_SOURCE_DIR})
@@ -17,37 +19,28 @@ AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/rpg2k/define SRCS)
 ADD_LIBRARY(${PROJECT_NAME} STATIC ${SRCS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${rpg2kLib_LIBRARIES})
 
-ADD_DEPENDENCIES(${PROJECT_NAME} "EASTL")
-
 # test
 ENABLE_TESTING()
 
 INCLUDE(FindThreads)
 
 FUNCTION(CXX_TEST target libs)
-	ADD_EXECUTABLE(test/${target} ${CMAKE_CURRENT_SOURCE_DIR}/test/${target}.cxx)
-	TARGET_LINK_LIBRARIES(test/${target}
+	ADD_EXECUTABLE(test_${target} ${CMAKE_CURRENT_SOURCE_DIR}/test/${target}.cxx)
+	TARGET_LINK_LIBRARIES(test_${target}
 		${rpg2kLib_LIBRARIES}
 		${libs}
 		"gtest"
 	)
-	IF(${UNIX})
-		TARGET_LINK_LIBRARIES(test/${target} pthread)
-	ENDIF()
-	ADD_TEST(test/${target} test/${target})
-	ADD_DEPENDENCIES(test/${target} ${PROJECT_NAME})
-
-	SET(TEST_TARGET "${TEST_TARGET};test/${target}" PARENT_SCOPE)
+	TARGET_LINK_LIBRARIES(test_${target} ${CMAKE_THREAD_LIBS_INIT})
+	ADD_TEST(
+		NAME test_${target}
+		WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+		COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${target}
+	)
+	ADD_DEPENDENCIES(test_${target} ${PROJECT_NAME})
 ENDFUNCTION()
 
-IF(${APPLE})
-	LINK_DIRECTORIES(/opt/local/lib)
-ENDIF()
-CXX_TEST(encode "gtest_main")
-CXX_TEST(model "gtest_main")
-CXX_TEST(stream "gtest_main")
-CXX_TEST(structure "gtest_main")
-
-# borrowed from
-# http://stackoverflow.com/questions/733475/cmake-ctest-make-test-doesnt-build-tests
-ADD_CUSTOM_TARGET(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS ${TEST_TARGET})
+SET(CXX_TEST_SOURCES "encode;model;stream;structure;")
+FOREACH(i ${CXX_TEST_SOURCES})
+	CXX_TEST(${i} "gtest_main")
+ENDFOREACH()

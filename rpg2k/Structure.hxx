@@ -7,14 +7,13 @@
 
 #include <climits>
 
-#include <EASTL/fixed_vector.h>
-#include <EASTL/set.h>
-#include <EASTL/vector.h>
+#include <set>
+#include <vector>
 
 
 namespace rpg2k
 {
-	class Binary : public eastl::vector<uint8_t>
+	class Binary : public std::vector<uint8_t>
 	{
 	private:
 		template<class SrcT>
@@ -51,14 +50,14 @@ namespace rpg2k
 		}
 	public:
 		Binary() {}
-		explicit Binary(unsigned size) : eastl::vector<uint8_t>(size) {}
-		explicit Binary(uint8_t* data, unsigned size) : eastl::vector<uint8_t>(data, data + size) {}
-		Binary(Binary const& b) : eastl::vector<uint8_t>(b) {}
-		Binary(eastl::string const& str) : eastl::vector<uint8_t>(str.begin(), str.end()) {}
+		explicit Binary(unsigned size) : std::vector<uint8_t>(size) {}
+		explicit Binary(uint8_t* data, unsigned size) : std::vector<uint8_t>(data, data + size) {}
+		Binary(Binary const& b) : std::vector<uint8_t>(b) {}
+		Binary(std::string const& str) : std::vector<uint8_t>(str.begin(), str.end()) {}
 
-		operator eastl::string() const
+		operator std::string() const
 		{
-			return eastl::string(reinterpret_cast<char const*>(this->data()), this->size()); 
+			return std::string(reinterpret_cast<char const*>(this->data()), this->size()); 
 		}
 
 		bool isBER() const;
@@ -76,11 +75,11 @@ namespace rpg2k
 		std::ostream& serialize(std::ostream& s) const;
 
 		template<typename T>
-		eastl::vector<T> toVector() const
+		std::vector<T> toVector() const
 		{
 			rpg2k_assert((this->size() % sizeof(T)) == 0);
 
-			eastl::vector<T> output(this->size() / sizeof(T));
+			std::vector<T> output(this->size() / sizeof(T));
 			exchangeEndianIfNeed(output, this->data());
 			return output;
 		}
@@ -95,16 +94,10 @@ namespace rpg2k
 			return output;
 		}
 		template<typename T>
-		eastl::set<T> toSet() const
+		std::set<T> toSet() const
 		{
-			eastl::vector<T> const v = this->toVector<T>();
-			return eastl::set<T>(v.begin(), v.end());
-		}
-		template<typename T, size_t S>
-		eastl::fixed_vector<T, S> toFixedVector() const
-		{
-			eastl::vector<T> const v = this->toVector<T>();
-			return eastl::fixed_vector<T, S>(v.begin(), v.end());
+			std::vector<T> const v = this->toVector<T>();
+			return std::set<T>(v.begin(), v.end());
 		}
 
 		template<class T>
@@ -116,9 +109,7 @@ namespace rpg2k
 		}
 
 		template<class T>
-		Binary(T const& src) { assign(src); }
-		template<class T>
-		Binary& operator =(T const& src) { return assign(src); }
+		Binary& operator =(T const& src) { return this->assign(src); }
 	}; // class Binary
 } // namespace rpg2k
 

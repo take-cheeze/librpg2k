@@ -75,7 +75,7 @@ namespace rpg2k
 			}
 		}
 		Descriptor::Descriptor(String const& type
-		, ArrayDefinePointer def, std::auto_ptr<ArrayTable> table)
+		, ArrayDefinePointer def, std::unique_ptr<ArrayTable> table)
 		: type_(ElementType::instance().toEnum(type)), hasDefault_(true)
 		, arrayTable_(table.release())
 		{

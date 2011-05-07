@@ -82,10 +82,10 @@ namespace rpg2k
 	{
 		if(!size() || ((size() > (sizeof(uint32_t) * CHAR_BIT) / stream::BER_BIT + 1))) return false;
 
-		const_reverse_iterator it = eastl::vector<uint8_t>::rbegin();
+		const_reverse_iterator it = std::vector<uint8_t>::rbegin();
 		if(*it > stream::BER_SIGN) return false;
 
-		while(++it < eastl::vector<uint8_t>::rend()) if(*it < stream::BER_SIGN) return false;
+		while(++it < std::vector<uint8_t>::rend()) if(*it < stream::BER_SIGN) return false;
 
 		return true;
 	}

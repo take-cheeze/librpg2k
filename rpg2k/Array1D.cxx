@@ -4,7 +4,7 @@
 #include "Element.hxx"
 #include "Stream.hxx"
 
-#include <EASTL/algorithm.h>
+#include <algorithm>
 
 
 namespace rpg2k
@@ -21,13 +21,13 @@ namespace rpg2k
 			#endif
 		} // namespace
 
-		bool Array1D::createAt(unsigned const pos)
+		bool Array1D::createAt(unsigned pos)
 		{
-			eastl::map<unsigned, Binary>::iterator it = binBuf_.find(pos);
+			std::map<unsigned, Binary>::iterator it = binBuf_.find(pos);
 			if(it == binBuf_.end()) return false;
 
-			if(isArray2D()) insert(pos, std::auto_ptr<Element>(new Element(owner(), index(), pos, it->second)));
-			else insert(pos, std::auto_ptr<Element>(new Element(*this, pos, it->second)));
+			if(isArray2D()) this->insert(pos, new Element(owner(), index(), pos, it->second));
+			else this->insert(pos, new Element(*this, pos, it->second));
 			binBuf_.erase(it);
 
 			return true;
@@ -41,16 +41,15 @@ namespace rpg2k
 			for(const_iterator it = src.begin(); it != src.end(); ++it) {
 				if(!it->second->exists()) continue;
 
-				Binary bin = it->second->serialize();
+				Binary const bin = it->second->serialize();
+				unsigned index = it->first;
 
 				if(bin.size() >= BIG_DATA_SIZE) {
-					binBuf_.insert(eastl::make_pair(it->first, bin));
+					binBuf_.insert(std::make_pair(it->first, bin));
 				} else if(src.isArray2D()) {
-					insert(it->first, std::auto_ptr<Element>(new Element(
-						src.owner(), src.index(), it->first, bin)));
+					this->insert(index, new Element(src.owner(), src.index(), it->first, bin));
 				} else {
-					insert(it->first, std::auto_ptr<Element>(
-						new Element(*this, it->first, bin)));
+					this->insert(index, new Element(*this, it->first, bin));
 				}
 			}
 		}
@@ -106,13 +105,13 @@ namespace rpg2k
 			Binary bin;
 
 			while(true) {
-				unsigned const index2 = stream::readBER(s);
+				unsigned index2 = stream::readBER(s);
 
 				if(index2 == ARRAY_1D_END) break;
 
 				stream::readWithSize(s, bin);
-				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(eastl::make_pair(index2, bin));
-				else insert(index2, std::auto_ptr<Element>(new Element(owner, index, index2, bin)));
+				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(std::make_pair(index2, bin));
+				else insert(index2, new Element(owner, index, index2, bin));
 			}
 		}
 		void Array1D::init(std::istream& s)
@@ -122,13 +121,13 @@ namespace rpg2k
 			Binary bin;
 
 			while(true) {
-				unsigned const index = stream::readBER(s);
+				unsigned index = stream::readBER(s);
 
 				if(index == ARRAY_1D_END) break;
 
 				stream::readWithSize(s, bin);
-				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(eastl::make_pair(index, bin));
-				else insert(index, std::auto_ptr<Element>(new Element(*this, index, bin)));
+				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(std::make_pair(index, bin));
+				else insert(index, new Element(*this, index, bin));
 
 				if(!toElement().hasOwner() && stream::isEOF(s)) return;
 			}
@@ -157,21 +156,17 @@ namespace rpg2k
 			return *this;
 		}
 
-		Element& Array1D::operator [](unsigned const index)
+		Element& Array1D::operator [](unsigned index)
 		{
 			iterator it = find(index);
 			if(it != end()) {
 				return *it->second;
 			} else if(createAt(index)) {
 				return *this->find(index)->second;
+			} else if(isArray2D()) {
+				return *this->insert(index, new Element(*owner_, index_, index)).first->second;
 			} else {
-				if(isArray2D()) {
-					return *insert(index, std::auto_ptr<Element>(
-						new Element(*owner_, index_, index))).first->second;
-				} else {
-					return *insert(index, std::auto_ptr<Element>(
-						new Element(*this, index))).first->second;
-				}
+				return *this->insert(index, new Element(*this, index)).first->second;
 			}
 		}
 		Element const& Array1D::operator [](unsigned const index) const
@@ -183,18 +178,15 @@ namespace rpg2k
 			Descriptor::ArrayTable const& table = this->toElement().descriptor().arrayTable();
 			Descriptor::ArrayTable::const_iterator tableIt = table.find(index);
 			rpg2k_assert(tableIt != table.end());
+			unsigned indexNo = tableIt->second;
 
-			iterator it = this->find(tableIt->second);
+			iterator it = this->find(indexNo);
 			if(it != end()) { return *it->second; }
-			else if(createAt(tableIt->second)) { return *this->find(tableIt->second)->second; }
-			else {
-				if(isArray2D()) {
-					return *insert(tableIt->second, std::auto_ptr<Element>(
-						new Element(*owner_, index_, tableIt->second))).first->second;
-				} else {
-					return *insert(tableIt->second, std::auto_ptr<Element>(
-						new Element(*this, tableIt->second))).first->second;
-				}
+			else if(createAt(indexNo)) { return *this->find(indexNo)->second; }
+			else if(isArray2D()) {
+				return *this->insert(indexNo, new Element(*owner_, index_, indexNo)).first->second;
+			} else {
+				return *this->insert(indexNo, new Element(*this, indexNo)).first->second;
 			}
 		}
 		Element const& Array1D::operator [](char const* index) const
@@ -222,7 +214,7 @@ namespace rpg2k
 				ret += stream::berSize(size);
 				ret += size;
 			}
-			for(eastl::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
+			for(std::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
 				ret += stream::berSize(it->first);
 				unsigned const size = it->second.size();
 				ret += stream::berSize(size);
@@ -235,11 +227,11 @@ namespace rpg2k
 		}
 		std::ostream& Array1D::serialize(std::ostream& s) const
 		{
-			eastl::map<unsigned, Binary> result = binBuf_;
+			std::map<unsigned, Binary> result = binBuf_;
 			for(const_iterator it = begin(); it != end(); ++it) {
-				if(it->second->exists()) { result.insert(eastl::make_pair(it->first, structure::serialize(*it->second))); }
+				if(it->second->exists()) { result.insert(std::make_pair(it->first, structure::serialize(*it->second))); }
 			}
-			for(eastl::map<unsigned, Binary>::const_iterator it = result.begin(); it != result.end(); ++it) {
+			for(std::map<unsigned, Binary>::const_iterator it = result.begin(); it != result.end(); ++it) {
 				stream::writeBER(s, it->first);
 				stream::writeWithSize(s, it->second);
 			}

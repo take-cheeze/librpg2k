@@ -1,7 +1,7 @@
 #ifndef _INC__RPG2K__MODEL__ARRAY_1D_HPP
 #define _INC__RPG2K__MODEL__ARRAY_1D_HPP
 
-#include <EASTL/map.h>
+#include <map>
 #ifdef NDEBUG
 	#include <boost/ptr_container/ptr_unordered_map.hpp>
 #else
@@ -30,7 +30,7 @@ namespace rpg2k
 		class Array1D : public BaseOfArray1D
 		{
 		private:
-			eastl::map<unsigned, Binary> binBuf_;
+			std::map<unsigned, Binary> binBuf_;
 			ArrayDefine arrayDefine_;
 
 			Element* const this_;

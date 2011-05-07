@@ -1,11 +1,10 @@
 #include <cstdlib>
-
-#include <EASTL/algorithm.h>
-#include <EASTL/functional.h>
-#include <EASTL/iterator.h>
+#include <memory>
 #include <stack>
 
-#include <boost/scoped_ptr.hpp>
+#include <algorithm>
+#include <functional>
+#include <iterator>
 
 #include "Array1D.hxx"
 #include "Array2D.hxx"
@@ -41,7 +40,7 @@ namespace rpg2k
 {
 	namespace debug
 	{
-		eastl::string error(int const errNo)
+		std::string error(int const errNo)
 		{
 			char const* message = strerror(errNo);
 			switch(errno) {
@@ -54,7 +53,7 @@ namespace rpg2k
 			if(atexit(func) != 0) rpg2k_assert(false);
 		}
 
-		eastl::string demangleTypeInfo(std::type_info const& info)
+		std::string demangleTypeInfo(std::type_info const& info)
 		{
 			#if (RPG2K_IS_GCC || RPG2K_IS_CLANG)
 				int status;
@@ -67,12 +66,12 @@ namespace rpg2k
 					case -3: rpg2k_assert(!"Argument was invalid");
 					default: break;
 				}
-				eastl::string ret = readable; // char* to string
+				std::string ret = readable; // char* to string
 				std::free(readable);
 			#elif RPG2K_IS_MSVC
 				char* const readable = _unDName(0, info.name(), 0, std::malloc, std::free, 0x2800);
 				rpg2k_assert(readable);
-				eastl::string ret = readable; // char* to string
+				std::string ret = readable; // char* to string
 				std::free(readabl);
 			#endif
 
@@ -152,20 +151,20 @@ namespace rpg2k
 				}
 			// Array1D
 				try {
-					boost::scoped_ptr<Element> p(new Element(Descriptor(
+					std::unique_ptr<Element> p(new Element(Descriptor(
 						ElementType::instance().toString(ElementType::Array1D_),
 						ArrayDefinePointer(new ArrayDefineType),
-						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
+						std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
 					ostrm << endl << "---Array1D check start---" << endl;
 					p.reset(); // trigger Element's destructor
 					ostrm << "---Array1D check end  ---";
 				} catch(...) {}
 			// Array2D
 				try {
-					boost::scoped_ptr<Element> p(new Element(Descriptor(
+					std::unique_ptr<Element> p(new Element(Descriptor(
 						ElementType::instance().toString(ElementType::Array2D_),
 						ArrayDefinePointer(new ArrayDefineType),
-						std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
+						std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
 					ostrm << endl << "---Array2D check start---" << endl;
 					p.reset(); // trigger Element's destructor
 					ostrm << "---Array2D check end  ---";
@@ -179,11 +178,11 @@ namespace rpg2k
 
 		std::ostream& Tracer::printArray1D(structure::Array1D const& val, std::ostream& ostrm)
 		{
-			eastl::map<unsigned, Element const*> buf;
+			std::map<unsigned, Element const*> buf;
 			for(Array1D::ConstIterator i = val.end(); i != val.end(); ++i) {
-				buf.insert(eastl::make_pair(i->first, i->second));
+				buf.insert(std::make_pair(i->first, i->second));
 			}
-			for(eastl::map<unsigned, Element const*>::const_iterator i = buf.begin(); i != buf.end(); ++i) {
+			for(std::map<unsigned, Element const*>::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 				printTrace(*(i->second), true, ostrm);
 			}
 			return ostrm;

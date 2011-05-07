@@ -3,9 +3,10 @@
 #include "Stream.hxx"
 #include "define/Define.hxx"
 
-#include <EASTL/algorithm.h>
+#include <algorithm>
 #include <fstream>
 #include <stack>
+#include <utility>
 
 #include <cctype>
 #include <cstdio>
@@ -38,7 +39,7 @@ namespace rpg2k
 		{
 			boost::ptr_vector<Descriptor> const& info = descriptor();
 			for(unsigned int i = 0; i < info.size(); i++) {
-				data_.push_back(std::auto_ptr<Element>(new Element(info[i])));
+				data_.push_back(new Element(info[i]));
 			}
 		}
 
@@ -70,14 +71,14 @@ namespace rpg2k
 
 			if(!stream::checkHeader(ifs, this->header())) rpg2k_assert(false);
 			/*
-			if(this->header() == eastl::string("LcfMapTree")) {
+			if(this->header() == std::string("LcfMapTree")) {
 				// TODO
 			}
 			*/
 
 			boost::ptr_vector<Descriptor> const& info = descriptor();
 			for(unsigned int i = 0; i < info.size(); i++) {
-				data_.push_back(std::auto_ptr<Element>(new Element(info[i], ifs)));
+				data_.push_back(new Element(info[i], ifs));
 			}
 
 			rpg2k_assert(stream::isEOF(ifs));
@@ -109,7 +110,7 @@ namespace rpg2k
 			isArray_.insert("Array2D");
 
 			#define PP_insert(arg) \
-				defineText_.insert(eastl::make_pair(String(#arg), define::arg))
+				defineText_.insert(std::make_pair(String(#arg), define::arg))
 			PP_insert(EventState);
 			PP_insert(LcfDataBase);
 			PP_insert(LcfMapTree);
@@ -184,15 +185,15 @@ namespace rpg2k
 					case TYPE: nextToken(NAME);
 					case NAME:
 						if(*it == ";") {
-							dst.push_back(std::auto_ptr<Descriptor>(new Descriptor(typeName)));
+							dst.push_back(new Descriptor(typeName));
 							nextToken(EXP_END);
 						} else if(isArray(typeName) && (*it == "{")) {
-							ArrayDefinePointer arrayDef(new ArrayDefineType());
-							nest.push(arrayDef.get());
-							std::auto_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable());
+							ArrayDefinePointer arrayDefine(new ArrayDefineType);
+							std::unique_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable);
 							tableNest.push(arrayTable.get());
+							nest.push(arrayDefine.get());
 
-							dst.push_back(std::auto_ptr<Descriptor>(new Descriptor(typeName, arrayDef, arrayTable)));
+							dst.push_back(new Descriptor(typeName, std::move(arrayDefine), std::move(arrayTable)));
 
 							nextToken(OPEN_STRUCT);
 						}
@@ -219,27 +220,27 @@ namespace rpg2k
 						nextToken(TYPE);
 					case TYPE:
 						if((*it == "dummy")
-						|| tableNest.top()->insert(eastl::make_pair(*it, col)).second) { nextToken(NAME); }
+						|| tableNest.top()->insert(std::make_pair(*it, col)).second) { nextToken(NAME); }
 						else { break; }
 					case NAME:
 						if(*it == "=") { nextToken(EQUALS);
 						} else if(*it == ";") {
 							if(isArray(typeName)) {
 								Descriptor const& def = this->get(typeName)[0];
-								nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(
+								nest.top()->insert(col, new Descriptor(
 									ElementType::instance().toString(def.type()),
 									ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
-									std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable())))));
-							} else nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(typeName)));
+									std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable()))));
+							} else nest.top()->insert(col, new Descriptor(typeName));
 
-							nextToken(EXP_END);
+						nextToken(EXP_END);
 						} else if((*it == "{") && isArray(typeName)) {
-							ArrayDefinePointer arrayDef(new ArrayDefineType());
-							ArrayDefineType* p = arrayDef.get();
-							std::auto_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable());
+							ArrayDefinePointer arrayDefine(new ArrayDefineType);
+							ArrayDefineType* p = arrayDefine.get();
+							std::unique_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable);
 							tableNest.push(arrayTable.get());
 
-							nest.top()->insert(col, std::auto_ptr<Descriptor>(new  Descriptor(typeName, arrayDef, arrayTable)));
+							nest.top()->insert(col, new Descriptor(typeName, std::move(arrayDefine), std::move(arrayTable)));
 							nest.push(p);
 
 							nextToken(OPEN_STRUCT);
@@ -248,10 +249,10 @@ namespace rpg2k
 						if(isArray(typeName)) {
 							Descriptor const& def = this->get(*it)[0];
 							nest.top()->insert(col,
-								std::auto_ptr<Descriptor>(new Descriptor(typeName,
+								new Descriptor(typeName,
 								ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
-								std::auto_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable())))));
-						} else nest.top()->insert(col, std::auto_ptr<Descriptor>(new Descriptor(typeName, *it)));
+								std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable()))));
+						} else nest.top()->insert(col, new Descriptor(typeName, *it));
 						nextToken(DEFAULT);
 					case DEFAULT:
 						if(*it == ";") { nextToken(EXP_END); } else break;

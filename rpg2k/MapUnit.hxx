@@ -12,8 +12,8 @@ namespace rpg2k
 		private:
 			unsigned id_;
 
-			eastl::vector<uint16_t> upper_;
-			eastl::vector<uint16_t> lower_;
+			std::vector<uint16_t> upper_;
+			std::vector<uint16_t> lower_;
 
 			unsigned width_, height_;
 
@@ -42,8 +42,8 @@ namespace rpg2k
 			structure::Array2D& event() { return (*this)[81]; }
 			structure::Array2D const& event() const { return (*this)[81]; }
 
-			eastl::vector<uint16_t> const& upper() const { return upper_; }
-			eastl::vector<uint16_t> const& lower() const { return lower_; }
+			std::vector<uint16_t> const& upper() const { return upper_; }
+			std::vector<uint16_t> const& lower() const { return lower_; }
 		};
 	} // namespace model
 } // namespace rpg2k

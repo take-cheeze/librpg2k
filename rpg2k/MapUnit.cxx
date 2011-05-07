@@ -1,3 +1,5 @@
+#include <boost/format.hpp>
+
 #include "Debug.hxx"
 #include "MapUnit.hxx"
 
@@ -19,7 +21,7 @@ namespace rpg2k
 		MapUnit::MapUnit(SystemString const& dir, unsigned const id)
 		: Base(dir, SystemString()), id_(id)
 		{
-			setFileName(eastl::string(CtorSprintf(), "Map%04d.lmu", int(id)));
+			setFileName((boost::format("Map%04d.lmu") % int(id)).str());
 
 			checkExists();
 
@@ -45,8 +47,8 @@ namespace rpg2k
 
 		void MapUnit::saveImpl()
 		{
-			(*this)[71] = Binary(lower_);
-			(*this)[72] = Binary(upper_);
+			(*this)[71].toBinary().assign(lower_);
+			(*this)[72].toBinary().assign(upper_);
 
 			(*this)[2] = width_ ;
 			(*this)[3] = height_;
