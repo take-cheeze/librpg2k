@@ -63,12 +63,12 @@ namespace rpg2k
 			}
 		}
 
-		std::vector<uint8_t> const& DataBase::chipFlag(unsigned id, ChipSet::Type t) const
+		std::vector<uint8_t> const& DataBase::chipFlag(unsigned id, ChipSet t) const
 		{
 			ChipFlag::const_iterator it = chipFlag_.find(id);
 			rpg2k_assert(it != chipFlag_.end());
-			rpg2k_assert(rpg2k::within<unsigned>(t, it->second.size()));
-			return it->second[t];
+			rpg2k_assert(rpg2k::within<unsigned>(int(t), it->second.size()));
+			return it->second[int(t)];
 		}
 		std::vector<uint16_t> const& DataBase::terrain(unsigned const id) const
 		{
@@ -85,3 +85,6 @@ namespace rpg2k
 		}
 	} // namespace model
 } // namespace rpg2k
+
+
+

@@ -23,7 +23,7 @@ namespace rpg2k
 		return(os << str.c_str());
 	}
 
-	CharSet::Dir::Type toCharSetDir(EventDir::Type const dir)
+	CharSet::Dir toCharSetDir(EventDir const dir)
 	{
 		switch(dir) {
 			case EventDir::DOWN : return CharSet::Dir::DOWN ;
@@ -33,7 +33,7 @@ namespace rpg2k
 			default: return CharSet::Dir::DOWN;
 		}
 	}
-	EventDir::Type toEventDir(CharSet::Dir::Type const key)
+	EventDir toEventDir(CharSet::Dir const key)
 	{
 		switch(key) {
 			case CharSet::Dir::UP   : return EventDir::UP   ;

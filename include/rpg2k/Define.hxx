@@ -143,63 +143,63 @@ namespace rpg2k
 		ID_THIS  = 10005,
 	};
 
-	struct ChipSet { enum Type { BEGIN, LOWER = BEGIN, UPPER, END, }; };
+	enum class ChipSet : unsigned { BEGIN, LOWER = BEGIN, UPPER, END, };
 	struct CharSet
 	{
-		struct Dir { enum Type { BEGIN, UP = BEGIN, RIGHT, DOWN, LEFT, END }; };
-		struct Pat { enum Type { BEGIN, LEFT = BEGIN, MIDDLE, RIGHT, END }; };
+		enum class Dir { BEGIN, UP = BEGIN, RIGHT, DOWN, LEFT, END };
+		enum class Pat { BEGIN, LEFT = BEGIN, MIDDLE, RIGHT, END };
 	};
 
-	struct EventDir { enum Type { DOWN = 2, LEFT = 4, RIGHT = 6, UP = 8, }; };
-	struct EventMove { enum Type {
+	enum class EventDir { DOWN = 2, LEFT = 4, RIGHT = 6, UP = 8, };
+	enum class EventMove {
 		FIXED, RANDOM_MOVE, UP_DOWN, LEFT_RIGHT,
 		TO_PARTY, FROM_PARTY, MANUAL_MOVE,
-	}; };
-	struct EventStart { enum Type {
+	};
+	enum class EventStart {
 		BEGIN,
 		KEY_ENTER = BEGIN, PARTY_TOUCH, EVENT_TOUCH,
 		AUTO, PARALLEL, CALLED,
 		END,
-	}; };
-	struct EventPriority { enum Type {
+	};
+	enum class EventPriority {
 		BEGIN,
 		BELOW = BEGIN, CHAR, ABOVE,
 		END,
-	}; };
+	};
 
-	struct Equip { enum Type {
+	enum class Equip {
 		BEGIN,
 		WEAPON = BEGIN, SHIELD, ARMOR, HELMET, OTHER,
 		END,
-	}; };
-	struct Item { enum Type {
+	};
+	enum class Item {
 		BEGIN,
 		NORMAL = BEGIN,
 		WEAPON, SHIELD, ARMOR, HELMET, ACCESSORY,
 		MEDICINE, BOOK, SEED, SPECIAL, SWITCH,
 		END,
-	}; };
+	};
 
-	struct Param { enum Type {
+	enum class Param {
 		BEGIN,
 		HP = BEGIN, MP,
 		ATTACK, GAURD, MIND, SPEED,
 		END,
-	}; };
+	};
 
-	struct Skill{ enum Type {
+	enum class Skill {
 		BEGIN,
 		NORMAL = BEGIN,
 		TELEPORT, ESCAPE,
 		SWITCH,
 		END,
-	}; };
+	};
 
-	struct Window { enum Type { NORMAL, NO_FRAME, }; };
-	struct Wallpaper { enum Type { ZOOM, TILE, }; };
+	enum class Window { NORMAL, NO_FRAME, };
+	enum class Wallpaper { ZOOM, TILE, };
 
-	CharSet::Dir::Type toCharSetDir(EventDir::Type dir);
-	EventDir::Type toEventDir(CharSet::Dir::Type key);
+	CharSet::Dir toCharSetDir(EventDir dir);
+	EventDir toEventDir(CharSet::Dir key);
 
 	unsigned random();
 	unsigned random(unsigned ax);
@@ -244,7 +244,7 @@ namespace rpg2k
 		};
 	}; // struct Action
 
-	struct Face { enum Type { GOTHIC, MINCHO, }; };
+	enum class Face { GOTHIC, MINCHO, };
 	namespace font
 	{
 		enum Color {

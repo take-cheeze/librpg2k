@@ -27,7 +27,7 @@ namespace rpg2k
 			class Character
 			{
 			public:
-				typedef boost::array<uint16_t, rpg2k::Equip::END> Equip;
+				typedef boost::array<uint16_t, int(rpg2k::Equip::END)> Equip;
 			private:
 				unsigned const charID_;
 
@@ -63,8 +63,8 @@ namespace rpg2k
 				void setHP(unsigned const val) const { lsd_[71] = val; }
 				void setMP(unsigned const val) const { lsd_[72] = val; }
 
-				int basicParam(int level, Param::Type t) const;
-				int param(Param::Type t) const;
+				int basicParam(int level, Param t) const;
+				int param(Param t) const;
 
 				int level() const { return get<int, 31, 7>(); }
 				void setLevel(unsigned val);
@@ -138,9 +138,9 @@ namespace rpg2k
 			void loadLSD(unsigned id);
 			void saveLSD(unsigned id);
 
-			int paramWithEquip(unsigned charID, Param::Type t) const;
+			int paramWithEquip(unsigned charID, Param t) const;
 			bool   equip(unsigned charID, unsigned itemID);
-			void unequip(unsigned charID, Equip::Type type);
+			void unequip(unsigned charID, Equip type);
 			unsigned equipNum(unsigned itemID) const;
 
 			bool validPageMap   (structure::Array1D const& term) const;
@@ -163,8 +163,8 @@ namespace rpg2k
 			structure::Array1D const* currentPage(structure::Array2D const& pages) const;
 
 			String const& systemGraphic() const;
-			Wallpaper::Type wallpaperType() const;
-			Face::Type fontType() const;
+			Wallpaper wallpaperType() const;
+			Face fontType() const;
 
 			Character const& character(unsigned const id) const;
 			Character& character(unsigned const id);

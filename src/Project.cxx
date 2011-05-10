@@ -271,8 +271,8 @@ namespace rpg2k
 			if(itemNum == 0) return false;
 
 			unsigned type = ldb.item()[itemID][3];
-			rpg2k_assert(rpg2k::within(unsigned(Item::WEAPON), type, unsigned(Item::ACCESSORY+1)));
-			type -= Item::WEAPON;
+			rpg2k_assert(rpg2k::within(unsigned(Item::WEAPON), unsigned(type), unsigned(Item::ACCESSORY)+1));
+			type -= int(Item::WEAPON);
 
 			Character& c = this->character(charID);
 			c.equip()[type] = itemID;
@@ -281,14 +281,14 @@ namespace rpg2k
 
 			return true;
 		}
-		void Project::unequip(unsigned const charID, Equip::Type type)
+		void Project::unequip(unsigned const charID, Equip const type)
 		{
 			SaveData& lsd = getLSD();
 
 			Character::Equip& equip = this->character(charID).equip();
 
-			lsd.setItemNum(equip[type], lsd.itemNum(equip[type]) + 1);
-			equip[type] = 0;
+			lsd.setItemNum(equip[int(type)], lsd.itemNum(equip[int(type)]) + 1);
+			equip[int(type)] = 0;
 		}
 
 		String const& Project::systemGraphic() const
@@ -298,19 +298,19 @@ namespace rpg2k
 			if(sys.exists(21)) return sys[21];
 			else return getLDB()[22].toArray1D()[19];
 		}
-		Wallpaper::Type Project::wallpaperType() const
+		Wallpaper Project::wallpaperType() const
 		{
 			Array1D const& sys = getLSD()[101];
 
-			if(sys.exists(22)) return Wallpaper::Type(sys[22].to<int>());
-			else return Wallpaper::Type(getLDB()[22].toArray1D()[71].to<int>());
+			if(sys.exists(22)) return Wallpaper(sys[22].to<int>());
+			else return Wallpaper(getLDB()[22].toArray1D()[71].to<int>());
 		}
-		Face::Type Project::fontType() const
+		Face Project::fontType() const
 		{
 			Array1D const& sys = getLSD()[101];
 
-			if(sys.exists(23)) return Face::Type(sys[23].to<int>());
-			else return Face::Type(getLDB()[22].toArray1D()[72].to<int>());
+			if(sys.exists(23)) return Face(sys[23].to<int>());
+			else return Face(getLDB()[22].toArray1D()[72].to<int>());
 		}
 
 		void Project::newGame()
@@ -441,7 +441,7 @@ namespace rpg2k
 		, skill_(lsd_[52].toBinary().toSet<uint16_t>())
 		, condition_(lsd_[84].toBinary().toVector<uint8_t>())
 		, conditionStep_(lsd_[82].toBinary().toVector<uint16_t>())
-		, equip_(lsd_[61].toBinary().toArray<uint16_t, rpg2k::Equip::END>())
+		, equip_(lsd_[61].toBinary().toArray<uint16_t, int(rpg2k::Equip::END)>())
 		{
 		}
 		void Project::Character::sync()
@@ -466,8 +466,7 @@ namespace rpg2k
 				Member const& mem = getLSD().member();
 				for(unsigned i = 0; i < mem.size(); i++) {
 					Character::Equip const& equip = this->character(mem[i]).equip();
-
-					for(int j = Equip::BEGIN; j < Equip::END; j++) if(equip[i] == id) return true;
+					if(std::find(equip.begin(), equip.end(), id) != equip.end()) return true;
 				}
 			}
 
@@ -521,18 +520,18 @@ namespace rpg2k
 			) ? false : true;
 		}
 
-		int Project::Character::basicParam(int const level, Param::Type const t) const
+		int Project::Character::basicParam(int const level, Param const t) const
 		{
-			rpg2k_assert(rpg2k::within(basicParam_.size() / Param::END * t + level - 1, basicParam_.size()));
-			return basicParam_[basicParam_.size() / Param::END * t + level - 1];
+			rpg2k_assert(rpg2k::within(basicParam_.size() / int(Param::END) * int(t) + level - 1, basicParam_.size()));
+			return basicParam_[basicParam_.size() / int(Param::END) * int(t) + level - 1];
 		}
-		int Project::Character::param(Param::Type const t) const
+		int Project::Character::param(Param const t) const
 		{
 			switch(t) {
 				case Param::HP: case Param::MP:
-					return basicParam(level(), t) + lsd_[33 + t].to<int>();
+					return basicParam(level(), t) + lsd_[33 + int(t)].to<int>();
 				case Param::ATTACK: case Param::GAURD: case Param::MIND: case Param::SPEED:
-					return basicParam(level(), t) + lsd_[41 + t - Param::ATTACK].to<int>();
+					return basicParam(level(), t) + lsd_[41 + int(t) - int(Param::ATTACK)].to<int>();
 				default: return 0;
 			}
 		}
@@ -607,12 +606,12 @@ namespace rpg2k
 			return *it->second;
 		}
 
-		int Project::paramWithEquip(unsigned charID, Param::Type t) const
+		int Project::paramWithEquip(unsigned charID, Param t) const
 		{
 			Character const& c = this->character(charID);
 			int ret = c.param(t);
-			for(size_t i = 0; i < c.equip().size(); i++) {
-			  ret += ldb_.item()[ c.equip()[i] ][11 + t - 2].to<int>();
+			for(uint16_t i : c.equip()) {
+				ret += ldb_.item()[i][11 + int(t) - 2].to<int>();
 			}
 			return ret;
 		}
@@ -648,7 +647,7 @@ namespace rpg2k
 				case Action::Move::FROM_PARTY:
 					break;
 				case Action::Move::A_STEP:
-					return processAction(eventID, Action::Move::UP + ev.eventDir(), s);
+					return processAction(eventID, int(Action::Move::UP) + int(ev.eventDir()), s);
 				case Action::Face::UP   :
 				case Action::Face::RIGHT:
 				case Action::Face::DOWN :
@@ -657,14 +656,13 @@ namespace rpg2k
 					ev[22] = int(act - Action::Face::UP);
 					break;
 				case Action::Turn::RIGHT_90:
-					ev[21] = int(CharSet::Dir::Type(ev.eventDir() / CharSet::Dir::END));
+					ev[21] = int(CharSet::Dir(int(ev.eventDir()) / int(CharSet::Dir::END)));
 					break;
 				case Action::Turn::LEFT_90:
-					ev[21] = int(CharSet::Dir::Type(
-						(ev.eventDir() + CharSet::Dir::END - 1) / CharSet::Dir::END));
+					ev[21] = int(CharSet::Dir((int(ev.eventDir()) + int(CharSet::Dir::END) - 1) / int(CharSet::Dir::END)));
 					break;
 				case Action::Turn::OPPOSITE:
-					ev[21] = int(CharSet::Dir::Type(ev.eventDir() + 1 / CharSet::Dir::END));
+					ev[21] = int(int(ev.eventDir()) + 1 / int(CharSet::Dir::END));
 					break;
 				case Action::Turn::RIGHT_OR_LEFT_90:
 					return processAction(eventID,

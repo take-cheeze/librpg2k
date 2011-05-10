@@ -23,7 +23,7 @@ namespace rpg2k
 
 			size_t commandCount_;
 
-			typedef boost::ptr_multimap< EventStart::Type, Context, std::greater<EventStart::Type> > ContextList;
+			typedef boost::ptr_multimap<EventStart, Context, std::greater<EventStart>> ContextList;
 			ContextList contextList_;
 
 			void updateThis();

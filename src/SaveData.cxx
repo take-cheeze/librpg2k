@@ -3,6 +3,8 @@
 #include "rpg2k/Structure.hxx"
 
 #include <boost/format.hpp>
+#include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/algorithm/find.hpp>
 
 #include <algorithm>
 
@@ -87,10 +89,9 @@ namespace rpg2k
 			member_.resize(status[1].to_int());
 			member_ = status[2].toBinary().toVector<uint16_t>();
 		// chip replace
-			chipReplace_.resize(ChipSet::END);
-			for(unsigned i = 0; i < ChipSet::END; i++) {
-				chipReplace_[i] = event[21+i].toBinary();
-			}
+			chipReplace_.resize(int(ChipSet::END));
+			std::for_each(boost::make_counting_iterator(0), boost::make_counting_iterator(int(ChipSet::END))
+			, [this, event](int const i) { chipReplace_[i] = event[21+i].toBinary(); });
 		}
 
 		void SaveData::saveImpl()
@@ -128,15 +129,14 @@ namespace rpg2k
 			(*this)[109].toArray1D()[1] = int(member_.size());
 			(*this)[109].toArray1D()[2].toBinary().assign(member_);
 		// chip replace
-			for(unsigned i = ChipSet::BEGIN; i < ChipSet::END; i++) {
-				(*this)[111].toArray1D()[21+i].toBinary().assign(chipReplace_[i]);
-			}
+			std::for_each(boost::make_counting_iterator(int(ChipSet::BEGIN)), boost::make_counting_iterator(int(ChipSet::END))
+			, [this](int const i) { (*this)[111].toArray1D()[21+i].toBinary().assign(chipReplace_[i]); });
 		}
 
 		bool SaveData::addMember(unsigned const charID)
 		{
 			if((member_.size() > rpg2k::MEMBER_MAX)
-			|| std::find(member_.begin(), member_.end(), charID) == member_.end()) return false;
+			|| boost::find(member_, charID) == member_.end()) return false;
 			else {
 				member_.push_back(charID);
 				return true;
@@ -228,23 +228,20 @@ namespace rpg2k
 			}
 		}
 
-		void SaveData::replace(ChipSet::Type const type, unsigned dstNo, unsigned const srcNo)
+		void SaveData::replace(ChipSet const type, unsigned const dstNo, unsigned const srcNo)
 		{
 			rpg2k_assert(rpg2k::within<unsigned>(dstNo, CHIP_REPLACE_MAX));
 			rpg2k_assert(rpg2k::within<unsigned>(srcNo, CHIP_REPLACE_MAX));
 
-			unsigned srcVal = chipReplace_[type][srcNo];
-			unsigned dstVal = chipReplace_[type][dstNo];
-			chipReplace_[type][dstNo] = srcVal;
-			chipReplace_[type][srcNo] = dstVal;
+			std::swap(chipReplace_[int(type)][srcNo], chipReplace_[int(type)][dstNo]);
 		}
 		void SaveData::resetReplace()
 		{
 			chipReplace_.clear();
-			chipReplace_.resize(ChipSet::END);
-			for(unsigned i = ChipSet::BEGIN; i < ChipSet::END; i++) {
+			chipReplace_.resize(int(ChipSet::END));
+			for(int i = int(ChipSet::BEGIN); i < int(ChipSet::END); i++) {
 				chipReplace_[i].resize(CHIP_REPLACE_MAX);
-				for(unsigned j = 0; j < CHIP_REPLACE_MAX; j++) chipReplace_[i][j] = j;
+				std::copy(boost::make_counting_iterator(0), boost::make_counting_iterator(int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
 			}
 		}
 	} // namespace model

@@ -30,7 +30,7 @@ namespace rpg2k
 		class Context
 		{
 		public:
-			Context(Project& p, unsigned evID, EventStart::Type t);
+			Context(Project& p, unsigned evID, EventStart t);
 
 			typedef void (Context::*Command)(structure::Instruction const&);
 			template<unsigned Code>
@@ -41,7 +41,7 @@ namespace rpg2k
 		private:
 			Project& owner_;
 			unsigned const eventID_;
-			EventStart::Type const type_;
+			EventStart const type_;
 			Waiter waiter_;
 			struct EventStream
 			{

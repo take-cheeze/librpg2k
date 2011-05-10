@@ -64,7 +64,7 @@ namespace rpg2k
 			String const& vocabulary(unsigned index) const;
 
 			std::vector<uint16_t> const& terrain(unsigned id) const;
-			std::vector<uint8_t> const& chipFlag(unsigned id, ChipSet::Type t) const;
+			std::vector<uint8_t> const& chipFlag(unsigned id, ChipSet t) const;
 			std::vector<uint8_t> const& lowerChipFlag(unsigned id) const
 			{
 				return chipFlag(id, ChipSet::LOWER);

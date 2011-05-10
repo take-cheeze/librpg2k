@@ -6,7 +6,7 @@ namespace rpg2k
 {
 	namespace model
 	{
-		Context::Context(Project& p, unsigned evID, EventStart::Type t)
+		Context::Context(Project& p, unsigned evID, EventStart t)
 		: owner_(p)
 		, eventID_(evID), type_(t)
 		{
