@@ -3,8 +3,6 @@
 #include "rpg2k/Stream.hxx"
 #include "rpg2k/Structure.hxx"
 
-#include <sstream>
-
 
 namespace rpg2k
 {

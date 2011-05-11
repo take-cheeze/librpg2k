@@ -18,26 +18,26 @@ using namespace rpg2k::model;
 
 TEST(MapUnit, OpenAndClose)
 {
-	char const* const LMU_TEST_FILE = "./test/Map0001.lmu.test";
+	char const* const LMU_TEST_FILE = "./Map0001.lmu.test";
 	boost::scoped_ptr<MapUnit> lmu;
 
-	lmu.reset(new MapUnit("./test/TestGame", 1));
+	lmu.reset(new MapUnit("./TestGame", 1));
 	lmu->saveAs(LMU_TEST_FILE);
 
-	lmu.reset(new MapUnit("./test", "Map0001.lmu.test"));
+	lmu.reset(new MapUnit(".", "Map0001.lmu.test"));
 	lmu.reset();
 
 	std::remove(LMU_TEST_FILE);
 }
 TEST(MapTree, OpenAndClose)
 {
-	char const* const LMT_TEST_FILE = "./test/RPG_RT.lmt.test";
+	char const* const LMT_TEST_FILE = "./RPG_RT.lmt.test";
 	boost::scoped_ptr<MapTree> lmt;
 
-	lmt.reset(new MapTree("./test/TestGame"));
+	lmt.reset(new MapTree("./TestGame"));
 	lmt->saveAs(LMT_TEST_FILE);
 
-	lmt.reset(new MapTree("./test", "RPG_RT.lmt.test"));
+	lmt.reset(new MapTree(".", "RPG_RT.lmt.test"));
 	lmt.reset();
 
 	std::remove(LMT_TEST_FILE);
@@ -45,13 +45,13 @@ TEST(MapTree, OpenAndClose)
 /*
 TEST(SaveData, OpenAndClose)
 {
-	char const* const LSD_TEST_FILE = "./test/Save01.lsd.test";
+	char const* const LSD_TEST_FILE = "./Save01.lsd.test";
 	boost::scoped_ptr<SaveData> lsd;
 
-	lsd.reset(new SaveData("./test/TestGame", 1));
+	lsd.reset(new SaveData("./TestGame", 1));
 	lsd->saveAs(LSD_TEST_FILE);
 
-	lsd.reset(new SaveData("./test", "Save01.lsd.test"));
+	lsd.reset(new SaveData("./", "Save01.lsd.test"));
 	lsd.reset();
 
 	std::remove(LSD_TEST_FILE);
@@ -60,7 +60,7 @@ TEST(SaveData, OpenAndClose)
 /*
 TEST(DataBase, OpenAndClose)
 {
-	DataBase("./test/TestGame");
+	DataBase("./TestGame");
 }
 */
 
@@ -82,6 +82,6 @@ TEST(DefineLoader, CheckDefines)
 /*
 TEST(Project, OpenAndClose)
 {
-	Project("./test/TestGame");
+	Project("./TestGame");
 }
 */

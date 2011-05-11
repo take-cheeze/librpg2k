@@ -1,7 +1,7 @@
-#include <boost/format.hpp>
-
 #include "rpg2k/Debug.hxx"
 #include "rpg2k/MapUnit.hxx"
+
+#include "ntfmt_string.hpp"
 
 
 namespace rpg2k
@@ -21,7 +21,10 @@ namespace rpg2k
 		MapUnit::MapUnit(SystemString const& dir, unsigned const id)
 		: Base(dir, SystemString()), id_(id)
 		{
-			setFileName((boost::format("Map%04d.lmu") % int(id)).str());
+			std::string fileName;
+			ntfmt::sink_string(fileName)
+				<< "Map" << ntfmt::fmt(id, "%04d") << ".lmu";
+			setFileName(fileName);
 
 			checkExists();
 

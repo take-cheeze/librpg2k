@@ -1,12 +1,12 @@
+#include "ntfmt_string.hpp"
+
 #include "rpg2k/Debug.hxx"
 #include "rpg2k/SaveData.hxx"
 #include "rpg2k/Structure.hxx"
 
-#include <boost/format.hpp>
-#include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/counting_range.hpp>
+#include <boost/range/algorithm/copy.hpp>
 #include <boost/range/algorithm/find.hpp>
-
-#include <algorithm>
 
 
 namespace rpg2k
@@ -29,7 +29,10 @@ namespace rpg2k
 		SaveData::SaveData(SystemString const& dir, unsigned const id)
 		: Base(dir, ""), id_(id)
 		{
-			setFileName((boost::format("Save%02d.lsd") % int(id)).str());
+			std::string fileName;
+			ntfmt::sink_string(fileName)
+				<< "Save" << ntfmt::fmt(id, "%02d") << ".lsd";
+			setFileName(fileName);
 
 			checkExists();
 
@@ -90,8 +93,8 @@ namespace rpg2k
 			member_ = status[2].toBinary().toVector<uint16_t>();
 		// chip replace
 			chipReplace_.resize(int(ChipSet::END));
-			std::for_each(boost::make_counting_iterator(0), boost::make_counting_iterator(int(ChipSet::END))
-			, [this, event](int const i) { chipReplace_[i] = event[21+i].toBinary(); });
+			for(auto i : boost::counting_range(0, int(ChipSet::END)))
+			{ chipReplace_[i] = event[21 + i].toBinary(); }
 		}
 
 		void SaveData::saveImpl()
@@ -129,8 +132,8 @@ namespace rpg2k
 			(*this)[109].toArray1D()[1] = int(member_.size());
 			(*this)[109].toArray1D()[2].toBinary().assign(member_);
 		// chip replace
-			std::for_each(boost::make_counting_iterator(int(ChipSet::BEGIN)), boost::make_counting_iterator(int(ChipSet::END))
-			, [this](int const i) { (*this)[111].toArray1D()[21+i].toBinary().assign(chipReplace_[i]); });
+			for(auto i : boost::counting_range(int(ChipSet::BEGIN), int(ChipSet::END)))
+			{ (*this)[111].toArray1D()[21 + i].toBinary().assign(chipReplace_[i]); }
 		}
 
 		bool SaveData::addMember(unsigned const charID)
@@ -241,8 +244,24 @@ namespace rpg2k
 			chipReplace_.resize(int(ChipSet::END));
 			for(int i = int(ChipSet::BEGIN); i < int(ChipSet::END); i++) {
 				chipReplace_[i].resize(CHIP_REPLACE_MAX);
-				std::copy(boost::make_counting_iterator(0), boost::make_counting_iterator(int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
+				boost::copy(boost::counting_range(0, int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
 			}
 		}
 	} // namespace model
 } // namespace rpg2k
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
