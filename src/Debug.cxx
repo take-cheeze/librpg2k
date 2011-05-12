@@ -1,10 +1,16 @@
 #include <cstdlib>
+#include <iterator>
 #include <memory>
 #include <stack>
+#include <vector>
 
-#include <algorithm>
-#include <functional>
-#include <iterator>
+#include <boost/lambda/lambda.hpp>
+#include <boost/range/algorithm/count_if.hpp>
+#include <boost/range/algorithm/for_each.hpp>
+#include <boost/range/algorithm/remove_copy_if.hpp>
+#include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/transform.hpp>
+#include <boost/range/irange.hpp>
 
 #include "rpg2k/Array1D.hxx"
 #include "rpg2k/Array2D.hxx"
@@ -178,20 +184,16 @@ namespace rpg2k
 
 		std::ostream& Tracer::printArray1D(structure::Array1D const& val, std::ostream& ostrm)
 		{
-			std::map<unsigned, Element const*> buf;
-			for(Array1D::ConstIterator i = val.end(); i != val.end(); ++i) {
-				buf.insert(std::make_pair(i->first, i->second));
-			}
-			for(std::map<unsigned, Element const*>::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-				printTrace(*(i->second), true, ostrm);
-			}
+			std::vector<Element const*> buf;
+			boost::transform(val, std::back_inserter(buf)
+			, [](decltype(*val.begin()) const& v) { return v.second; });
+			boost::sort(buf, [](Element const* l, Element const* r) { return l->indexOfArray1D() < r->indexOfArray1D(); });
+			for(auto const& i : buf) { printTrace(*i, true, ostrm); }
 			return ostrm;
 		}
 		std::ostream& Tracer::printArray2D(structure::Array2D const& val, std::ostream& ostrm)
 		{
-			for(Array2D::ConstIterator i = val.begin(); i != val.end(); ++i) {
-				printArray1D(*i->second, ostrm);
-			}
+			for(auto const& i : val) { printArray1D(*i->second, ostrm); }
 			return ostrm;
 		}
 		std::ostream& Tracer::printInt(int const val, std::ostream& ostrm)
@@ -219,7 +221,7 @@ namespace rpg2k
 			ostrm << std::dec << std::setfill(' ');
 			ostrm << "size = " << val.serializedSize() << "; data = {";
 
-			for(unsigned i = 0; i < val.size(); i++) {
+			for(auto const& i : boost::irange(0, int(val.size()))) {
 				ostrm << endl << "\t";
 				printInstruction(val[i], ostrm, true);
 			}
@@ -231,7 +233,8 @@ namespace rpg2k
 		std::ostream& Tracer::printInstruction(structure::Instruction const& inst
 		, std::ostream& ostrm, bool indent)
 		{
-			if(indent) for(unsigned i = 0; i < inst.nest(); i++) ostrm << "\t";
+			if(indent)
+				for(auto const& i : boost::irange(0, int(inst.nest()))) { (void) i; ostrm << "\t"; }
 			ostrm << "{ "
 				<< "nest: " << std::setw(4) << std::dec << inst.nest() << ", "
 				<< "code: " << std::setw(5) << std::dec << inst.code() << ", "
@@ -252,7 +255,7 @@ namespace rpg2k
 			ostrm << "size = " << val.size() << "; data = { ";
 
 			ostrm << std::setfill('0') << std::hex;
-			for(unsigned i = 0; i < val.size(); i++) ostrm << std::setw(2) << (val[i] & 0xff) << " ";
+			for(auto const& i : boost::irange(0, int(val.size()))) ostrm << std::setw(2) << (val[i] & 0xff) << " ";
 
 			ostrm << "}";
 

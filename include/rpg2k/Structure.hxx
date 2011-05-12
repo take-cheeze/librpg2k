@@ -1,9 +1,10 @@
 #ifndef _INC__RPG2K__STRUCTURE_HPP
 #define _INC__RPG2K__STRUCTURE_HPP
 
-#include "Define.hxx"
+#include "rpg2k/Define.hxx"
 
 #include <boost/array.hpp>
+#include <boost/range/irange.hpp>
 
 #include <climits>
 
@@ -19,9 +20,9 @@ namespace rpg2k
 		template<class SrcT>
 		static void exchangeEndianIfNeed(uint8_t* dst, SrcT const& src)
 		{
-			for(typename SrcT::const_iterator srcIt = src.begin(); srcIt != src.end(); ++srcIt) {
-				uint8_t const* srcCur = reinterpret_cast<uint8_t const*>(&(*srcIt));
-				for(unsigned i = 0; i < sizeof(typename SrcT::value_type); i++) {
+			for(auto const& srcIt : src) {
+				uint8_t const* srcCur = reinterpret_cast<uint8_t const*>(&srcIt);
+				for(auto const& i : boost::irange(0, int(sizeof(typename SrcT::value_type)))) {
 				#if RPG2K_IS_BIG_ENDIAN
 					*(dst++) = srcCur[sizeof(typename SrcT::value_type)-i-1];
 				#elif RPG2K_IS_LITTLE_ENDIAN
@@ -35,9 +36,9 @@ namespace rpg2k
 		template<class DstT>
 		static void exchangeEndianIfNeed(DstT& dst, uint8_t const* src)
 		{
-			for(typename DstT::iterator dstIt = dst.begin(); dstIt != dst.end(); ++dstIt) {
-				uint8_t* dstCur = reinterpret_cast<uint8_t*>(&(*dstIt));
-				for(unsigned i = 0; i < sizeof(typename DstT::value_type); i++) {
+			for(auto& dstIt : dst) {
+				uint8_t* dstCur = reinterpret_cast<uint8_t*>(&dstIt);
+				for(auto const& i : boost::irange(0, int(sizeof(typename DstT::value_type)))) {
 				#if RPG2K_IS_BIG_ENDIAN
 					dstCur[sizeof(typename SrcT::value_type)-i-1] = *(src++);
 				#elif RPG2K_IS_LITTLE_ENDIAN

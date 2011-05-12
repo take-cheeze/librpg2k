@@ -17,19 +17,13 @@ namespace rpg2k
 	{
 		this->updateThis();
 
-		if(children_)
-		for(Children::left_map::iterator i = children_->left.begin(); i != children_->left.end(); ++i) {
-			i->second->update();
-		}
+		if(children_) for(auto& i : children_->left) { i.second->update(); }
 	}
 	void Node::draw(Graphics2D& g) const
 	{
 		this->draw(g);
 
-		if(children_)
-		for(Children::left_map::const_iterator i = children_->left.begin(); i != children_->left.end(); ++i) {
-			i->second->draw(g);
-		}
+		if(children_) for(auto& i : children_->left) { i.second->draw(g); }
 	}
 
 	void NodeSwitcher::addChild(Key const& k, Node& child) 

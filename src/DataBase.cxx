@@ -1,6 +1,8 @@
 #include "rpg2k/Debug.hxx"
 #include "rpg2k/DataBase.hxx"
 
+#include <boost/range/irange.hpp>
+
 
 namespace rpg2k
 {
@@ -27,39 +29,39 @@ namespace rpg2k
 		{
 		// load chip infos
 			structure::Array2D const& chips = (*this)[20];
-			for(structure::Array2D::ConstIterator it = chips.begin(); it != chips.end(); ++it) {
-				terrain_.insert(std::make_pair(it->first, (*it->second)[3].toBinary().toVector<uint16_t>()));
+			for(auto const& i : chips) {
+				terrain_.insert(std::make_pair(i->first, (*i->second)[3].toBinary().toVector<uint16_t>()));
 
-				std::vector< std::vector<uint8_t> >& dst = chipFlag_[it->first];
-				dst.push_back((*it->second)[4].to<Binary>());
-				dst.push_back((*it->second)[5].to<Binary>());
+				std::vector<std::vector<uint8_t>>& dst = chipFlag_[i->first];
+				dst.push_back((*i->second)[4].to<Binary>());
+				dst.push_back((*i->second)[5].to<Binary>());
 			}
 		// copying vocabulary
 			structure::Array1D const& vocSrc = (*this)[21];
-			for(structure::Array1D::ConstIterator it = vocSrc.begin(); it != vocSrc.end(); ++it) {
-				if(it->first >= vocabulary_.size()) {
-					vocabulary_.resize(it->first + 1);
+			for(auto const& i : vocSrc) {
+				if(i->first >= vocabulary_.size()) {
+					vocabulary_.resize(i->first + 1);
 				}
-				vocabulary_[it->first] = it->second->toString();
+				vocabulary_[i->first] = i->second->toString();
 			}
 		}
 		void DataBase::saveImpl()
 		{
 		// save chip info
 			structure::Array2D& chips = (*this)[20];
-			for(structure::Array2D::Iterator it = chips.begin(); it != chips.end(); ++it) {
-				if(!it->second->exists()) continue;
+			for(auto const& i : chips) {
+				if(!i->second->exists()) continue;
 
-				(*it->second)[3].toBinary().assign(terrain(it->first));
+				(*i->second)[3].toBinary().assign(terrain(i->first));
 
-				(*it->second)[4].toBinary().assign(upperChipFlag(it->first));
-				(*it->second)[5].toBinary().assign(lowerChipFlag(it->first));
+				(*i->second)[4].toBinary().assign(upperChipFlag(i->first));
+				(*i->second)[5].toBinary().assign(lowerChipFlag(i->first));
 			}
 		// saving vocabulary
 			structure::Array1D& vocDst = (*this)[21];
-			for(std::vector<String>::const_iterator it = vocabulary_.begin()
-			; it < vocabulary_.end(); ++it) {
-				if(!it->empty()) { vocDst[ it - vocabulary_.begin() ] = *it; }
+			for(auto const& i : boost::irange(size_t(0), vocabulary_.size())) {
+				if(vocabulary_[i].empty()) continue;
+				vocDst[i] = vocabulary_[i];
 			}
 		}
 

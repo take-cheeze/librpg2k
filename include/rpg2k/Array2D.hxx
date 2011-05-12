@@ -27,11 +27,6 @@ namespace rpg2k
 			void init(std::istream& f);
 			bool isInvalidArray2D(Binary const& b);
 		public:
-			typedef iterator Iterator;
-			typedef reverse_iterator RIterator;
-			typedef const_iterator ConstIterator;
-			typedef const_reverse_iterator ConstRIterator;
-
 			Array2D(Array2D const& array);
 
 			Array2D(ArrayDefine info);

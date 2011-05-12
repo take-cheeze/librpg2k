@@ -76,7 +76,7 @@ namespace rpg2k
 				std::vector<uint8_t > num = status[13].toBinary().toVector<uint8_t>();
 				std::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
 
-				for(int i = 0; i < itemTypeNum; i++) {
+				for(auto const& i : boost::irange(0, itemTypeNum)) {
 					if(!num[i]) continue;
 
 					Item info = { num[i], use[i] };
@@ -93,7 +93,7 @@ namespace rpg2k
 			member_ = status[2].toBinary().toVector<uint16_t>();
 		// chip replace
 			chipReplace_.resize(int(ChipSet::END));
-			for(auto i : boost::counting_range(0, int(ChipSet::END)))
+			for(auto const& i : boost::counting_range(0, int(ChipSet::END)))
 			{ chipReplace_[i] = event[21 + i].toBinary(); }
 		}
 
@@ -112,10 +112,10 @@ namespace rpg2k
 				std::vector<uint8_t > use(itemNum);
 
 				int i = 0;
-				for(ItemTable::const_iterator it = item_.begin(); it != item_.end(); ++it) {
-					id [i] = it->first;
-					num[i] = it->second.num;
-					use[i] = it->second.use;
+				for(auto const& p : item_) {
+					id [i] = p.first;
+					num[i] = p.second.num;
+					use[i] = p.second.use;
 
 					i++;
 				}
@@ -132,7 +132,7 @@ namespace rpg2k
 			(*this)[109].toArray1D()[1] = int(member_.size());
 			(*this)[109].toArray1D()[2].toBinary().assign(member_);
 		// chip replace
-			for(auto i : boost::counting_range(int(ChipSet::BEGIN), int(ChipSet::END)))
+			for(auto const& i : boost::counting_range(int(ChipSet::BEGIN), int(ChipSet::END)))
 			{ (*this)[111].toArray1D()[21 + i].toBinary().assign(chipReplace_[i]); }
 		}
 
@@ -242,7 +242,7 @@ namespace rpg2k
 		{
 			chipReplace_.clear();
 			chipReplace_.resize(int(ChipSet::END));
-			for(int i = int(ChipSet::BEGIN); i < int(ChipSet::END); i++) {
+			for(auto const& i : boost::irange(int(ChipSet::BEGIN), int(ChipSet::END))) {
 				chipReplace_[i].resize(CHIP_REPLACE_MAX);
 				boost::copy(boost::counting_range(0, int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
 			}

@@ -4,6 +4,8 @@
 #include <cstdarg>
 #include <cstring>
 
+#include <boost/range/irange.hpp>
+
 
 namespace rpg2k
 {
@@ -24,7 +26,7 @@ namespace rpg2k
 			T cur = start;
 
 			va_start(ap, start);
-			for(unsigned i = 0; i < D; i++) {
+			for(auto const& i : boost::irange(0, int(D))) {
 				(*this)[i] = cur;
 				cur = va_arg(ap, T);
 			}
@@ -35,7 +37,7 @@ namespace rpg2k
 		template<typename OtherType>
 		Vector(Vector< D, OtherType > const& src)
 		{
-			for(unsigned i = 0; i < D; i++) elm_[i] = src[i];
+			for(auto const& i : boost::irange(0, int(D))) elm_[i] = src[i];
 		}
 
 		~Vector() {}
@@ -46,7 +48,7 @@ namespace rpg2k
 			T cur = start;
 
 			va_start(ap, start);
-			for(unsigned i = 0; i < D; i++) {
+			for(auto const& i : boost::irange(0, int(D))) {
 				(*this)[i] = cur;
 				cur = va_arg(ap, T);
 			}
@@ -63,13 +65,13 @@ namespace rpg2k
 		template<typename OtherType>
 		Vector<D, T> const& operator =(Vector<D, OtherType> const& src)
 		{
-			for(unsigned i = 0; i < D; i++) (*this)[i] = src[i];
+			for(auto const& i : boost::irange(0, int(D))) (*this)[i] = src[i];
 			return *this;
 		}
 		template<typename OtherType>
 		Vector<D, T> const& operator =(OtherType src)
 		{
-			for(unsigned i = 0; i < D; i++) (*this)[i] = src;
+			for(auto const& i : boost::irange(0, int(D))) (*this)[i] = src;
 			return *this;
 		}
 
@@ -77,27 +79,27 @@ namespace rpg2k
 			template<typename OtherType> \
 			Vector< D, T > const& operator op##=(Vector<D, OtherType> const& src) \
 			{ \
-				for(unsigned i = 0; i < D; i++) (*this)[i] op##= src[i]; \
+				for(auto const& i : boost::irange(0, int(D))) (*this)[i] op##= src[i]; \
 				return *this; \
 			} \
 			template<typename OtherType> \
 			Vector< D, OtherType > operator op(Vector<D, OtherType> const& src) const \
 			{ \
 				Vector< D, T > ret; \
-				for(unsigned i = 0; i < D; i++) ret[i] = (*this)[i] op src[i]; \
+				for(auto const& i : boost::irange(0, int(D))) ret[i] = (*this)[i] op src[i]; \
 				return ret; \
 			} \
 			template<typename OtherType> \
 			Vector< D, T > const& operator op##=(OtherType src) \
 			{ \
-				for(unsigned i = 0; i < D; i++) (*this)[i] op##= src; \
+				for(auto const& i : boost::irange(0, int(D))) (*this)[i] op##= src; \
 				return *this; \
 			} \
 			template<typename OtherType> \
 			Vector< D, T > operator op(OtherType src) const \
 			{ \
 				Vector< D, T > ret; \
-				for(unsigned i = 0; i < D; i++) ret[i] = (*this)[i] op src; \
+				for(auto const& i : boost::irange(0, int(D))) ret[i] = (*this)[i] op src; \
 				return ret; \
 			}
 		PP_vectorOperator(+)
@@ -109,12 +111,12 @@ namespace rpg2k
 
 		bool operator ==(Vector<D, T> const& src)
 		{
-			for(unsigned i = 0; i < D; i++) if((*this)[i] != src[i]) return false;
+			for(auto const& i : boost::irange(0, int(D))) if((*this)[i] != src[i]) return false;
 			return true;
 		}
 		bool operator !=(Vector<D, T> const& src)
 		{
-			for(unsigned i = 0; i < D; i++) if((*this)[i] == src[i]) return false;
+			for(auto const& i : boost::irange(0, int(D))) if((*this)[i] == src[i]) return false;
 			return true;
 		}
 

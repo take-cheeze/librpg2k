@@ -4,6 +4,9 @@
 #include "rpg2k/Project.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <boost/range/irange.hpp>
+#include <boost/range/algorithm/copy.hpp>
+
 
 namespace
 {
@@ -19,14 +22,16 @@ namespace
 
 		#if (RPG2K_IS_PSP || RPG2K_IS_IPHONE)
 			float standard = basic, additional = 1.5f + (increase * 0.01f);
-			for(int i = 0; i < (level - 1); i++) {
+			for(auto const& i : boost::irange(0, level - 1)) {
+				(void)i;
 				result += int(standard);
 				standard *= additional;
 				additional = (level * 0.002f + 0.8f) * (additional - 1.f) + 1.f;
 			}
 		#else
 			double standard = basic, additional = 1.5 + (increase * 0.01);
-			for(int i = 0; i < (level - 1); i++) {
+			for(auto const& i : boost::irange(0, level - 1)) {
+				(void)i;
 				result += int(standard);
 				standard *= additional;
 				additional = (level * 0.002 + 0.8) * (additional - 1.0) + 1.0;
@@ -63,7 +68,7 @@ namespace rpg2k
 			lastSaveDataID_ = ID_MIN;
 
 			lsd_.push_back(new SaveData()); // set LcfSaveData buffer
-			for(unsigned i = ID_MIN; i <= SAVE_DATA_MAX; i++) {
+			for(auto const& i : boost::irange(int(ID_MIN), int(SAVE_DATA_MAX))) {
 				lsd_.push_back(new SaveData(baseDir_, i));
 
 				if(lsd_.back().exists()) {
@@ -132,11 +137,11 @@ namespace rpg2k
 			Array2D const& charsLDB = ldb_.character();
 			Array2D& charsLSD = getLSD().character();
 			charTable_.clear();
-			for(Array2D::ConstIterator it = charsLDB.begin(); it != charsLDB.end(); ++it) {
-				if(!it->second->exists()) continue;
+			for(auto const& i : charsLDB) {
+				if(!i.second->exists()) continue;
 
-				unsigned index = it->first;
-				charTable_.insert(index, new Character(it->first, *it->second, charsLSD[it->first]));
+				unsigned index = i.first;
+				charTable_.insert(index, new Character(i.first, *i.second, charsLSD[i.first]));
 			}
 		}
 
@@ -162,16 +167,14 @@ namespace rpg2k
 					prev[13] = c.hp();
 				}
 				// set faceSet
-				for(unsigned i = 0; i < mem.size(); i++) {
+				for(auto const& i : boost::irange(0, int(mem.size()))) {
 					Character const& c = character(mem[i]);
 					prev[21 + 2*i] = c.faceSet();
 					prev[22 + 2*i] = c.faceSetPos();
 				}
 			}
 
-			for(CharacterTable::iterator i = charTable_.begin(); i != charTable_.end(); ++i) {
-				i->second->sync();
-			}
+			for(auto const& i : charTable_) { i.second->sync(); }
 
 			lsd_[id] = lsd;
 			lsd_[id].save();
@@ -252,11 +255,11 @@ namespace rpg2k
 		}
 		Array1D const* Project::currentPage(Array2D const& pages) const
 		{
-			for(Array2D::ConstRIterator it = pages.rbegin(); it != pages.rend(); ++it) {
+			for(auto const& i : pages) {
 				if(
-					it->second->exists() &&
-					validPageMap((*it->second)[2])
-				) return it->second;
+					i.second->exists() &&
+					validPageMap((*i.second)[2])
+				) return i.second;
 			}
 
 			return NULL;
@@ -322,7 +325,7 @@ namespace rpg2k
 		// set party, boat, ship and airShip start point
 			Array1D const& startLMT = getLMT().startPoint();
 			Array1D const& sysLDB = getLDB()[22];
-			for(unsigned i = 1; i <= (ID_AIRSHIP - ID_PARTY); i++) {
+			for(auto const& i : boost::irange(1, ID_AIRSHIP - ID_PARTY)) {
 				EventState& dst = lsd.eventState(i + ID_PARTY);
 
 				dst[11] = startLMT[10*i + 1].to<int>();
@@ -339,22 +342,22 @@ namespace rpg2k
 			Array2D const& charsLDB = ldb.character();
 			Array2D& charsLSD = lsd.character();
 			unsigned const conditioNum = ldb.condition().rbegin()->first + 1;
-			for(Array2D::ConstIterator it = charsLDB.begin(); it != charsLDB.end(); ++it) {
-				if(!it->second->exists()) continue;
+			for(auto const& i : charsLDB) {
+				if(!i.second->exists()) continue;
 
-				Array1D const& charLDB = *it->second;
-				Array1D& charLSD = charsLSD[ it->first ];
+				Array1D const& charLDB = *i.second;
+				Array1D& charLSD = charsLSD[i.first];
 
-				int level = charLDB[7].to<int>();
+				int const level = charLDB[7].to<int>();
 				charLSD[31] = level; // level
 				charLSD[33] = 0; // HP fix
 				charLSD[34] = 0; // MP fix
 
 				charLSD[61] = charLDB[51].toBinary(); // equip
 
-				unsigned index = it->first;
-				charTable_.insert(index, new Character(it->first, charLDB, charLSD));
-				Character& c = this->character(it->first);
+				unsigned index = i.first;
+				charTable_.insert(index, new Character(i.first, charLDB, charLSD));
+				Character& c = this->character(i.first);
 
 				charLSD[32] = c.exp(level); // experience
 
@@ -398,18 +401,18 @@ namespace rpg2k
 		// set map event position
 			Array2D const& mapEvent = lmu[81];
 			Array2D& states = lsd.eventState();
-			for(Array2D::ConstIterator it = mapEvent.begin(); it != mapEvent.end(); ++it) {
-				if(!it->second->exists()) continue;
+			for(auto const& i : mapEvent) {
+				if(!i.second->exists()) continue;
 
-				Array1D const* page = currentPage((*it->second)[5]);
+				Array1D const* page = currentPage((*i.second)[5]);
 				if(page == NULL) continue;
 
 				Array1D const& src = *page;
-				Array1D& dst = states[it->first];
+				Array1D& dst = states[i.first];
 
 				dst[11] = 0; // mapID
-				dst[12] = (*it->second)[2].to<int>(); // x
-				dst[13] = (*it->second)[3].to<int>(); // y
+				dst[12] = (*i.second)[2].to<int>(); // x
+				dst[13] = (*i.second)[3].to<int>(); // y
 
 				dst[21] = src[23].to<int>(); // direction
 				dst[22] = src[23].to<int>();
@@ -464,7 +467,7 @@ namespace rpg2k
 			if(getLSD().item().find(id) != getLSD().item().end()) return true;
 			else {
 				Member const& mem = getLSD().member();
-				for(unsigned i = 0; i < mem.size(); i++) {
+				for(auto const& i : boost::irange(0, int(mem.size()))) {
 					Character::Equip const& equip = this->character(mem[i]).equip();
 					if(std::find(equip.begin(), equip.end(), id) != equip.end()) return true;
 				}
@@ -476,7 +479,7 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 			Member const& mem = getLSD().member();
-			for(std::size_t i = 0; i < mem.size(); i++) {
+			for(auto const& i : boost::irange(0, int(mem.size()))) {
 				Character::Equip const& equip = this->character(mem[i]).equip();
 				ret += std::count(equip.begin(), equip.end(), itemID);
 			}
@@ -551,23 +554,23 @@ namespace rpg2k
 			Array2D const& skillList = ldb_[63];
 			unsigned currentLv = 1;
 			if(prevLv > nextLv) {
-				for(Array2D::ConstIterator it = skillList.begin(); it != skillList.end(); ++it) {
-					if((*it->second)[1].exists()) { currentLv = (*it->second)[1]; }
+				for(auto const& i : skillList) {
+					if((*i.second)[1].exists()) { currentLv = (*i.second)[1]; }
 
 					if(currentLv < nextLv) { continue; }
 					else if(prevLv < currentLv) { break; }
 					else {
-						std::set<uint16_t>::iterator er = skill_.find((*it->second)[2].to<int>());
+						std::set<uint16_t>::iterator er = skill_.find((*i.second)[2].to<int>());
 						if(er != skill_.end()) { skill_.erase(er); }
 					}
 				}
 			} else if(nextLv > prevLv) {
-				for(Array2D::ConstIterator it = skillList.begin(); it != skillList.end(); ++it) {
-					if((*it->second)[1].exists()) { currentLv = (*it->second)[1]; }
+				for(auto const& i : skillList) {
+					if((*i.second)[1].exists()) { currentLv = (*i.second)[1]; }
 
 					if(currentLv < prevLv) { continue; }
 					else if(nextLv < currentLv) { break; }
-					else { skill_.insert((*it->second)[2].to<int>()); }
+					else { skill_.insert((*i.second)[2].to<int>()); }
 				}
 			}
 		}
@@ -610,7 +613,7 @@ namespace rpg2k
 		{
 			Character const& c = this->character(charID);
 			int ret = c.param(t);
-			for(uint16_t i : c.equip()) {
+			for(auto const& i : c.equip()) {
 				ret += ldb_.item()[i][11 + int(t) - 2].to<int>();
 			}
 			return ret;
@@ -700,9 +703,7 @@ namespace rpg2k
 					break;
 				case Action::CHANGE_CHAR_SET: {
 					String charSet(stream::readBER(s), '\0');
-					for(String::iterator it = charSet.begin(); it < charSet.end(); ++it) {
-						*it = stream::readBER(s);
-					}
+					for(auto& i : charSet) { i = stream::readBER(s); }
 					ev[73] = charSet;
 					ev[74] = stream::readBER(s);
 				} break;
@@ -729,13 +730,11 @@ namespace rpg2k
 		std::vector<unsigned> Project::sortLSD() const
 		{
 			std::map<double, unsigned> tmp;
-			for(unsigned i = 0; i < SAVE_DATA_MAX; i++) {
+			for(auto const& i : boost::irange(0, int(SAVE_DATA_MAX))) {
 				tmp.insert(std::make_pair(i + 1, lsd_[i + 1][100].toArray1D()[1].to<double>()));
 			}
 			std::vector<unsigned> ret;
-			for(std::map<double, unsigned>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-				ret.push_back(i->second);
-			}
+			for(auto const& i : tmp) ret.push_back(i.first);
 
 			return ret;
 		}

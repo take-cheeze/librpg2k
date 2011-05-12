@@ -53,23 +53,20 @@ namespace rpg2k
 
 		void BerEnum::init(std::istream& s)
 		{
-			unsigned const length = stream::readBER(s) + 1;
-
-			this->resize(length);
-			for(unsigned i = 0; i < length; i++) { (*this)[i] = stream::readBER(s); }
+			this->resize(stream::readBER(s) + 1);
+			for(auto& i : *this) { i = stream::readBER(s); }
 		}
 
 		size_t BerEnum::serializedSize() const
 		{
 			unsigned ret = stream::berSize(size() - 1);
-			for(unsigned i = 0; i < size(); i++) ret += stream::berSize((*this)[i]);
-
+			for(auto const& i : *this) ret += stream::berSize(i);
 			return ret;
 		}
 		std::ostream& BerEnum::serialize(std::ostream& s) const
 		{
 			stream::writeBER(s, this->size() - 1);
-			for(unsigned i = 0; i < size(); i++) stream::writeBER(s, (*this)[i]);
+			for(auto const& i : *this) stream::writeBER(s, i);
 			return s;
 		}
 

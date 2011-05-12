@@ -2,11 +2,7 @@
 #define _INC__RPG2K__MODEL__ARRAY_1D_HPP
 
 #include <map>
-#ifdef NDEBUG
-	#include <boost/ptr_container/ptr_unordered_map.hpp>
-#else
-	#include <boost/ptr_container/ptr_map.hpp>
-#endif
+#include <boost/ptr_container/ptr_unordered_map.hpp>
 #include "Descriptor.hxx"
 #include "Structure.hxx"
 
@@ -21,16 +17,11 @@ namespace rpg2k
 		class EventState;
 		class Sound;
 
-		#ifdef NDEBUG
-			typedef boost::ptr_unordered_map<unsigned, Element> BaseOfArray1D;
-		#else
-			typedef boost::ptr_map<unsigned, Element> BaseOfArray1D;
-		#endif
+		typedef boost::ptr_unordered_map<unsigned, Element> BaseOfArray1D;
 
 		class Array1D : public BaseOfArray1D
 		{
 		private:
-			// std::map<unsigned, Binary> binBuf_;
 			ArrayDefine arrayDefine_;
 
 			Element* const this_;
@@ -44,13 +35,7 @@ namespace rpg2k
 			Array1D();
 
 			void init(std::istream& s);
-			// bool createAt(unsigned pos);
 		public:
-			typedef iterator Iterator;
-			typedef reverse_iterator RIterator;
-			typedef const_iterator ConstIterator;
-			typedef const_reverse_iterator ConstRIterator;
-
 			Array1D(Array1D const& array);
 
 			Array1D(ArrayDefine info);

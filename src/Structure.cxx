@@ -91,7 +91,7 @@ namespace rpg2k
 	}
 	bool Binary::isString() const
 	{
-		for(const_iterator i = begin(); i < end(); i++) if(std::iscntrl(*i)) return false;
+		for(auto const& i : *this) if(std::iscntrl(i)) return false;
 		try {
 			String(reinterpret_cast<char const*>(this->data()), this->size()).toSystem();
 			return true;

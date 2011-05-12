@@ -4,6 +4,9 @@
 #include "rpg2k/Element.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <boost/range/irange.hpp>
+#include <boost/range/algorithm/count_if.hpp>
+
 
 namespace rpg2k
 {
@@ -55,8 +58,8 @@ namespace rpg2k
 		}
 		void Array2D::init(std::istream& s)
 		{
-			size_t const length = stream::readBER(s);
-			for(size_t i = 0; i < length; i++) {
+			for(auto const& i : boost::irange(0u, stream::readBER(s))) {
+				(void)i;
 				unsigned index = stream::readBER(s);
 				this->insert(index, new Array1D(*this, index, s));
 			}
@@ -73,11 +76,13 @@ namespace rpg2k
 	 */
 		bool Array2D::isInvalidArray2D(Binary const& b)
 		{
-			static unsigned const PARTICULAR_DATA_SIZE = 512;
+			enum { PARTICULAR_DATA_SIZE = 512 };
 		// check the data size
 			if(b.size() < PARTICULAR_DATA_SIZE) return false;
 		// check the data inside Binary
-			for(unsigned i = 0; i < PARTICULAR_DATA_SIZE; i++) if(b[i] != 0xff) return false;
+			if(std::find_if(b.begin(), b.begin() + PARTICULAR_DATA_SIZE
+							, [](uint8_t const i) { return i != 0xff; })
+			   < (b.begin() + PARTICULAR_DATA_SIZE)) { return false; }
 
 			debug::Tracer::printBinary(b, clog);
 		// return true if it is particular Array2D
@@ -113,22 +118,19 @@ namespace rpg2k
 
 		unsigned Array2D::count() const
 		{
-			unsigned ret = 0;
-			for(const_iterator it = begin(); it != end(); ++it) {
-				if(it->second->exists()) ret++;
-			}
-			return ret;
+			return boost::count_if(*this
+			, [](decltype(*this->begin()) const& i) { return i.second->exists(); });
 		}
 		size_t Array2D::serializedSize() const
 		{
 			unsigned ret = 0;
 
 			ret += stream::berSize(count());
-			for(const_iterator it = begin(); it != end(); ++it) {
-				if(!it->second->exists()) continue;
+			for(auto const& i : *this) {
+				if(!i->second->exists()) continue;
 
-				ret += stream::berSize(it->first);
-				ret += it->second->serializedSize();
+				ret += stream::berSize(i->first);
+				ret += i->second->serializedSize();
 			}
 
 			return ret;
@@ -136,11 +138,11 @@ namespace rpg2k
 		std::ostream& Array2D::serialize(std::ostream& s) const
 		{
 			stream::writeBER(s, count());
-			for(const_iterator it = begin(); it != end(); ++it) {
-				if(!it->second->exists()) continue;
+			for(auto const& i : *this) {
+				if(!i->second->exists()) continue;
 
-				stream::writeBER(s, it->first);
-				it->second->serialize(s);
+				stream::writeBER(s, i->first);
+				i->second->serialize(s);
 			}
 			return s;
 		}

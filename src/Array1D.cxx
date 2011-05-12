@@ -4,10 +4,13 @@
 #include "rpg2k/Element.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <iterator>
 #include <vector>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/range/algorithm/remove_if.hpp>
+
+#include <boost/range/algorithm/count_if.hpp>
+#include <boost/range/algorithm/remove_copy_if.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/transform.hpp>
 
 
 namespace rpg2k
@@ -29,7 +32,7 @@ namespace rpg2k
 		, arrayDefine_(src.arrayDefine_), this_(src.this_)
 		, exists_(src.exists_), owner_(src.owner_), index_(src.index_)
 		{
-			for(auto it : src) {
+			for(auto const& it : src) {
 				if(!it->second->exists()) continue;
 
 				Binary const bin = it->second->serialize();
@@ -158,17 +161,14 @@ namespace rpg2k
 
 		unsigned Array1D::count() const
 		{
-			unsigned ret = 0;
-			for(const_iterator it = begin(); it != end(); ++it) {
-				if(it->second->exists()) ret++;
-			}
-			return ret;
+			return boost::count_if(*this
+			, [](decltype(*this->begin()) const& i) { return i.second->exists(); });
 		}
 		size_t Array1D::serializedSize() const
 		{
 			size_t ret = 0;
 
-			for(auto it : *this) {
+			for(auto const& it : *this) {
 				if(!it->second->exists()) continue;
 
 				ret += stream::berSize(it->first);
@@ -183,14 +183,17 @@ namespace rpg2k
 		}
 		std::ostream& Array1D::serialize(std::ostream& s) const
 		{
-			std::vector<const_iterator> result(boost::make_counting_iterator(this->begin())
-			, boost::make_counting_iterator(this->end()));
-			result.resize(distance(result.begin(), boost::remove_if(result
-			, [](const_iterator const val) { return !val->second->exists(); } )));
-			boost::sort(result, [](const_iterator const l, const_iterator const r) { return (*l)->first > (*r)->first; });
-			for(auto i : result) {
-				stream::writeBER(s, (*i)->first);
-				stream::writeWithSize(s, *(*i)->second);
+			typedef decltype(*this->begin()) const_value_type;
+			std::vector<Element const*> result;
+			boost::transform(*this, std::back_inserter(result)
+			, [](const_value_type const& v) { return v.second; });
+			boost::remove_copy_if(result, result.begin()
+			, [](Element const* v) { return !v->exists(); });
+			boost::sort(result
+			, [](Element const* l, Element const* r) { return l->indexOfArray1D() < r->indexOfArray1D(); });
+			for(auto const& i : result) {
+				stream::writeBER(s, i->indexOfArray1D());
+				stream::writeWithSize(s, *i);
 			}
 
 			if(this->toElement().hasOwner() || this->isArray2D()) stream::writeBER(s, ARRAY_1D_END);

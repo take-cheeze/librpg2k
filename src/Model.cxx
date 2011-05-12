@@ -37,10 +37,8 @@ namespace rpg2k
 
 		void Base::reset()
 		{
-			boost::ptr_vector<Descriptor> const& info = descriptor();
-			for(unsigned int i = 0; i < info.size(); i++) {
-				data_.push_back(new Element(info[i]));
-			}
+			data_.clear();
+			for(auto const& i : this->descriptor()) { data_.push_back(new Element(i)); }
 		}
 
 		Element& Base::operator [](unsigned index)
@@ -76,10 +74,7 @@ namespace rpg2k
 			}
 			*/
 
-			boost::ptr_vector<Descriptor> const& info = descriptor();
-			for(unsigned int i = 0; i < info.size(); i++) {
-				data_.push_back(new Element(info[i], ifs));
-			}
+			for(auto const& i : this->descriptor()) { data_.push_back(new Element(i, ifs)); }
 
 			rpg2k_assert(stream::isEOF(ifs));
 
@@ -95,9 +90,7 @@ namespace rpg2k
 		void Base::serialize(std::ostream& s)
 		{
 			stream::writeHeader(s, this->header());
-			for(boost::ptr_vector<Element>::const_iterator it = data_.begin(); it < data_.end(); ++it) {
-				it->serialize(s);
-			}
+			for(auto const& i : data_) { i.serialize(s); }
 		}
 
 		DefineLoader::DefineLoader()

@@ -86,6 +86,6 @@ namespace rpg2k
 			LabelTable label_;
 		}; // class Event
 	} // namespace structure
-} // namespace rpg2k
+} //o namespace rpg2k
 
 #endif
