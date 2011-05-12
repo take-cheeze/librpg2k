@@ -11,10 +11,23 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include <string>
 
 using namespace rpg2k::model;
 
+
+bool compareFile(rpg2k::SystemString const& l, rpg2k::SystemString const& r)
+{
+	std::ifstream lstream(l.c_str()), rstream(r.c_str());
+	if(lstream || rstream) return false;
+
+	std::istream_iterator<char> lIt(lstream), rIt(rstream), end;
+
+	std::mismatch(lIt, end, rIt);
+	return(lIt == end);
+}
 
 TEST(MapUnit, OpenAndClose)
 {
@@ -26,6 +39,8 @@ TEST(MapUnit, OpenAndClose)
 
 	lmu.reset(new MapUnit(".", "Map0001.lmu.test"));
 	lmu.reset();
+
+	ASSERT_TRUE(compareFile("./TestGame/Map0001.lmu", LMU_TEST_FILE));
 
 	std::remove(LMU_TEST_FILE);
 }
@@ -40,6 +55,8 @@ TEST(MapTree, OpenAndClose)
 	lmt.reset(new MapTree(".", "RPG_RT.lmt.test"));
 	lmt.reset();
 
+	ASSERT_TRUE(compareFile("./TestGame/RPG_RT.lmt", LMT_TEST_FILE));
+
 	std::remove(LMT_TEST_FILE);
 }
 /*
@@ -53,6 +70,8 @@ TEST(SaveData, OpenAndClose)
 
 	lsd.reset(new SaveData("./", "Save01.lsd.test"));
 	lsd.reset();
+
+	ASSERT_TRUE(compareFile("./TestGame/Save01.lsd", LSD_TEST_FILE));
 
 	std::remove(LSD_TEST_FILE);
 }

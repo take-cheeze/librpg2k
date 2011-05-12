@@ -6,5 +6,5 @@ using rpg2k::Encode;
 
 TEST(Encode, Open)
 {
-	Encode::instance();
+	ASSERT_NO_THROW(Encode::instance());
 }
