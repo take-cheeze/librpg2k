@@ -76,16 +76,16 @@ namespace rpg2k
 		std::ostream& Element::serialize(std::ostream& s) const
 		{
 			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						return impl_.TYPE##_->serialize(s);
-				PP_rpg2kTypes(PP_enum)
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						return impl_.BOOST_PP_CAT(elem, data)->serialize(s);
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
 				#undef PP_enum
 
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						return (Binary() = impl_.TYPE##_).serialize(s);
-				PP_basicTypes(PP_enum)
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						return (Binary() = impl_.BOOST_PP_CAT(elem, data)).serialize(s);
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 
 				default: rpg2k_assert(false); return s;
@@ -94,19 +94,19 @@ namespace rpg2k
 		size_t Element::serializedSize() const
 		{
 			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						return impl_.TYPE##_->serializedSize();
-				PP_rpg2kTypes(PP_enum)
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						return impl_.BOOST_PP_CAT(elem, data)->serializedSize();
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
 				#undef PP_enum
 
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: { \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): { \
 						Binary bin; \
-						bin = impl_.TYPE##_; \
+						bin = impl_.BOOST_PP_CAT(elem, data); \
 						return bin.size(); \
 					}
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 
 				default: rpg2k_assert(false); return 0;
@@ -116,20 +116,20 @@ namespace rpg2k
 		Element::Element(Element const& e)
 		: descriptor_(e.descriptor_)
 		, exists_(e.exists_), owner_(e.owner_)
-		, index1_(e.index1_), index2_(e.index2_)
+		, indexOfArray1D_(e.indexOfArray1D_), indexOfArray2D_(e.indexOfArray2D_)
 		{
 			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE(*e.impl_.TYPE##_); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(*e.impl_.BOOST_PP_CAT(elem, data)); \
 						break;
-				PP_rpg2kTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
 				#undef PP_enum
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = descriptor().hasDefault()? descriptor() : TYPE(); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = descriptor().hasDefault()? descriptor() : elem(); \
 						break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 			}
 		}
@@ -139,43 +139,36 @@ namespace rpg2k
 			exists_ = false;
 
 			if(descriptor_->hasDefault()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = this->descriptor(); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = this->descriptor(); \
 						break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE(*this); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(*this); \
 						break;
-				PP_enum(Array1D)
-				PP_enum(Array2D)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (Array1D)(Array2D))
 				#undef PP_enum
 
-				#define PP_enumNoDefault(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE(); \
+				#define PP_enumNoDefault(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(); \
 						break;
-				PP_enumNoDefault(BerEnum)
-				PP_enumNoDefault(Binary)
-				PP_enumNoDefault(Event)
-				PP_enumNoDefault(String)
+				BOOST_PP_SEQ_FOR_EACH(PP_enumNoDefault, _, (BerEnum)(Binary)(Event)(String))
 
 				default: rpg2k_analyze_assert(false); break;
 			} else switch(descriptor_->type()) {
-				PP_enumNoDefault(BerEnum)
-				PP_enumNoDefault(Binary)
-				PP_enumNoDefault(Event)
-				PP_enumNoDefault(String)
+					BOOST_PP_SEQ_FOR_EACH(PP_enumNoDefault, _, (BerEnum)(Binary)(Event)(String))
 				#undef PP_enumNoDefault
 
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = TYPE(); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = elem(); \
 						break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 
 				default: rpg2k_analyze_assert(false); break;
@@ -186,29 +179,25 @@ namespace rpg2k
 			exists_ = true;
 
 			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE(*this, b); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(*this, b); \
 						break;
-				PP_enum(Array1D)
-				PP_enum(Array2D)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (Array1D)(Array2D))
 				#undef PP_enum
 
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = b; \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = b; \
 						break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE(b); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(b); \
 						break;
-				PP_enum(BerEnum)
-				PP_enum(Binary)
-				PP_enum(Event)
-				PP_enum(String)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (BerEnum)(Binary)(Event)(String))
 				#undef PP_enum
 			} else { impl_.Binary_ = new Binary(b); }
 		}
@@ -217,12 +206,11 @@ namespace rpg2k
 			exists_ = true;
 
 			switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = new TYPE(*this, s); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(*this, s); \
 						break;
-				PP_enum(Array1D)
-				PP_enum(Array2D)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (Array1D)(Array2D))
 				#undef PP_enum
 
 				case ElementType::BerEnum_:
@@ -233,17 +221,17 @@ namespace rpg2k
 		}
 
 		Element::Element()
-		: descriptor_(NULL), owner_(NULL), index1_(-1), index2_(-1)
+		: descriptor_(NULL), owner_(NULL), indexOfArray1D_(NOT_ARRAY), indexOfArray2D_(NOT_ARRAY)
 		{
 			init();
 		}
 		Element::Element(Descriptor const& info)
-		: descriptor_(&info), owner_(NULL), index1_(-1), index2_(-1)
+		: descriptor_(&info), owner_(NULL), indexOfArray1D_(NOT_ARRAY), indexOfArray2D_(NOT_ARRAY)
 		{
 			init();
 		}
 		Element::Element(Descriptor const& info, Binary const& b)
-		: descriptor_(&info), owner_(NULL), index1_(-1), index2_(-1)
+		: descriptor_(&info), owner_(NULL), indexOfArray1D_(NOT_ARRAY), indexOfArray2D_(NOT_ARRAY)
 		{
 			#if RPG2K_CHECK_AT_CONSTRUCTOR
 				rpg2k_analyze_assert(instance_.checkSerialize(b));
@@ -252,7 +240,7 @@ namespace rpg2k
 			init(b);
 		}
 		Element::Element(Descriptor const& info, std::istream& s)
-		: descriptor_(&info), owner_(NULL), index1_(-1), index2_(-1)
+		: descriptor_(&info), owner_(NULL), indexOfArray1D_(NOT_ARRAY), indexOfArray2D_(NOT_ARRAY)
 		{
 			init(s);
 		}
@@ -261,8 +249,8 @@ namespace rpg2k
 		: descriptor_(
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
 				? owner.arrayDefine().find(index)->second : NULL)
-		, owner_(&owner.toElement())
-		, index1_(index), index2_(-1)
+		, owner_(&owner.toElement()), indexOfArray1D_(index)
+		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
 		{
 			init();
 		}
@@ -270,30 +258,8 @@ namespace rpg2k
 		: descriptor_(
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
 				? owner.arrayDefine().find(index)->second : NULL)
-		, owner_(&owner.toElement())
-		, index1_(index), index2_(-1)
-		{
-			#if RPG2K_CHECK_AT_CONSTRUCTOR
-				rpg2k_analyze_assert(instance_.checkSerialize(b));
-			#endif
-
-			init(b);
-		}
-		Element::Element(Array2D const& owner, unsigned index1, unsigned index2)
-		: descriptor_(
-			owner.arrayDefine().find(index2) != owner.arrayDefine().end()
-				? owner.arrayDefine().find(index2)->second : NULL)
-		, owner_ (&owner.toElement())
-		, index1_(index1), index2_(index2)
-		{
-			init();
-		}
-		Element::Element(Array2D const& owner, unsigned index1, unsigned index2, Binary const& b)
-		: descriptor_(
-			owner.arrayDefine().find(index2) != owner.arrayDefine().end()
-				? owner.arrayDefine().find(index2)->second : NULL)
-		, owner_ (&owner.toElement())
-		, index1_(index1), index2_(index2)
+		, owner_(&owner.toElement()), indexOfArray1D_(index)
+		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
 		{
 			#if RPG2K_CHECK_AT_CONSTRUCTOR
 				rpg2k_analyze_assert(instance_.checkSerialize(b));
@@ -307,11 +273,11 @@ namespace rpg2k
 			ANALYZE_SELF();
 
 			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) case ElementType::TYPE##_: delete impl_.TYPE##_; break;
-				PP_rpg2kTypes(PP_enum)
+				#define PP_enum(r, data, elem) case ElementType::BOOST_PP_CAT(elem, data): delete impl_.BOOST_PP_CAT(elem, data); break;
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
 				#undef PP_enum
-				#define PP_enum(TYPE) case ElementType::TYPE##_:
-				PP_basicTypes(PP_enum)
+				#define PP_enum(r, data, elem) case ElementType::BOOST_PP_CAT(elem, data):
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 					break;
 				default: rpg2k_assert(false); break;
@@ -321,17 +287,17 @@ namespace rpg2k
 		Element& Element::operator =(Element const& src)
 		{
 			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						(*impl_.TYPE##_) = (*src.impl_.TYPE##_); \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						(*impl_.BOOST_PP_CAT(elem, data)) = (*src.impl_.BOOST_PP_CAT(elem, data)); \
 						break;
-				PP_rpg2kTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
 				#undef PP_enum
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = src.impl_.TYPE##_; \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = src.impl_.BOOST_PP_CAT(elem, data); \
 						break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 				default: rpg2k_assert(false); break;
 			} else (*impl_.Binary_) = (*src.impl_.Binary_);
@@ -342,17 +308,6 @@ namespace rpg2k
 		Binary Element::serialize() const
 		{
 			return structure::serialize(*this);
-		}
-
-		unsigned Element::index1() const
-		{
-			rpg2k_assert(hasOwner());
-			return index1_;
-		}
-		unsigned Element::index2() const
-		{
-			rpg2k_assert(owner().descriptor().type() == ElementType::Array2D_);
-			return index2_;
 		}
 
 		Element const& Element::owner() const
@@ -369,18 +324,18 @@ namespace rpg2k
 		void Element::substantiate()
 		{
 			if(descriptor_ && descriptor_->hasDefault()) switch(descriptor_->type()) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						if((impl_.TYPE##_) == static_cast<TYPE const&>(*descriptor_)) { \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						if((impl_.BOOST_PP_CAT(elem, data)) == static_cast<elem const&>(*descriptor_)) { \
 							exists_ = false; \
 							return; \
 						} \
 						break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 
-				#define PP_enum(TYPE) case ElementType::TYPE##_:
-				PP_rpg2kTypes(PP_enum)
+				#define PP_enum(r, data, elem) case ElementType::BOOST_PP_CAT(elem, data):
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
 				#undef PP_enum
 					break;
 				default: rpg2k_assert(false);
@@ -392,7 +347,7 @@ namespace rpg2k
 				owner_->substantiate();
 
 				if(owner().descriptor().type() == ElementType::Array2D_) {
-					(*owner().impl_.Array2D_)[index1()].substantiate();
+					(*owner().impl_.Array2D_)[indexOfArray2D()].substantiate();
 				}
 			}
 		}
@@ -403,40 +358,40 @@ namespace rpg2k
 			return *descriptor_;
 		}
 
-		#define PP_castOperator(TYPE) \
-			Element::operator TYPE const&() const \
+		#define PP_castOperator(r, data, elem) \
+			Element::operator elem const&() const \
 			{ \
 				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
-				rpg2k_assert(impl_.TYPE##_); \
-				return *impl_.TYPE##_; \
+				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
+				rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
+				return *impl_.BOOST_PP_CAT(elem, data); \
 			} \
-			Element::operator TYPE&() \
+			Element::operator elem&() \
 			{ \
 				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
-				rpg2k_assert(impl_.TYPE##_); \
-				return *impl_.TYPE##_; \
+				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
+				rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
+				return *impl_.BOOST_PP_CAT(elem, data); \
 			}
-		PP_rpg2kTypes(PP_castOperator)
+		BOOST_PP_SEQ_FOR_EACH(PP_castOperator, _, PP_rpg2kTypes)
 		#undef PP_castOperator
 
-		#define PP_castOperator(TYPE) \
-			Element::operator TYPE const&() const \
+		#define PP_castOperator(r, data, elem) \
+			Element::operator elem const&() const \
 			{ \
 				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
+				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
 				rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
-				return impl_.TYPE##_; \
+				return impl_.BOOST_PP_CAT(elem, data); \
 			} \
-			Element::operator TYPE&() \
+			Element::operator elem&() \
 			{ \
 				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::TYPE##_); \
+				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
 				rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
-				return impl_.TYPE##_; \
+				return impl_.BOOST_PP_CAT(elem, data); \
 			}
-		PP_basicTypes(PP_castOperator)
+		BOOST_PP_SEQ_FOR_EACH(PP_castOperator, _, PP_basicTypes)
 		#undef PP_castOperator
 	} // namespace structure
 } // namespace rpg2k

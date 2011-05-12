@@ -3,6 +3,8 @@
 #include "rpg2k/Stream.hxx"
 #include "rpg2k/Structure.hxx"
 
+#include <boost/preprocessor/stringize.hpp>
+
 
 namespace rpg2k
 {
@@ -10,9 +12,9 @@ namespace rpg2k
 	{
 		ElementType::ElementType()
 		{
-			#define PP_insert(TYPE) table_.insert(Table::value_type(TYPE##_, #TYPE));
-			PP_basicTypes(PP_insert)
-			PP_rpg2kTypes(PP_insert)
+			#define PP_insert(r, data, elem) \
+				table_.insert(Table::value_type(BOOST_PP_CAT(elem, data), BOOST_PP_STRINGIZE(elem)));
+			BOOST_PP_SEQ_FOR_EACH(PP_insert, _, PP_allTypes)
 			#undef PP_insert
 		}
 		ElementType::Enum ElementType::toEnum(String const& name) const
@@ -33,11 +35,11 @@ namespace rpg2k
 		, arrayTable_(src.arrayTable_.get() ? new ArrayTable(*src.arrayTable_) : NULL)
 		{
 			if(hasDefault_) switch(type_) {
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: \
-						impl_.TYPE##_ = src.impl_.TYPE##_; \
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = src.impl_.BOOST_PP_CAT(elem, data); \
 						return;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 				case ElementType::Array1D_:
 				case ElementType::Array2D_:
@@ -62,12 +64,12 @@ namespace rpg2k
 					) impl_.String_ = new String(val.data() + 1, val.size() - 2);
 					else impl_.String_ = new String(val);
 					break;
-				#define PP_enum(TYPE) \
-					case ElementType::TYPE##_: { \
+				#define PP_enum(r, d, elem) \
+					case ElementType::BOOST_PP_CAT(elem, d): { \
 						io::stream<io::array_source> s(io::array_source(val.data(), val.size())); \
-						s >> std::boolalpha >> (impl_.TYPE##_); \
+						s >> std::boolalpha >> (impl_.BOOST_PP_CAT(elem, d)); \
 					} break;
-				PP_basicTypes(PP_enum)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 			default: rpg2k_assert(false); break;
 			}
@@ -91,21 +93,22 @@ namespace rpg2k
 				case ElementType::Array2D_:
 					delete impl_.arrayDefine;
 					break;
-				#define PP_enum(TYPE) case ElementType::TYPE##_:
-				PP_basicTypes(PP_enum)
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data):
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 					break;
 				default: rpg2k_assert(false); break;
 			}
 		}
 
-		#define PP_castOperator(TYPE) \
-			Descriptor::operator TYPE const&() const \
+		#define PP_castOperator(r, data, elem) \
+			Descriptor::operator elem const&() const \
 			{ \
-				rpg2k_assert(this->type_ == ElementType::TYPE##_); \
-				return impl_.TYPE##_; \
+				rpg2k_assert(this->type_ == ElementType::BOOST_PP_CAT(elem, data)); \
+				return impl_.BOOST_PP_CAT(elem, data); \
 			}
-		PP_basicTypes(PP_castOperator)
+		BOOST_PP_SEQ_FOR_EACH(PP_castOperator, _, PP_basicTypes)
 		#undef PP_castOperator
 
 		Descriptor::operator String const&() const

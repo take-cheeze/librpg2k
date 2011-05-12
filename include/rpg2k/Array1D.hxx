@@ -30,7 +30,7 @@ namespace rpg2k
 		class Array1D : public BaseOfArray1D
 		{
 		private:
-			std::map<unsigned, Binary> binBuf_;
+			// std::map<unsigned, Binary> binBuf_;
 			ArrayDefine arrayDefine_;
 
 			Element* const this_;
@@ -44,7 +44,7 @@ namespace rpg2k
 			Array1D();
 
 			void init(std::istream& s);
-			bool createAt(unsigned pos);
+			// bool createAt(unsigned pos);
 		public:
 			typedef iterator Iterator;
 			typedef reverse_iterator RIterator;

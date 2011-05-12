@@ -14,20 +14,21 @@ namespace rpg2k
 		class Element
 		{
 		private:
+			enum { NOT_ARRAY = -1, };
 			Descriptor const* const descriptor_;
 
 			bool exists_;
 
 			Element* const owner_;
-			unsigned const index1_;
-			unsigned const index2_;
+			int const indexOfArray1D_;
+			int const indexOfArray2D_;
 
 			union {
-				#define PP_types(TYPE) TYPE* TYPE##_;
-				PP_rpg2kTypes(PP_types)
+				#define PP_types(r, data, elem) elem* BOOST_PP_CAT(elem, _);
+				BOOST_PP_SEQ_FOR_EACH(PP_types, , PP_rpg2kTypes)
 				#undef PP_types
-				#define PP_types(TYPE) TYPE TYPE##_;
-				PP_basicTypes(PP_types)
+				#define PP_types(r, data, elem) elem BOOST_PP_CAT(elem, _);
+				BOOST_PP_SEQ_FOR_EACH(PP_types, , PP_basicTypes)
 				#undef PP_types
 			} impl_;
 
@@ -43,8 +44,6 @@ namespace rpg2k
 
 			Element(Array1D const& owner, unsigned index);
 			Element(Array1D const& owner, unsigned index , Binary const& b);
-			Element(Array2D const& owner, unsigned index1, unsigned index2);
-			Element(Array2D const& owner, unsigned index1, unsigned index2, Binary const& b);
 
 			bool isDefined() const { return descriptor_ != NULL; }
 			bool hasOwner() const { return owner_ != NULL; }
@@ -58,30 +57,28 @@ namespace rpg2k
 			std::ostream& serialize(std::ostream& s) const;
 			Binary serialize() const;
 
-			#define PP_castOperator(TYPE) \
-				operator TYPE const&() const; \
-				operator TYPE&(); \
-				TYPE& to_##TYPE() { return to<TYPE>(); } \
-				TYPE const& to_##TYPE() const { return to<TYPE>(); }
-			PP_basicTypes(PP_castOperator)
+			#define PP_castOperator(r, data, elem) \
+				operator elem const&() const; \
+				operator elem&(); \
+				elem& BOOST_PP_CAT(to_, elem)() { return to<elem>(); } \
+				elem const& BOOST_PP_CAT(to_, elem)() const { return to<elem>(); }
+			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , PP_basicTypes)
 			#undef PP_castOperator
 
-			#define PP_castOperator(TYPE) \
-				operator TYPE const&() const; \
-				operator TYPE&(); \
-				TYPE& to##TYPE() { return to<TYPE>(); } \
-				TYPE const& to##TYPE() const { return to<TYPE>(); }
-			PP_rpg2kTypes(PP_castOperator)
+			#define PP_castOperator(r, data, elem) \
+				operator elem const&() const; \
+				operator elem&(); \
+				elem& BOOST_PP_CAT(to, elem)() { return to<elem>(); } \
+				elem const& BOOST_PP_CAT(to, elem)() const { return to<elem>(); }
+			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , PP_rpg2kTypes)
 			#undef PP_castOperator
 
-			#define PP_castOperator(type) \
-				operator type const&() const { return reinterpret_cast<type const&>(toArray1D()); } \
-				operator type&() { return reinterpret_cast<type&>(toArray1D()); } \
-				type& to##type() { return to<type>(); } \
-				type const& to##type() const { return to<type>(); }
-			PP_castOperator(Music)
-			PP_castOperator(Sound)
-			PP_castOperator(EventState)
+			#define PP_castOperator(r, data, elem) \
+				operator elem const&() const { return reinterpret_cast<elem const&>(toArray1D()); } \
+				operator elem&() { return reinterpret_cast<elem&>(toArray1D()); } \
+				elem& BOOST_PP_CAT(to, elem)() { return to<elem>(); } \
+				elem const& BOOST_PP_CAT(to, elem)() const { return to<elem>(); }
+			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , (Music)(Sound)(EventState))
 			#undef PP_castOperator
 
 			operator unsigned&() { return reinterpret_cast<unsigned&>(to<int>()); }
@@ -107,8 +104,14 @@ namespace rpg2k
 			Element& owner();
 			Element const& owner() const;
 
-			unsigned index1() const;
-			unsigned index2() const;
+			unsigned indexOfArray1D() const {
+				rpg2k_assert(indexOfArray1D_ != NOT_ARRAY);
+				return indexOfArray1D_;
+			}
+			unsigned indexOfArray2D() const {
+				rpg2k_assert(indexOfArray2D_ != NOT_ARRAY);
+				return indexOfArray2D_;
+			}
 		}; // class Element
 
 		template< > inline

@@ -4,7 +4,10 @@
 #include "rpg2k/Element.hxx"
 #include "rpg2k/Stream.hxx"
 
-#include <algorithm>
+#include <vector>
+#include <boost/iterator/counting_iterator.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
+#include <boost/range/algorithm/sort.hpp>
 
 
 namespace rpg2k
@@ -21,36 +24,18 @@ namespace rpg2k
 			#endif
 		} // namespace
 
-		bool Array1D::createAt(unsigned pos)
-		{
-			std::map<unsigned, Binary>::iterator it = binBuf_.find(pos);
-			if(it == binBuf_.end()) return false;
-
-			if(isArray2D()) this->insert(pos, new Element(owner(), index(), pos, it->second));
-			else this->insert(pos, new Element(*this, pos, it->second));
-			binBuf_.erase(it);
-
-			return true;
-		}
-
 		Array1D::Array1D(Array1D const& src)
-		: BaseOfArray1D(), binBuf_(src.binBuf_)
+		: BaseOfArray1D()
 		, arrayDefine_(src.arrayDefine_), this_(src.this_)
 		, exists_(src.exists_), owner_(src.owner_), index_(src.index_)
 		{
-			for(const_iterator it = src.begin(); it != src.end(); ++it) {
+			for(auto it : src) {
 				if(!it->second->exists()) continue;
 
 				Binary const bin = it->second->serialize();
 				unsigned index = it->first;
 
-				if(bin.size() >= BIG_DATA_SIZE) {
-					binBuf_.insert(std::make_pair(it->first, bin));
-				} else if(src.isArray2D()) {
-					this->insert(index, new Element(src.owner(), src.index(), it->first, bin));
-				} else {
-					this->insert(index, new Element(*this, it->first, bin));
-				}
+				this->insert(index, new Element(*this, it->first, bin));
 			}
 		}
 
@@ -100,19 +85,7 @@ namespace rpg2k
 		: arrayDefine_(owner.arrayDefine()), this_(NULL)
 		, owner_(&owner), index_(index)
 		{
-			exists_ = true;
-
-			Binary bin;
-
-			while(true) {
-				unsigned index2 = stream::readBER(s);
-
-				if(index2 == ARRAY_1D_END) break;
-
-				stream::readWithSize(s, bin);
-				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(std::make_pair(index2, bin));
-				else insert(index2, new Element(owner, index, index2, bin));
-			}
+			init(s);
 		}
 		void Array1D::init(std::istream& s)
 		{
@@ -126,13 +99,12 @@ namespace rpg2k
 				if(index == ARRAY_1D_END) break;
 
 				stream::readWithSize(s, bin);
-				if(bin.size() >= BIG_DATA_SIZE) binBuf_.insert(std::make_pair(index, bin));
-				else insert(index, new Element(*this, index, bin));
+				insert(index, new Element(*this, index, bin));
 
 				if(!toElement().hasOwner() && stream::isEOF(s)) return;
 			}
 
-			rpg2k_analyze_assert(stream::isEOF(s));
+			rpg2k_analyze_assert(isArray2D() || stream::isEOF(s));
 		}
 
 		bool Array1D::isElement() const
@@ -159,15 +131,9 @@ namespace rpg2k
 		Element& Array1D::operator [](unsigned index)
 		{
 			iterator it = find(index);
-			if(it != end()) {
-				return *it->second;
-			} else if(createAt(index)) {
-				return *this->find(index)->second;
-			} else if(isArray2D()) {
-				return *this->insert(index, new Element(*owner_, index_, index)).first->second;
-			} else {
-				return *this->insert(index, new Element(*this, index)).first->second;
-			}
+			return(it != end())
+				? *it->second
+				: *this->insert(index, new Element(*this, index)).first->second;
 		}
 		Element const& Array1D::operator [](unsigned const index) const
 		{
@@ -181,13 +147,9 @@ namespace rpg2k
 			unsigned indexNo = tableIt->second;
 
 			iterator it = this->find(indexNo);
-			if(it != end()) { return *it->second; }
-			else if(createAt(indexNo)) { return *this->find(indexNo)->second; }
-			else if(isArray2D()) {
-				return *this->insert(indexNo, new Element(*owner_, index_, indexNo)).first->second;
-			} else {
-				return *this->insert(indexNo, new Element(*this, indexNo)).first->second;
-			}
+			return(it != end())
+				? *it->second
+				: *this->insert(indexNo, new Element(*this, indexNo)).first->second;
 		}
 		Element const& Array1D::operator [](char const* index) const
 		{
@@ -204,19 +166,13 @@ namespace rpg2k
 		}
 		size_t Array1D::serializedSize() const
 		{
-			unsigned ret = 0;
+			size_t ret = 0;
 
-			for(const_iterator it = begin(); it != end(); ++it) {
+			for(auto it : *this) {
 				if(!it->second->exists()) continue;
 
 				ret += stream::berSize(it->first);
 				size_t const size = it->second->serializedSize();
-				ret += stream::berSize(size);
-				ret += size;
-			}
-			for(std::map<unsigned, Binary>::const_iterator it = binBuf_.begin(); it != binBuf_.end(); ++it) {
-				ret += stream::berSize(it->first);
-				unsigned const size = it->second.size();
 				ret += stream::berSize(size);
 				ret += size;
 			}
@@ -227,13 +183,14 @@ namespace rpg2k
 		}
 		std::ostream& Array1D::serialize(std::ostream& s) const
 		{
-			std::map<unsigned, Binary> result = binBuf_;
-			for(const_iterator it = begin(); it != end(); ++it) {
-				if(it->second->exists()) { result.insert(std::make_pair(it->first, structure::serialize(*it->second))); }
-			}
-			for(std::map<unsigned, Binary>::const_iterator it = result.begin(); it != result.end(); ++it) {
-				stream::writeBER(s, it->first);
-				stream::writeWithSize(s, it->second);
+			std::vector<const_iterator> result(boost::make_counting_iterator(this->begin())
+			, boost::make_counting_iterator(this->end()));
+			result.resize(distance(result.begin(), boost::remove_if(result
+			, [](const_iterator const val) { return !val->second->exists(); } )));
+			boost::sort(result, [](const_iterator const l, const_iterator const r) { return (*l)->first > (*r)->first; });
+			for(auto i : result) {
+				stream::writeBER(s, (*i)->first);
+				stream::writeWithSize(s, *(*i)->second);
 			}
 
 			if(this->toElement().hasOwner() || this->isArray2D()) stream::writeBER(s, ARRAY_1D_END);
@@ -256,8 +213,7 @@ namespace rpg2k
 		bool Array1D::exists(unsigned index) const
 		{
 			const_iterator it = find(index);
-			return ((it != end()) && it->second->exists()) ||
-				(binBuf_.find(index) != binBuf_.end());
+			return (it != end()) && it->second->exists();
 		}
 	} // namespace structure
 } // namespace rpg2k

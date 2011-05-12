@@ -8,6 +8,9 @@
 
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/seq/for_each.hpp>
+#include <boost/preprocessor/seq/enum.hpp>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -33,32 +36,28 @@ namespace rpg2k
 		typedef ArrayDefineType const& ArrayDefine;
 		typedef std::unique_ptr<ArrayDefineType> ArrayDefinePointer;
 
-		#define PP_basicTypes(func) \
-			func(int) \
-			func(bool) \
-			func(double) \
+		#define PP_basicTypes \
+			(int) \
+			(bool) \
+			(double) \
 
-		#define PP_rpg2kTypes(func) \
-			func(Array1D) \
-			func(Array2D) \
-			func(BerEnum) \
-			func(Binary) \
-			func(String) \
-			func(Event) \
+		#define PP_rpg2kTypes \
+			(Array1D) \
+			(Array2D) \
+			(BerEnum) \
+			(Binary) \
+			(String) \
+			(Event) \
 
-		#define PP_allTypes(func) \
-			PP_basicTypes(func) \
-			PP_rpg2kTypes(func) \
+		#define PP_allTypes PP_basicTypes PP_rpg2kTypes
 
 		class ElementType : public ConstSingleton<ElementType>
 		{
 			friend class ConstSingleton<ElementType>;
 		public:
-			enum Enum {
-				#define PP_enum(TYPE) TYPE##_,
-				PP_allTypes(PP_enum)
-				#undef PP_enum
-			};
+			#define PP_enum(r, data, elem) BOOST_PP_CAT(elem, data),
+			enum Enum { BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_allTypes) };
+			#undef PP_enum
 			Enum toEnum(String const& name) const;
 			String const& toString(Enum e) const;
 		private:
@@ -80,8 +79,9 @@ namespace rpg2k
 
 			~Descriptor();
 
-			#define PP_castOperator(type) operator type const&() const;
-			PP_basicTypes(PP_castOperator)
+			#define PP_castOperator(r, data, elem) \
+				operator elem const&() const;
+			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , PP_basicTypes)
 			#undef PP_castOperator
 			operator String const&() const;
 			operator unsigned const&() const
@@ -100,8 +100,8 @@ namespace rpg2k
 			bool const hasDefault_;
 
 			union {
-				#define PP_enum(TYPE) TYPE TYPE##_;
-				PP_basicTypes(PP_enum)
+				#define PP_enum(r, data, elem) elem BOOST_PP_CAT(elem, data);
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
 				#undef PP_enum
 				String const* String_;
 				boost::ptr_unordered_map<unsigned, Descriptor>* arrayDefine;

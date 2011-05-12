@@ -94,10 +94,10 @@ namespace rpg2k
 				ElementType::Enum const ownerType = top.owner().descriptor().type();
 
 				ostrm << std::dec << std::setfill(' ');
-				ostrm << ElementType::instance().toString(ownerType)
-					<< "[" << std::setw(4) << top.index1() << "]";
 				if(ownerType == ElementType::Array2D_) ostrm
-					<< "[" << std::setw(4) << top.index2() << "]";
+					<< "[" << std::setw(4) << top.indexOfArray2D() << "]";
+				ostrm << ElementType::instance().toString(ownerType)
+					<< "[" << std::setw(4) << top.indexOfArray1D() << "]";
 				ostrm << ": ";
 			}
 
