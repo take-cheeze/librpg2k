@@ -46,7 +46,7 @@ namespace rpg2k
 		}
 		BerEnum::BerEnum(Binary const& b)
 		{
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 			init(s);
 			rpg2k_assert(stream::isEOF(s));
 		}

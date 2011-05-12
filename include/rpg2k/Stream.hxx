@@ -1,10 +1,9 @@
-#ifndef _INC__RPG2K__FILE_HPP
-#define _INC__RPG2K__FILE_HPP
+#ifndef _INC__RPG2K__STREAM_HPP
+#define _INC__RPG2K__STREAM_HPP
 
 #include "Structure.hxx"
 
 #include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/array.hpp>
 
 #include <iosfwd>
 
@@ -19,7 +18,7 @@ namespace rpg2k
 		Binary serialize(T const& src)
 		{
 			Binary ret(src.serializedSize());
-			io::stream<io::array_sink> s(io::array_sink(reinterpret_cast<char*>(ret.data()), ret.size()));
+			io::stream<io::array_sink> s(ret.sink());
 			src.serialize(s);
 
 			return ret;

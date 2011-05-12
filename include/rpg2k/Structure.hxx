@@ -4,6 +4,7 @@
 #include "rpg2k/Define.hxx"
 
 #include <boost/array.hpp>
+#include <boost/iostreams/device/array.hpp>
 #include <boost/range/irange.hpp>
 
 #include <climits>
@@ -111,6 +112,13 @@ namespace rpg2k
 
 		template<class T>
 		Binary& operator =(T const& src) { return this->assign(src); }
+
+		boost::iostreams::array_source source() const {
+			return boost::iostreams::array_source(reinterpret_cast<char const*>(this->data()), this->size());
+		}
+		boost::iostreams::array_sink sink() {
+			return boost::iostreams::array_sink(reinterpret_cast<char*>(this->data()), this->size());
+		}
 	}; // class Binary
 } // namespace rpg2k
 

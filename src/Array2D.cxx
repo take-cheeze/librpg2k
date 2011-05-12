@@ -17,7 +17,7 @@ namespace rpg2k
 		, this_(src.this_)
 		{
 			Binary const b = structure::serialize(src);
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 			this->init(s);
 		}
 
@@ -33,7 +33,7 @@ namespace rpg2k
 		Array2D::Array2D(ArrayDefine info, Binary const& b)
 		: arrayDefine_(info), this_(NULL)
 		{
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 
 			if(isInvalidArray2D(b)) { return; } // s.seek(PARTICULAR_DATA_SIZE);
 			else { this->init(s); }

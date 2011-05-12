@@ -55,7 +55,7 @@ namespace rpg2k
 		Array1D::Array1D(ArrayDefine info, Binary const& b)
 		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
 		{
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 			init(s);
 		}
 
@@ -75,7 +75,7 @@ namespace rpg2k
 		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		, owner_(NULL), index_(-1)
 		{
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 			init(s);
 		}
 		Array1D::Array1D(Array2D& owner, unsigned index)

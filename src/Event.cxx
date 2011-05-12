@@ -57,7 +57,7 @@ namespace rpg2k
 
 		Event::Event(Binary const& b)
 		{
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 			init(s);
 		}
 

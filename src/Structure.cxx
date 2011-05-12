@@ -103,7 +103,7 @@ namespace rpg2k
 		rpg2k_assert(isBER());
 
 		namespace io = boost::iostreams;
-		io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(this->data()), this->size()));
+		io::stream<io::array_source> s(this->source());
 		return rpg2k_integer(stream::readBER(s));
 	}
 	Binary::operator bool() const
@@ -126,7 +126,7 @@ namespace rpg2k
 	{
 		this->resize(stream::berSize(num));
 		namespace io = boost::iostreams;
-		io::stream<io::array_sink> s(io::array_sink(reinterpret_cast<char*>(this->data()), this->size()));
+		io::stream<io::array_sink> s(this->sink());
 		stream::writeBER(s, rpg2k_integer(num));
 		return *this;
 	}
