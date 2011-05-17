@@ -17,30 +17,41 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC ${SRCS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${rpg2kLib_LIBRARIES})
 
 # test
-ENABLE_TESTING()
+enable_testing()
 
-INCLUDE(FindThreads)
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
-FUNCTION(CXX_TEST target libs)
-	ADD_EXECUTABLE(test_${target} ${CMAKE_CURRENT_SOURCE_DIR}/test/${target}.cxx)
-	TARGET_LINK_LIBRARIES(test_${target}
+# gtest-config
+find_program(GTEST_CONFIG "gtest-config")
+if(NOT GTEST_CONFIG)
+	message(SEND_ERROR "gtest-config not found")
+else()
+	message(STATUS "gtest-config found")
+endif()
+# cxx_flags
+exec_program(${GTEST_CONFIG} ARGS "--cppflags --cxxflags" OUTPUT_VARIABLE GTEST_CXX_FLAGS)
+LIST(APPEND CMAKE_CXX_FLAGS ${GTEST_CXX_FLAGS})
+# link_flags
+exec_program(${GTEST_CONFIG} ARGS "--ldflags --libs" OUTPUT_VARIABLE GTEST_LINK_FLAGS)
+list(APPEND LINK_FLAGS ${GTEST_LINK_FLAGS})
+
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/test CXX_TEST_SOURCES)
+foreach(i ${CXX_TEST_SOURCES})
+	string(REGEX REPLACE ".*/\([a-z_]*\).cxx" "\\1" exe ${i})
+	add_executable(test_${exe} ${i})
+	target_link_libraries(test_${exe}
 		${rpg2kLib_LIBRARIES}
 		${libs}
-		"gtest"
+		${GTEST_BOTH_LIBRARIES}
 	)
-	TARGET_LINK_LIBRARIES(test_${target} ${CMAKE_THREAD_LIBS_INIT})
-	ADD_TEST(
-		NAME test_${target}
+	add_test(
+		NAME ${exe}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-		COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${target}
+		COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${exe}
 	)
-	ADD_DEPENDENCIES(test_${target} ${PROJECT_NAME})
-ENDFUNCTION()
-
-SET(CXX_TEST_SOURCES "encode;model;stream;structure;")
-FOREACH(i ${CXX_TEST_SOURCES})
-	CXX_TEST(${i} "gtest_main")
-ENDFOREACH()
+	add_dependencies(test_${exe} ${PROJECT_NAME})
+endforeach()
 
 # pugixml
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/pugixml/scripts)
