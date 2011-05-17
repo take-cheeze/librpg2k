@@ -3,6 +3,7 @@
 
 #include "Structure.hxx"
 
+#include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream.hpp>
 
 #include <iosfwd>
@@ -54,6 +55,24 @@ namespace rpg2k
 		}
 
 		bool isEOF(std::istream& is);
+
+		struct istream_range_source : public boost::iostreams::source {
+			istream_range_source(std::istream& is, std::streamsize const s)
+				: stream_(is), size_(s)
+			{
+			}
+			istream_range_source(istream_range_source const& src)
+				: stream_(src.stream_), size_(src.size_) {}
+			std::streamsize read(char* o, std::streamsize const n)
+			{
+				std::streamsize const result = std::min(n, size_);
+				size_ -= result;
+				return (result != 0)? (stream_.read(o, result), result) : EOF;
+			}
+		private:
+			std::istream& stream_;
+			std::streamsize size_;
+		};
 	} // namespace structure
 } // namespace rpg2k
 

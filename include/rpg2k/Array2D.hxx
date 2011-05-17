@@ -31,10 +31,12 @@ namespace rpg2k
 
 			Array2D(ArrayDefine info);
 			Array2D(ArrayDefine info, std::istream& s);
+			Array2D(ArrayDefine info, std::istream& s, size_t size);
 			Array2D(ArrayDefine info, Binary const& b);
 
 			Array2D(Element& e);
 			Array2D(Element& e, std::istream& s);
+			Array2D(Element& e, std::istream& s, size_t size);
 			Array2D(Element& e, Binary const& b);
 
 			Array2D const& operator =(Array2D const& src);

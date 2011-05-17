@@ -110,27 +110,6 @@ namespace rpg2k
 			} else { return impl_.Binary_->serializedSize(); }
 		}
 
-		Element::Element(Element const& e)
-		: descriptor_(e.descriptor_)
-		, exists_(e.exists_), owner_(e.owner_)
-		, indexOfArray1D_(e.indexOfArray1D_), indexOfArray2D_(e.indexOfArray2D_)
-		{
-			if(isDefined()) switch(descriptor_->type()) {
-				#define PP_enum(r, data, elem) \
-					case ElementType::BOOST_PP_CAT(elem, data): \
-						impl_.BOOST_PP_CAT(elem, data) = new elem(*e.impl_.BOOST_PP_CAT(elem, data)); \
-						break;
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
-				#undef PP_enum
-				#define PP_enum(r, data, elem) \
-					case ElementType::BOOST_PP_CAT(elem, data): \
-						impl_.BOOST_PP_CAT(elem, data) = descriptor().hasDefault()? descriptor() : elem(); \
-						break;
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
-				#undef PP_enum
-			}
-		}
-
 		void Element::init()
 		{
 			exists_ = false;
@@ -222,6 +201,26 @@ namespace rpg2k
 		{
 			init();
 		}
+		Element::Element(Element const& e)
+		: descriptor_(e.descriptor_)
+		, exists_(e.exists_), owner_(e.owner_)
+		, indexOfArray1D_(e.indexOfArray1D_), indexOfArray2D_(e.indexOfArray2D_)
+		{
+			if(isDefined()) switch(descriptor_->type()) {
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = new elem(*e.impl_.BOOST_PP_CAT(elem, data)); \
+						break;
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2kTypes)
+				#undef PP_enum
+				#define PP_enum(r, data, elem) \
+					case ElementType::BOOST_PP_CAT(elem, data): \
+						impl_.BOOST_PP_CAT(elem, data) = descriptor().hasDefault()? descriptor() : elem(); \
+						break;
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
+				#undef PP_enum
+			}
+		}
 		Element::Element(Descriptor const& info)
 		: descriptor_(&info), owner_(NULL), indexOfArray1D_(NOT_ARRAY), indexOfArray2D_(NOT_ARRAY)
 		{
@@ -241,6 +240,13 @@ namespace rpg2k
 		{
 			init(s);
 		}
+		Element::Element(Descriptor const& info, std::istream& stream, size_t const size)
+		: descriptor_(&info), owner_(NULL), indexOfArray1D_(NOT_ARRAY), indexOfArray2D_(NOT_ARRAY)
+		{
+			io::stream<stream::istream_range_source>
+				s(stream::istream_range_source(stream, size));
+			init(s);
+		}
 
 		Element::Element(Array1D const& owner, unsigned index)
 		: descriptor_(
@@ -250,6 +256,17 @@ namespace rpg2k
 		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
 		{
 			init();
+		}
+		Element::Element(Array1D const& owner, unsigned const index, std::istream& stream, size_t const size)
+		: descriptor_(
+			owner.arrayDefine().find(index) != owner.arrayDefine().end()
+				? owner.arrayDefine().find(index)->second : NULL)
+		, owner_(&owner.toElement()), indexOfArray1D_(index)
+		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
+		{
+			io::stream<stream::istream_range_source>
+				s(stream::istream_range_source(stream, size));
+			init(s);
 		}
 		Element::Element(Array1D const& owner, unsigned index, Binary const& b)
 		: descriptor_(

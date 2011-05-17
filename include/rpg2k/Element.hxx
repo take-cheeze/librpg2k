@@ -39,10 +39,12 @@ namespace rpg2k
 			Element();
 			Element(Element const& e);
 			Element(Descriptor const& info);
-			Element(Descriptor const& info, Binary const& b);
 			Element(Descriptor const& info, std::istream& s);
+			Element(Descriptor const& info, std::istream& s, size_t size);
+			Element(Descriptor const& info, Binary const& b);
 
 			Element(Array1D const& owner, unsigned index);
+			Element(Array1D const& owner, unsigned index, std::istream& s, size_t size);
 			Element(Array1D const& owner, unsigned index , Binary const& b);
 
 			bool isDefined() const { return descriptor_ != NULL; }

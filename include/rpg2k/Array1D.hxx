@@ -40,10 +40,12 @@ namespace rpg2k
 
 			Array1D(ArrayDefine info);
 			Array1D(ArrayDefine info, std::istream& s);
+			Array1D(ArrayDefine info, std::istream& s, size_t size);
 			Array1D(ArrayDefine info, Binary const& b);
 
 			Array1D(Element& e);
 			Array1D(Element& e, std::istream& s);
+			Array1D(Element& e, std::istream& s, size_t size);
 			Array1D(Element& e, Binary const& b);
 
 			Array1D(Array2D& owner, unsigned index);

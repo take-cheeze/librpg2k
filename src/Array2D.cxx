@@ -30,6 +30,14 @@ namespace rpg2k
 		{
 			init(s);
 		}
+		Array2D::Array2D(ArrayDefine info, std::istream& in, size_t const size)
+		: arrayDefine_(info), this_(NULL)
+		{
+			io::stream<stream::istream_range_source>
+				s(stream::istream_range_source(in, size));
+			init(s);
+		}
+		/*
 		Array2D::Array2D(ArrayDefine info, Binary const& b)
 		: arrayDefine_(info), this_(NULL)
 		{
@@ -38,6 +46,7 @@ namespace rpg2k
 			if(isInvalidArray2D(b)) { return; } // s.seek(PARTICULAR_DATA_SIZE);
 			else { this->init(s); }
 		}
+		*/
 
 		Array2D::Array2D(Element& e)
 		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
@@ -46,6 +55,13 @@ namespace rpg2k
 		Array2D::Array2D(Element& e, std::istream& s)
 		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		{
+			init(s);
+		}
+		Array2D::Array2D(Element& e, std::istream& in, size_t const size)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
+		{
+			io::stream<stream::istream_range_source>
+				s(stream::istream_range_source(in, size));
 			init(s);
 		}
 		Array2D::Array2D(Element& e, Binary const& b)

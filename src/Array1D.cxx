@@ -52,6 +52,13 @@ namespace rpg2k
 		{
 			init(s);
 		}
+		Array1D::Array1D(ArrayDefine info, std::istream& in, size_t const size)
+		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
+		{
+			io::stream<stream::istream_range_source>
+				s(stream::istream_range_source(in, size));
+			init(s);
+		}
 		Array1D::Array1D(ArrayDefine info, Binary const& b)
 		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
 		{
@@ -69,6 +76,14 @@ namespace rpg2k
 		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		, owner_(NULL), index_(-1)
 		{
+			init(s);
+		}
+		Array1D::Array1D(Element& e, std::istream& in, size_t const size)
+		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
+		, owner_(NULL), index_(-1)
+		{
+			io::stream<stream::istream_range_source>
+				s(stream::istream_range_source(in, size));
 			init(s);
 		}
 		Array1D::Array1D(Element& e, Binary const& b)
@@ -101,8 +116,13 @@ namespace rpg2k
 
 				if(index == ARRAY_1D_END) break;
 
-				stream::readWithSize(s, bin);
-				insert(index, new Element(*this, index, bin));
+				// stream::readWithSize(s, bin);
+				// insert(index, new Element(*this, index, bin));
+
+				size_t const size = stream::readBER(s);
+				std::streampos const pos = size + s.tellg();
+				insert(index, new Element(*this, index, s, size));
+				s.seekg(pos);
 
 				if(!toElement().hasOwner() && stream::isEOF(s)) return;
 			}
