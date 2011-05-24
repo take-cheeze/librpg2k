@@ -63,7 +63,7 @@ namespace rpg2k
 			void init(std::istream& s);
 		public:
 			Event() {}
-			Event(Binary const& b);
+			explicit Event(Binary const& b);
 
 			Instruction const& operator [](unsigned index) const { return data_[index]; }
 

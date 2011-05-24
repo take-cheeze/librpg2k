@@ -1,17 +1,28 @@
 #ifndef _INC__RPG2K__DEFINES_HPP
 #define _INC__RPG2K__DEFINES_HPP
 
-#include <cstdint>
 #include <iosfwd>
-
 #include <string>
 
 #include "Config.hxx"
-#include "Vector.hxx"
+#include "vec.hxx"
+
+#include <boost/checked_delete.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 
 
 namespace rpg2k
 {
+	using namespace cheeze;
+
+	template<class T, class D = boost::checked_deleter<T> >
+	struct unique_ptr
+	{
+		typedef boost::interprocess::unique_ptr<T, D> type;
+	};
+
 	class SystemString;
 	class String : public std::string
 	{
@@ -50,15 +61,15 @@ namespace rpg2k
 
 	namespace
 	{
-		Size2D const SCREEN_SIZE(320, 240);
+		ivec2 const SCREEN_SIZE(320, 240);
 
-		Size2D const SCROLL_SIZE(16, 8);
+		ivec2 const SCROLL_SIZE(16, 8);
 
-		Size2D const FACE_SIZE(48, 48);
-		Size2D const CHIP_SIZE(16, 16);
-		Size2D const CHAR_SIZE(24, 32);
+		ivec2 const FACE_SIZE(48, 48);
+		ivec2 const CHIP_SIZE(16, 16);
+		ivec2 const CHAR_SIZE(24, 32);
 
-		Size2D const MONEY_WINDOW_SIZE(88, 32);
+		ivec2 const MONEY_WINDOW_SIZE(88, 32);
 
 		char const* const AUDIO_OFF = "(OFF)";
 
@@ -143,63 +154,63 @@ namespace rpg2k
 		ID_THIS  = 10005,
 	};
 
-	enum class ChipSet : unsigned { BEGIN, LOWER = BEGIN, UPPER, END, };
+	struct ChipSet { enum type { BEGIN, LOWER = BEGIN, UPPER, END, }; };
 	struct CharSet
 	{
-		enum class Dir { BEGIN, UP = BEGIN, RIGHT, DOWN, LEFT, END };
-		enum class Pat { BEGIN, LEFT = BEGIN, MIDDLE, RIGHT, END };
+		struct Dir { enum type { BEGIN, UP = BEGIN, RIGHT, DOWN, LEFT, END }; };
+		struct Pat { enum type { BEGIN, LEFT = BEGIN, MIDDLE, RIGHT, END }; };
 	};
 
-	enum class EventDir { DOWN = 2, LEFT = 4, RIGHT = 6, UP = 8, };
-	enum class EventMove {
+	struct EventDir { enum type { DOWN = 2, LEFT = 4, RIGHT = 6, UP = 8, }; };
+	struct EventMove { enum type {
 		FIXED, RANDOM_MOVE, UP_DOWN, LEFT_RIGHT,
 		TO_PARTY, FROM_PARTY, MANUAL_MOVE,
-	};
-	enum class EventStart {
+	}; };
+	struct EventStart { enum type {
 		BEGIN,
 		KEY_ENTER = BEGIN, PARTY_TOUCH, EVENT_TOUCH,
 		AUTO, PARALLEL, CALLED,
 		END,
-	};
-	enum class EventPriority {
+	}; };
+	struct EventPriority { enum type {
 		BEGIN,
 		BELOW = BEGIN, CHAR, ABOVE,
 		END,
-	};
+	}; };
 
-	enum class Equip {
+	struct Equip { enum type {
 		BEGIN,
 		WEAPON = BEGIN, SHIELD, ARMOR, HELMET, OTHER,
 		END,
-	};
-	enum class Item {
+	}; };
+	struct Item { enum type {
 		BEGIN,
 		NORMAL = BEGIN,
 		WEAPON, SHIELD, ARMOR, HELMET, ACCESSORY,
 		MEDICINE, BOOK, SEED, SPECIAL, SWITCH,
 		END,
-	};
+	}; };
 
-	enum class Param {
+	struct Param { enum type {
 		BEGIN,
 		HP = BEGIN, MP,
 		ATTACK, GAURD, MIND, SPEED,
 		END,
-	};
+	}; };
 
-	enum class Skill {
+	struct Skill { enum type {
 		BEGIN,
 		NORMAL = BEGIN,
 		TELEPORT, ESCAPE,
 		SWITCH,
 		END,
-	};
+	}; };
 
-	enum class Window { NORMAL, NO_FRAME, };
-	enum class Wallpaper { ZOOM, TILE, };
+	struct Window { enum type { NORMAL, NO_FRAME, }; };
+	struct Wallpaper { enum type { ZOOM, TILE, }; };
 
-	CharSet::Dir toCharSetDir(EventDir dir);
-	EventDir toEventDir(CharSet::Dir key);
+	CharSet::Dir::type toCharSetDir(EventDir::type dir);
+	EventDir::type toEventDir(CharSet::Dir::type key);
 
 	unsigned random();
 	unsigned random(unsigned ax);
@@ -217,7 +228,7 @@ namespace rpg2k
 
 	struct Action
 	{
-		typedef unsigned Type;
+		typedef unsigned type;
 		struct Move { enum {
 			UP = 0, RIGHT, DOWN, LEFT,
 			RIGHT_UP, RIGHT_DOWN, LEFT_DOWN, LEFT_UP,
@@ -244,7 +255,7 @@ namespace rpg2k
 		};
 	}; // struct Action
 
-	enum class Face { GOTHIC, MINCHO, };
+	struct Face { enum type { GOTHIC, MINCHO, }; };
 	namespace font
 	{
 		enum Color {
@@ -253,14 +264,14 @@ namespace rpg2k
 			PARAM_UP = 2, PARAM_DOWN = 3, HP_LOW = 4, MP_LOW = 4,
 		};
 
-		static Size2D const FULL_SIZE(12, 12);
-		static Size2D const HALF_SIZE(6, 12);
+		static ivec2 const FULL_SIZE(12, 12);
+		static ivec2 const HALF_SIZE(6, 12);
 
 		typedef uint16_t const font_t;
 	} // namespace font
 } // namespace rpg2k
 
-namespace std
+namespace boost
 {
 	template<>
 	struct hash<rpg2k::String> : public hash<std::string> {};

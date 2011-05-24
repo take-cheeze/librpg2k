@@ -11,6 +11,7 @@
 #include <boost/range/algorithm/remove_copy_if.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/transform.hpp>
+#include <boost/typeof/typeof.hpp>
 
 
 namespace rpg2k
@@ -32,16 +33,16 @@ namespace rpg2k
 		, arrayDefine_(src.arrayDefine_), this_(src.this_)
 		, exists_(src.exists_), owner_(src.owner_), index_(src.index_)
 		{
-			for(auto const& it : src) {
-				if(!it->second->exists()) continue;
+			for(const_iterator i = src.begin(); i != src.end(); ++i) {
+				if(!i->second->exists()) continue;
 
-				Binary const bin = it->second->serialize();
-				unsigned index = it->first;
+				Binary const bin = i->second->serialize();
+				unsigned index = i->first;
 
-				this->insert(index, new Element(*this, it->first, bin));
+				this->insert(index, new Element(*this, i->first, bin));
 			}
 		}
-
+		/*
 		Array1D::Array1D(ArrayDefine info)
 		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
 		{
@@ -65,7 +66,7 @@ namespace rpg2k
 			io::stream<io::array_source> s(b.source());
 			init(s);
 		}
-
+		*/
 		Array1D::Array1D(Element& e)
 		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
 		, owner_(NULL), index_(-1)
@@ -181,18 +182,21 @@ namespace rpg2k
 
 		unsigned Array1D::count() const
 		{
-			return boost::count_if(*this
-			, [](decltype(*this->begin()) const& i) { return i.second->exists(); });
+			unsigned ret = 0;
+			for(const_iterator i = begin(); i != end(); ++i) {
+				if(i->second->exists()) ++ret;
+			}
+			return ret;
 		}
 		size_t Array1D::serializedSize() const
 		{
 			size_t ret = 0;
 
-			for(auto const& it : *this) {
-				if(!it->second->exists()) continue;
+			for(const_iterator i = this->begin(); i != this->end(); ++i) {
+				if(!i->second->exists()) continue;
 
-				ret += stream::berSize(it->first);
-				size_t const size = it->second->serializedSize();
+				ret += stream::berSize(i->first);
+				size_t const size = i->second->serializedSize();
 				ret += stream::berSize(size);
 				ret += size;
 			}
@@ -203,20 +207,20 @@ namespace rpg2k
 		}
 		std::ostream& Array1D::serialize(std::ostream& s) const
 		{
-			typedef decltype(*this->begin()) const_value_type;
+			typedef BOOST_TYPEOF(*this->begin()) const_value_type;
 			std::vector<Element const*> result;
-			boost::transform(*this, std::back_inserter(result)
-			, [](const_value_type const& v) { return v.second; });
-			boost::remove_copy_if(result, result.begin()
-			, [](Element const* v) { return !v->exists(); });
-			boost::sort(result
-			, [](Element const* l, Element const* r) { return l->indexOfArray1D() < r->indexOfArray1D(); });
-			for(auto const& i : result) {
+			for(const_iterator i = begin(); i != end(); ++i) {
+				if(i->second->exists()) result.push_back(i->second);
+			}
+			boost::sort(result, sort_function);
+			BOOST_FOREACH(Element const* const i, result) {
 				stream::writeBER(s, i->indexOfArray1D());
 				stream::writeWithSize(s, *i);
 			}
 
-			if(this->toElement().hasOwner() || this->isArray2D()) stream::writeBER(s, ARRAY_1D_END);
+			if(this->toElement().hasOwner() || this->isArray2D()) {
+				stream::writeBER(s, ARRAY_1D_END);
+			}
 
 			return s;
 		}
@@ -237,6 +241,11 @@ namespace rpg2k
 		{
 			const_iterator it = find(index);
 			return (it != end()) && it->second->exists();
+		}
+
+		bool Array1D::sort_function(Element const* l, Element const* r)
+		{
+			return l->indexOfArray1D() < r->indexOfArray1D();
 		}
 	} // namespace structure
 } // namespace rpg2k

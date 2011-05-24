@@ -23,7 +23,6 @@
 #include "rpg2k/SaveData.hxx"
 #include "rpg2k/Stream.hxx"
 #include "rpg2k/Structure.hxx"
-#include "rpg2k/Vector.hxx"
 
 #include "rpg2k/define/Define.hxx"
 

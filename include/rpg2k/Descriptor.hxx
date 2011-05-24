@@ -4,8 +4,6 @@
 #include "Define.hxx"
 #include "Singleton.hxx"
 
-#include <unordered_map>
-
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/preprocessor/cat.hpp>
@@ -13,6 +11,7 @@
 #include <boost/preprocessor/seq/enum.hpp>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 
 namespace rpg2k
@@ -27,14 +26,10 @@ namespace rpg2k
 		class Element;
 		class Event;
 
-		class EventState;
-		class Music;
-		class Sound;
-
 		class Descriptor;
 		typedef boost::ptr_unordered_map<unsigned, Descriptor> ArrayDefineType;
 		typedef ArrayDefineType const& ArrayDefine;
-		typedef std::unique_ptr<ArrayDefineType> ArrayDefinePointer;
+		typedef unique_ptr<ArrayDefineType>::type ArrayDefinePointer;
 
 		#define PP_basicTypes \
 			(int) \
@@ -46,8 +41,8 @@ namespace rpg2k
 			(Array2D) \
 			(BerEnum) \
 			(Binary) \
-			(String) \
 			(Event) \
+			(String) \
 
 		#define PP_allTypes PP_basicTypes PP_rpg2kTypes
 
@@ -73,9 +68,9 @@ namespace rpg2k
 			Descriptor(String const& type);
 			Descriptor(String const& type, String const& val);
 
-			typedef std::unordered_map<String, int> ArrayTable;
+			typedef boost::unordered_map<String, int> ArrayTable;
 			Descriptor(String const& type
-			, ArrayDefinePointer def, std::unique_ptr<ArrayTable> table);
+			, ArrayDefinePointer def, unique_ptr<ArrayTable>::type table);
 
 			~Descriptor();
 

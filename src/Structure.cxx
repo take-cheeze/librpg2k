@@ -4,7 +4,7 @@
 #include "rpg2k/Encode.hxx"
 #include "rpg2k/Stream.hxx"
 
-#include <cctype>
+#include <boost/foreach.hpp>
 
 
 namespace 
@@ -23,7 +23,7 @@ namespace rpg2k
 		return(os << str.c_str());
 	}
 
-	CharSet::Dir toCharSetDir(EventDir const dir)
+	CharSet::Dir::type toCharSetDir(EventDir::type const dir)
 	{
 		switch(dir) {
 			case EventDir::DOWN : return CharSet::Dir::DOWN ;
@@ -33,7 +33,7 @@ namespace rpg2k
 			default: return CharSet::Dir::DOWN;
 		}
 	}
-	EventDir toEventDir(CharSet::Dir const key)
+	EventDir::type toEventDir(CharSet::Dir::type const key)
 	{
 		switch(key) {
 			case CharSet::Dir::UP   : return EventDir::UP   ;
@@ -91,7 +91,7 @@ namespace rpg2k
 	}
 	bool Binary::isString() const
 	{
-		for(auto const& i : *this) if(std::iscntrl(i)) return false;
+		BOOST_FOREACH(uint8_t const i, *this) if(std::iscntrl(i)) return false;
 		try {
 			String(reinterpret_cast<char const*>(this->data()), this->size()).toSystem();
 			return true;

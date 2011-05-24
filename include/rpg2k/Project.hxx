@@ -63,8 +63,8 @@ namespace rpg2k
 				void setHP(unsigned const val) const { lsd_[71] = val; }
 				void setMP(unsigned const val) const { lsd_[72] = val; }
 
-				int basicParam(int level, Param t) const;
-				int param(Param t) const;
+				int basicParam(int level, Param::type t) const;
+				int param(Param::type t) const;
 
 				int level() const { return get<int, 31, 7>(); }
 				void setLevel(unsigned val);
@@ -138,9 +138,9 @@ namespace rpg2k
 			void loadLSD(unsigned id);
 			void saveLSD(unsigned id);
 
-			int paramWithEquip(unsigned charID, Param t) const;
+			int paramWithEquip(unsigned charID, Param::type t) const;
 			bool   equip(unsigned charID, unsigned itemID);
-			void unequip(unsigned charID, Equip type);
+			void unequip(unsigned charID, Equip::type type);
 			unsigned equipNum(unsigned itemID) const;
 
 			bool validPageMap   (structure::Array1D const& term) const;
@@ -157,14 +157,14 @@ namespace rpg2k
 			uint8_t pass(int chipID);
 			int terrainID(int chipID);
 
-			bool processAction(unsigned eventID, Action::Type act, std::istream& is);
+			bool processAction(unsigned eventID, Action::type act, std::istream& is);
 
 			int currentPageID(unsigned eventID);
 			structure::Array1D const* currentPage(structure::Array2D const& pages) const;
 
 			String const& systemGraphic() const;
-			Wallpaper wallpaperType() const;
-			Face fontType() const;
+			Wallpaper::type wallpaperType() const;
+			Face::type fontType() const;
 
 			Character const& character(unsigned const id) const;
 			Character& character(unsigned const id);

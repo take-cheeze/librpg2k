@@ -32,15 +32,15 @@ namespace rpg2k
 			int mapID() const { return (*this)[11]; }
 			int x() const { return (*this)[12]; }
 			int y() const { return (*this)[13]; }
-			Vector2D position() const { return Vector2D(x(), y()); }
+			vec2 position() const { return vec2(x(), y()); }
 
 			String const& charSet() const { return (*this)[73]; }
 			int charSetPos() const { return (*this)[74]; }
-			CharSet::Dir charSetDir() const { return CharSet::Dir((*this)[75].to<int>()); }
-			CharSet::Pat charSetPat() const { return CharSet::Pat::MIDDLE; }
+			CharSet::Dir::type charSetDir() const { return CharSet::Dir::type((*this)[75].to<int>()); }
+			CharSet::Pat::type charSetPat() const { return CharSet::Pat::MIDDLE; }
 
-			CharSet::Dir eventDir() const { return CharSet::Dir((*this)[21].to<int>()); }
-			CharSet::Dir  talkDir() const { return CharSet::Dir((*this)[22].to<int>()); }
+			CharSet::Dir::type eventDir() const { return CharSet::Dir::type((*this)[21].to<int>()); }
+			CharSet::Dir::type  talkDir() const { return CharSet::Dir::type((*this)[22].to<int>()); }
 
 			// CharSetDir charSetDir() const;
 		}; // class EventState

@@ -4,6 +4,7 @@
 #include "rpg2k/Element.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/count_if.hpp>
 
@@ -74,7 +75,7 @@ namespace rpg2k
 		}
 		void Array2D::init(std::istream& s)
 		{
-			for(auto const& i : boost::irange(0u, stream::readBER(s))) {
+			BOOST_FOREACH(unsigned i, boost::irange(0u, stream::readBER(s))) {
 				(void)i;
 				unsigned index = stream::readBER(s);
 				this->insert(index, new Array1D(*this, index, s));
@@ -96,13 +97,10 @@ namespace rpg2k
 		// check the data size
 			if(b.size() < PARTICULAR_DATA_SIZE) return false;
 		// check the data inside Binary
-			if(std::find_if(b.begin(), b.begin() + PARTICULAR_DATA_SIZE
-							, [](uint8_t const i) { return i != 0xff; })
-			   < (b.begin() + PARTICULAR_DATA_SIZE)) { return false; }
-
-			debug::Tracer::printBinary(b, clog);
 		// return true if it is particular Array2D
-			return true;
+			return (boost::count(b, 0xff) < PARTICULAR_DATA_SIZE)
+				? false
+				: debug::Tracer::printBinary(b, clog), true;
 		}
 
 		Element& Array2D::toElement() const
@@ -134,15 +132,18 @@ namespace rpg2k
 
 		unsigned Array2D::count() const
 		{
-			return boost::count_if(*this
-			, [](decltype(*this->begin()) const& i) { return i.second->exists(); });
+			unsigned ret = 0;
+			for(const_iterator i = begin(); i != end(); ++i) {
+				if(i->second->exists()) ++ret;
+			}
+			return ret;
 		}
 		size_t Array2D::serializedSize() const
 		{
 			unsigned ret = 0;
 
 			ret += stream::berSize(count());
-			for(auto const& i : *this) {
+			for(const_iterator i = this->begin(); i != this->end(); ++i) {
 				if(!i->second->exists()) continue;
 
 				ret += stream::berSize(i->first);
@@ -154,7 +155,7 @@ namespace rpg2k
 		std::ostream& Array2D::serialize(std::ostream& s) const
 		{
 			stream::writeBER(s, count());
-			for(auto const& i : *this) {
+			for(const_iterator i = this->begin(); i != this->end(); ++i) {
 				if(!i->second->exists()) continue;
 
 				stream::writeBER(s, i->first);

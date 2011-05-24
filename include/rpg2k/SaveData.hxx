@@ -73,8 +73,8 @@ namespace rpg2k
 
 			unsigned timerLeft() const { return 0; } // TODO
 
-			unsigned replace(ChipSet const type, unsigned const num) const { return chipReplace_[int(type)][num]; }
-			void replace(ChipSet type, unsigned dstNum, unsigned srcNum);
+			unsigned replace(ChipSet::type const type, unsigned const num) const { return chipReplace_[int(type)][num]; }
+			void replace(ChipSet::type type, unsigned dstNum, unsigned srcNum);
 			void resetReplace();
 
 			structure::Array1D& system() { return (*this)[101]; }

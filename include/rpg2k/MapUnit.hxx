@@ -33,8 +33,8 @@ namespace rpg2k
 
 			int chipIDLw(unsigned x, unsigned y) const;
 			int chipIDUp(unsigned x, unsigned y) const;
-			int chipIDLw(Vector2D const& pos) const { return chipIDLw(pos[0], pos[1]); }
-			int chipIDUp(Vector2D const& pos) const { return chipIDUp(pos[0], pos[1]); }
+			int chipIDLw(vec2 const& pos) const { return chipIDLw(pos[0], pos[1]); }
+			int chipIDUp(vec2 const& pos) const { return chipIDUp(pos[0], pos[1]); }
 
 			unsigned width () const { return  width_; }
 			unsigned height() const { return height_; }

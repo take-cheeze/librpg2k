@@ -1,5 +1,8 @@
 #include "rpg2k/Node.hxx"
 
+#include <boost/foreach.hpp>
+
+
 namespace rpg2k
 {
 	void Node::addChild(Priority const& p, Node& child) 
@@ -17,13 +20,13 @@ namespace rpg2k
 	{
 		this->updateThis();
 
-		if(children_) for(auto& i : children_->left) { i.second->update(); }
+		if(children_) BOOST_FOREACH(Children::left_value_type& i, children_->left) { i.second->update(); }
 	}
 	void Node::draw(Graphics2D& g) const
 	{
 		this->draw(g);
 
-		if(children_) for(auto& i : children_->left) { i.second->draw(g); }
+		if(children_) BOOST_FOREACH(Children::left_value_type& i, children_->left) { i.second->draw(g); }
 	}
 
 	void NodeSwitcher::addChild(Key const& k, Node& child) 

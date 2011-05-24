@@ -157,20 +157,20 @@ namespace rpg2k
 				}
 			// Array1D
 				try {
-					std::unique_ptr<Element> p(new Element(Descriptor(
+					unique_ptr<Element>::type p(new Element(Descriptor(
 						ElementType::instance().toString(ElementType::Array1D_),
 						ArrayDefinePointer(new ArrayDefineType),
-						std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
+						unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable())), bin));
 					ostrm << endl << "---Array1D check start---" << endl;
 					p.reset(); // trigger Element's destructor
 					ostrm << "---Array1D check end  ---";
 				} catch(...) {}
 			// Array2D
 				try {
-					std::unique_ptr<Element> p(new Element(Descriptor(
+					unique_ptr<Element>::type p(new Element(Descriptor(
 						ElementType::instance().toString(ElementType::Array2D_),
 						ArrayDefinePointer(new ArrayDefineType),
-						std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable())), bin));
+						unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable())), bin));
 					ostrm << endl << "---Array2D check start---" << endl;
 					p.reset(); // trigger Element's destructor
 					ostrm << "---Array2D check end  ---";
@@ -185,15 +185,18 @@ namespace rpg2k
 		std::ostream& Tracer::printArray1D(structure::Array1D const& val, std::ostream& ostrm)
 		{
 			std::vector<Element const*> buf;
-			boost::transform(val, std::back_inserter(buf)
-			, [](decltype(*val.begin()) const& v) { return v.second; });
-			boost::sort(buf, [](Element const* l, Element const* r) { return l->indexOfArray1D() < r->indexOfArray1D(); });
-			for(auto const& i : buf) { printTrace(*i, true, ostrm); }
+			for(structure::Array1D::const_iterator i = val.begin(); i != val.end(); ++i) {
+				buf.push_back(i->second);
+			}
+			boost::sort(buf, structure::Array1D::sort_function);
+			BOOST_FOREACH(Element const* i, buf) { printTrace(*i, true, ostrm); }
 			return ostrm;
 		}
 		std::ostream& Tracer::printArray2D(structure::Array2D const& val, std::ostream& ostrm)
 		{
-			for(auto const& i : val) { printArray1D(*i->second, ostrm); }
+			for(structure::Array2D::const_iterator i = val.begin(); i != val.end(); ++i) {
+				printArray1D(*i->second, ostrm);
+			}
 			return ostrm;
 		}
 		std::ostream& Tracer::printInt(int const val, std::ostream& ostrm)
@@ -221,9 +224,9 @@ namespace rpg2k
 			ostrm << std::dec << std::setfill(' ');
 			ostrm << "size = " << val.serializedSize() << "; data = {";
 
-			for(auto const& i : boost::irange(0, int(val.size()))) {
+			BOOST_FOREACH(structure::Instruction const& i, val.data()) {
 				ostrm << endl << "\t";
-				printInstruction(val[i], ostrm, true);
+				printInstruction(i, ostrm, true);
 			}
 
 			ostrm << endl << "}";
@@ -234,7 +237,7 @@ namespace rpg2k
 		, std::ostream& ostrm, bool indent)
 		{
 			if(indent)
-				for(auto const& i : boost::irange(0, int(inst.nest()))) { (void) i; ostrm << "\t"; }
+				BOOST_FOREACH(int const i, boost::irange(0, int(inst.nest()))) { (void) i; ostrm << "\t"; }
 			ostrm << "{ "
 				<< "nest: " << std::setw(4) << std::dec << inst.nest() << ", "
 				<< "code: " << std::setw(5) << std::dec << inst.code() << ", "
@@ -255,7 +258,9 @@ namespace rpg2k
 			ostrm << "size = " << val.size() << "; data = { ";
 
 			ostrm << std::setfill('0') << std::hex;
-			for(auto const& i : boost::irange(0, int(val.size()))) ostrm << std::setw(2) << (val[i] & 0xff) << " ";
+			BOOST_FOREACH(uint8_t const i, val) {
+				ostrm << std::setw(2) << (i & 0xff) << " ";
+			}
 
 			ostrm << "}";
 

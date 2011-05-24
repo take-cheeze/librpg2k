@@ -4,7 +4,8 @@
 #include "rpg2k/SaveData.hxx"
 #include "rpg2k/Structure.hxx"
 
-#include <boost/range/counting_range.hpp>
+#include <boost/foreach.hpp>
+#include <boost/range/irange.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/range/algorithm/find.hpp>
 
@@ -42,9 +43,9 @@ namespace rpg2k
 		}
 		SaveData::~SaveData()
 		{
-		#if RPG2K_DEBUG
+#if RPG2K_DEBUG
 			debug::ANALYZE_RESULT << header() << ": " << int(id_) << endl;
-		#endif
+#endif
 		}
 
 		SaveData const& SaveData::operator =(SaveData const& src)
@@ -76,7 +77,7 @@ namespace rpg2k
 				std::vector<uint8_t > num = status[13].toBinary().toVector<uint8_t>();
 				std::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
 
-				for(auto const& i : boost::irange(0, itemTypeNum)) {
+				BOOST_FOREACH(int const i, boost::irange(0, itemTypeNum)) {
 					if(!num[i]) continue;
 
 					Item info = { num[i], use[i] };
@@ -93,7 +94,7 @@ namespace rpg2k
 			member_ = status[2].toBinary().toVector<uint16_t>();
 		// chip replace
 			chipReplace_.resize(int(ChipSet::END));
-			for(auto const& i : boost::counting_range(0, int(ChipSet::END)))
+			BOOST_FOREACH(int const i, boost::irange(0, int(ChipSet::END)))
 			{ chipReplace_[i] = event[21 + i].toBinary(); }
 		}
 
@@ -112,7 +113,7 @@ namespace rpg2k
 				std::vector<uint8_t > use(itemNum);
 
 				int i = 0;
-				for(auto const& p : item_) {
+				BOOST_FOREACH(ItemTable::value_type const p, item_) {
 					id [i] = p.first;
 					num[i] = p.second.num;
 					use[i] = p.second.use;
@@ -132,7 +133,7 @@ namespace rpg2k
 			(*this)[109].toArray1D()[1] = int(member_.size());
 			(*this)[109].toArray1D()[2].toBinary().assign(member_);
 		// chip replace
-			for(auto const& i : boost::counting_range(int(ChipSet::BEGIN), int(ChipSet::END)))
+			BOOST_FOREACH(int const i, boost::irange(int(ChipSet::BEGIN), int(ChipSet::END)))
 			{ (*this)[111].toArray1D()[21 + i].toBinary().assign(chipReplace_[i]); }
 		}
 
@@ -223,15 +224,16 @@ namespace rpg2k
 		{
 			switch(id) {
 				case ID_PARTY: case ID_BOAT: case ID_SHIP: case ID_AIRSHIP:
-					 return (*this)[ 104 + (id-ID_PARTY) ];
+					return reinterpret_cast<structure::EventState&>(
+						(*this)[104 + (id-ID_PARTY)]);
 				case ID_THIS: id = currentEventID(); // TODO
 				default:
-					return reinterpret_cast< structure::EventState& >(
+					return reinterpret_cast<structure::EventState&>(
 						(*this)[111].toArray1D()[11].toArray2D()[id]);
 			}
 		}
 
-		void SaveData::replace(ChipSet const type, unsigned const dstNo, unsigned const srcNo)
+		void SaveData::replace(ChipSet::type const type, unsigned const dstNo, unsigned const srcNo)
 		{
 			rpg2k_assert(rpg2k::within<unsigned>(dstNo, CHIP_REPLACE_MAX));
 			rpg2k_assert(rpg2k::within<unsigned>(srcNo, CHIP_REPLACE_MAX));
@@ -242,26 +244,10 @@ namespace rpg2k
 		{
 			chipReplace_.clear();
 			chipReplace_.resize(int(ChipSet::END));
-			for(auto const& i : boost::irange(int(ChipSet::BEGIN), int(ChipSet::END))) {
+			BOOST_FOREACH(int const i, boost::irange(int(ChipSet::BEGIN), int(ChipSet::END))) {
 				chipReplace_[i].resize(CHIP_REPLACE_MAX);
-				boost::copy(boost::counting_range(0, int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
+				boost::copy(boost::irange(0, int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
 			}
 		}
 	} // namespace model
 } // namespace rpg2k
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

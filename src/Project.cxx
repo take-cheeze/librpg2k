@@ -4,6 +4,7 @@
 #include "rpg2k/Project.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
@@ -12,7 +13,7 @@ namespace
 {
 	/*
 	 * EXP caclulation routine from http://twitter.com/easyrpg
-	 * (many rewrite with take-cheeze)
+	 * (many rewrite by take-cheeze)
 	 * The original code(writen with Pascal) is at
 	 * http://code.google.com/p/turbu/source/browse/trunk/turbu/hero_data.pas
 	 */
@@ -22,7 +23,7 @@ namespace
 
 		#if (RPG2K_IS_PSP || RPG2K_IS_IPHONE)
 			float standard = basic, additional = 1.5f + (increase * 0.01f);
-			for(auto const& i : boost::irange(0, level - 1)) {
+			BOOST_FOREACH(int const i, boost::irange(0, level - 1)) {
 				(void)i;
 				result += int(standard);
 				standard *= additional;
@@ -30,7 +31,7 @@ namespace
 			}
 		#else
 			double standard = basic, additional = 1.5 + (increase * 0.01);
-			for(auto const& i : boost::irange(0, level - 1)) {
+			BOOST_FOREACH(int const i, boost::irange(0, level - 1)) {
 				(void)i;
 				result += int(standard);
 				standard *= additional;
@@ -68,7 +69,7 @@ namespace rpg2k
 			lastSaveDataID_ = ID_MIN;
 
 			lsd_.push_back(new SaveData()); // set LcfSaveData buffer
-			for(auto const& i : boost::irange(int(ID_MIN), int(SAVE_DATA_MAX))) {
+			BOOST_FOREACH(int const i, boost::irange(int(ID_MIN), int(SAVE_DATA_MAX))) {
 				lsd_.push_back(new SaveData(baseDir_, i));
 
 				if(lsd_.back().exists()) {
@@ -137,11 +138,11 @@ namespace rpg2k
 			Array2D const& charsLDB = ldb_.character();
 			Array2D& charsLSD = getLSD().character();
 			charTable_.clear();
-			for(auto const& i : charsLDB) {
-				if(!i.second->exists()) continue;
+			for(Array2D::const_iterator i = charsLDB.begin(); i != charsLDB.end(); ++i) {
+				if(!i->second->exists()) continue;
 
-				unsigned index = i.first;
-				charTable_.insert(index, new Character(i.first, *i.second, charsLSD[i.first]));
+				unsigned index = i->first;
+				charTable_.insert(index, new Character(i->first, *i->second, charsLSD[i->first]));
 			}
 		}
 
@@ -167,14 +168,14 @@ namespace rpg2k
 					prev[13] = c.hp();
 				}
 				// set faceSet
-				for(auto const& i : boost::irange(0, int(mem.size()))) {
+				BOOST_FOREACH(int const i, boost::irange(0, int(mem.size()))) {
 					Character const& c = character(mem[i]);
 					prev[21 + 2*i] = c.faceSet();
 					prev[22 + 2*i] = c.faceSetPos();
 				}
 			}
 
-			for(auto const& i : charTable_) { i.second->sync(); }
+			for(CharacterTable::iterator i = charTable_.begin(); i != charTable_.end(); ++i) { i->second->sync(); }
 
 			lsd_[id] = lsd;
 			lsd_[id].save();
@@ -255,11 +256,11 @@ namespace rpg2k
 		}
 		Array1D const* Project::currentPage(Array2D const& pages) const
 		{
-			for(auto const& i : pages) {
+			for(Array2D::const_iterator i = pages.begin(); i != pages.end(); ++i) {
 				if(
-					i.second->exists() &&
-					validPageMap((*i.second)[2])
-				) return i.second;
+					i->second->exists() &&
+					validPageMap((*i->second)[2])
+				) return i->second;
 			}
 
 			return NULL;
@@ -284,7 +285,7 @@ namespace rpg2k
 
 			return true;
 		}
-		void Project::unequip(unsigned const charID, Equip const type)
+		void Project::unequip(unsigned const charID, Equip::type const type)
 		{
 			SaveData& lsd = getLSD();
 
@@ -301,19 +302,21 @@ namespace rpg2k
 			if(sys.exists(21)) return sys[21];
 			else return getLDB()[22].toArray1D()[19];
 		}
-		Wallpaper Project::wallpaperType() const
+		Wallpaper::type Project::wallpaperType() const
 		{
 			Array1D const& sys = getLSD()[101];
 
-			if(sys.exists(22)) return Wallpaper(sys[22].to<int>());
-			else return Wallpaper(getLDB()[22].toArray1D()[71].to<int>());
+			return sys.exists(22)
+				? Wallpaper::type(sys[22].to<int>())
+				: Wallpaper::type(getLDB()[22].toArray1D()[71].to<int>());
 		}
-		Face Project::fontType() const
+		Face::type Project::fontType() const
 		{
 			Array1D const& sys = getLSD()[101];
 
-			if(sys.exists(23)) return Face(sys[23].to<int>());
-			else return Face(getLDB()[22].toArray1D()[72].to<int>());
+			return Face::type(sys.exists(23)
+				? sys[23].to<int>()
+				: getLDB()[22].toArray1D()[72].to<int>());
 		}
 
 		void Project::newGame()
@@ -325,7 +328,7 @@ namespace rpg2k
 		// set party, boat, ship and airShip start point
 			Array1D const& startLMT = getLMT().startPoint();
 			Array1D const& sysLDB = getLDB()[22];
-			for(auto const& i : boost::irange(1, ID_AIRSHIP - ID_PARTY)) {
+			BOOST_FOREACH(int const i, boost::irange(1, ID_AIRSHIP - ID_PARTY)) {
 				EventState& dst = lsd.eventState(i + ID_PARTY);
 
 				dst[11] = startLMT[10*i + 1].to<int>();
@@ -342,11 +345,11 @@ namespace rpg2k
 			Array2D const& charsLDB = ldb.character();
 			Array2D& charsLSD = lsd.character();
 			unsigned const conditioNum = ldb.condition().rbegin()->first + 1;
-			for(auto const& i : charsLDB) {
-				if(!i.second->exists()) continue;
+			for(Array2D::const_iterator i = charsLDB.begin(); i != charsLDB.end(); ++i) {
+				if(!i->second->exists()) continue;
 
-				Array1D const& charLDB = *i.second;
-				Array1D& charLSD = charsLSD[i.first];
+				Array1D const& charLDB = *i->second;
+				Array1D& charLSD = charsLSD[i->first];
 
 				int const level = charLDB[7].to<int>();
 				charLSD[31] = level; // level
@@ -355,9 +358,9 @@ namespace rpg2k
 
 				charLSD[61] = charLDB[51].toBinary(); // equip
 
-				unsigned index = i.first;
-				charTable_.insert(index, new Character(i.first, charLDB, charLSD));
-				Character& c = this->character(i.first);
+				unsigned index = i->first;
+				charTable_.insert(index, new Character(i->first, charLDB, charLSD));
+				Character& c = this->character(i->first);
 
 				charLSD[32] = c.exp(level); // experience
 
@@ -401,18 +404,18 @@ namespace rpg2k
 		// set map event position
 			Array2D const& mapEvent = lmu[81];
 			Array2D& states = lsd.eventState();
-			for(auto const& i : mapEvent) {
-				if(!i.second->exists()) continue;
+			for(Array2D::const_iterator i = mapEvent.begin(); i != mapEvent.end(); ++i) {
+				if(!i->second->exists()) continue;
 
-				Array1D const* page = currentPage((*i.second)[5]);
+				Array1D const* page = currentPage((*i->second)[5]);
 				if(page == NULL) continue;
 
 				Array1D const& src = *page;
-				Array1D& dst = states[i.first];
+				Array1D& dst = states[i->first];
 
 				dst[11] = 0; // mapID
-				dst[12] = (*i.second)[2].to<int>(); // x
-				dst[13] = (*i.second)[3].to<int>(); // y
+				dst[12] = (*i->second)[2].to<int>(); // x
+				dst[13] = (*i->second)[3].to<int>(); // y
 
 				dst[21] = src[23].to<int>(); // direction
 				dst[22] = src[23].to<int>();
@@ -467,7 +470,7 @@ namespace rpg2k
 			if(getLSD().item().find(id) != getLSD().item().end()) return true;
 			else {
 				Member const& mem = getLSD().member();
-				for(auto const& i : boost::irange(0, int(mem.size()))) {
+				BOOST_FOREACH(int const i, boost::irange(0, int(mem.size()))) {
 					Character::Equip const& equip = this->character(mem[i]).equip();
 					if(std::find(equip.begin(), equip.end(), id) != equip.end()) return true;
 				}
@@ -479,7 +482,7 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 			Member const& mem = getLSD().member();
-			for(auto const& i : boost::irange(0, int(mem.size()))) {
+			BOOST_FOREACH(int const i, boost::irange(0, int(mem.size()))) {
 				Character::Equip const& equip = this->character(mem[i]).equip();
 				ret += std::count(equip.begin(), equip.end(), itemID);
 			}
@@ -523,12 +526,12 @@ namespace rpg2k
 			) ? false : true;
 		}
 
-		int Project::Character::basicParam(int const level, Param const t) const
+		int Project::Character::basicParam(int const level, Param::type const t) const
 		{
 			rpg2k_assert(rpg2k::within(basicParam_.size() / int(Param::END) * int(t) + level - 1, basicParam_.size()));
 			return basicParam_[basicParam_.size() / int(Param::END) * int(t) + level - 1];
 		}
-		int Project::Character::param(Param const t) const
+		int Project::Character::param(Param::type const t) const
 		{
 			switch(t) {
 				case Param::HP: case Param::MP:
@@ -554,23 +557,23 @@ namespace rpg2k
 			Array2D const& skillList = ldb_[63];
 			unsigned currentLv = 1;
 			if(prevLv > nextLv) {
-				for(auto const& i : skillList) {
-					if((*i.second)[1].exists()) { currentLv = (*i.second)[1]; }
+				for(Array2D::const_iterator i = skillList.begin(); i != skillList.end(); ++i) {
+					if((*i->second)[1].exists()) { currentLv = (*i->second)[1]; }
 
 					if(currentLv < nextLv) { continue; }
 					else if(prevLv < currentLv) { break; }
 					else {
-						std::set<uint16_t>::iterator er = skill_.find((*i.second)[2].to<int>());
+						std::set<uint16_t>::iterator er = skill_.find((*i->second)[2].to<int>());
 						if(er != skill_.end()) { skill_.erase(er); }
 					}
 				}
 			} else if(nextLv > prevLv) {
-				for(auto const& i : skillList) {
-					if((*i.second)[1].exists()) { currentLv = (*i.second)[1]; }
+				for(Array2D::const_iterator i = skillList.begin(); i != skillList.end(); ++i) {
+					if((*i->second)[1].exists()) { currentLv = (*i->second)[1]; }
 
 					if(currentLv < prevLv) { continue; }
 					else if(nextLv < currentLv) { break; }
-					else { skill_.insert((*i.second)[2].to<int>()); }
+					else { skill_.insert((*i->second)[2].to<int>()); }
 				}
 			}
 		}
@@ -609,16 +612,16 @@ namespace rpg2k
 			return *it->second;
 		}
 
-		int Project::paramWithEquip(unsigned charID, Param t) const
+		int Project::paramWithEquip(unsigned charID, Param::type t) const
 		{
 			Character const& c = this->character(charID);
 			int ret = c.param(t);
-			for(auto const& i : c.equip()) {
+			BOOST_FOREACH(uint16_t const& i, c.equip()) {
 				ret += ldb_.item()[i][11 + int(t) - 2].to<int>();
 			}
 			return ret;
 		}
-		bool Project::processAction(unsigned const eventID, Action::Type const act, std::istream& s)
+		bool Project::processAction(unsigned const eventID, Action::type const act, std::istream& s)
 		{
 			EventState& ev = getLSD().eventState(eventID);
 
@@ -659,10 +662,10 @@ namespace rpg2k
 					ev[22] = int(act - Action::Face::UP);
 					break;
 				case Action::Turn::RIGHT_90:
-					ev[21] = int(CharSet::Dir(int(ev.eventDir()) / int(CharSet::Dir::END)));
+					ev[21] = int(CharSet::Dir::type(int(ev.eventDir()) / int(CharSet::Dir::END)));
 					break;
 				case Action::Turn::LEFT_90:
-					ev[21] = int(CharSet::Dir((int(ev.eventDir()) + int(CharSet::Dir::END) - 1) / int(CharSet::Dir::END)));
+					ev[21] = int(CharSet::Dir::type((int(ev.eventDir()) + int(CharSet::Dir::END) - 1) / int(CharSet::Dir::END)));
 					break;
 				case Action::Turn::OPPOSITE:
 					ev[21] = int(int(ev.eventDir()) + 1 / int(CharSet::Dir::END));
@@ -703,7 +706,7 @@ namespace rpg2k
 					break;
 				case Action::CHANGE_CHAR_SET: {
 					String charSet(stream::readBER(s), '\0');
-					for(auto& i : charSet) { i = stream::readBER(s); }
+					BOOST_FOREACH(char& i, charSet) { i = stream::readBER(s); }
 					ev[73] = charSet;
 					ev[74] = stream::readBER(s);
 				} break;
@@ -729,12 +732,13 @@ namespace rpg2k
 
 		std::vector<unsigned> Project::sortLSD() const
 		{
-			std::map<double, unsigned> tmp;
-			for(auto const& i : boost::irange(0, int(SAVE_DATA_MAX))) {
+			typedef std::map<double, unsigned> tmp_type;
+			tmp_type tmp;
+			BOOST_FOREACH(int const i, boost::irange(0, int(SAVE_DATA_MAX))) {
 				tmp.insert(std::make_pair(i + 1, lsd_[i + 1][100].toArray1D()[1].to<double>()));
 			}
 			std::vector<unsigned> ret;
-			for(auto const& i : tmp) ret.push_back(i.first);
+			BOOST_FOREACH(tmp_type::value_type const i, tmp) ret.push_back(i.first);
 
 			return ret;
 		}

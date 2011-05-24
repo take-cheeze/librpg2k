@@ -13,9 +13,6 @@ namespace rpg2k
 	{
 		class Array2D;
 		class Element;
-		class Music;
-		class EventState;
-		class Sound;
 
 		typedef boost::ptr_unordered_map<unsigned, Element> BaseOfArray1D;
 
@@ -37,12 +34,12 @@ namespace rpg2k
 			void init(std::istream& s);
 		public:
 			Array1D(Array1D const& array);
-
+			/*
 			Array1D(ArrayDefine info);
 			Array1D(ArrayDefine info, std::istream& s);
 			Array1D(ArrayDefine info, std::istream& s, size_t size);
 			Array1D(ArrayDefine info, Binary const& b);
-
+			*/
 			Array1D(Element& e);
 			Array1D(Element& e, std::istream& s);
 			Array1D(Element& e, std::istream& s, size_t size);
@@ -77,6 +74,8 @@ namespace rpg2k
 
 			bool isElement() const;
 			Element& toElement() const;
+
+			static bool sort_function(Element const* l, Element const* r);
 		}; // class Array1D
 	} // namespace structure
 } // namespace rpg2k

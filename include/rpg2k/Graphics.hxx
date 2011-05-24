@@ -11,12 +11,6 @@
 
 namespace rpg2k
 {
-	class mat2;
-	class mat3;
-	class mat4;
-	class vec2;
-	class vec3;
-	class vec4;
 	class Rect;
 
 	class Texture
@@ -36,7 +30,7 @@ namespace rpg2k
 		uintptr_t data_;
 	};
 
-	typedef std::unique_ptr<Texture> (*TextureLoader)(SystemString const& path);
+	typedef unique_ptr<Texture>::type (*TextureLoader)(SystemString const& path);
 
 	class MaterialPool
 	{

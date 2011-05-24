@@ -1,6 +1,7 @@
 #include "rpg2k/Event.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
 
 
@@ -24,7 +25,7 @@ namespace rpg2k
 			int const argNum = stream::readBER(s);
 
 			argument_.resize(argNum, VAR_DEF_VAL);
-			for(auto& i : argument_) { i = stream::readBER(s); }
+			BOOST_FOREACH(int32_t& i, argument_) { i = stream::readBER(s); }
 		}
 
 		int32_t Instruction::at(unsigned index) const
@@ -42,7 +43,7 @@ namespace rpg2k
 				stream::berSize(code_) + stream::berSize(nest_) +
 				stream::berSize(stringArgument_.size()) + stringArgument_.size() +
 				stream::berSize(argument_.size());
-			for(auto const& i : argument_) ret += stream::berSize(i);
+			BOOST_FOREACH(int32_t const& i, argument_) ret += stream::berSize(i);
 			return ret;
 		}
 		std::ostream& Instruction::serialize(std::ostream& s) const
@@ -51,7 +52,7 @@ namespace rpg2k
 			stream::writeBER(s, nest_);
 			stream::writeWithSize(s, stringArgument_);
 			stream::writeBER(s, argument_.size());
-			for(auto const& i : argument_) stream::writeBER(s, i);
+			BOOST_FOREACH(int32_t const& i, argument_) stream::writeBER(s, i);
 			return s;
 		}
 
@@ -80,14 +81,14 @@ namespace rpg2k
 		size_t Event::serializedSize(unsigned const offset) const
 		{
 			unsigned ret = 0;
-			for(auto const& i : boost::irange(data_.begin() + offset, data_.end())) {
+			BOOST_FOREACH(Data::const_iterator i, boost::irange(data_.begin() + offset, data_.end())) {
 				ret += i->serializedSize();
 			}
 			return ret;
 		}
 		std::ostream& Event::serialize(std::ostream& s) const
 		{
-			for(auto const& i : data_) { i.serialize(s); }
+			BOOST_FOREACH(Data::value_type const& i, data_) { i.serialize(s); }
 			return s;
 		}
 

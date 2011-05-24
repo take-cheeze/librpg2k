@@ -18,17 +18,19 @@ ENDIF()
 # Boost
 FIND_PACKAGE(Boost REQUIRED)
 
-IF(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	LIST(APPEND rpg2kLib_DEFINITIONS "-Wall -Wextra -Werror")
-	LIST(APPEND rpg2kLib_LIBRARIES "-static-libgcc")
-ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	LIST(APPEND rpg2kLib_DEFINITIONS "-Wall -Wextra -Werror")
+IF((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+	LIST(APPEND rpg2kLib_DEFINITIONS
+		"-Wall" "-Wextra"
+		"-Wno-unused-variable" "-Wno-unused-parameter"
+	)
 ENDIF()
+
 LIST(APPEND rpg2kLib_INCLUDE_DIRS
 	"${Boost_INCLUDE_DIRS}"
-	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/src"
 	"${rpg2kLib_PATH}/include"
+	"${rpg2kLib_PATH}/glsl_type/include"
 	"${rpg2kLib_PATH}/ntfmt"
+	"${rpg2kLib_PATH}/pugixml/src"
 )
 LIST(APPEND rpg2kLib_LIBRARIES
 	"${Boost_LIBRARIES}"
@@ -36,8 +38,8 @@ LIST(APPEND rpg2kLib_LIBRARIES
 	"rpg2kLib"
 )
 LIST(APPEND rpg2kLib_LIBRARY_DIRS
-	"${CMAKE_CURRENT_SOURCE_DIR}/pugixml/scripts"
 	"${rpg2kLib_PATH}/lib"
+	"${rpg2kLib_PATH}/pugixml/scripts"
 )
 IF(APPLE)
 	LIST(APPEND rpg2kLib_LIBRARY_DIRS "/usr/local/lib" "/opt/local/lib")

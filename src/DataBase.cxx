@@ -1,6 +1,7 @@
 #include "rpg2k/Debug.hxx"
 #include "rpg2k/DataBase.hxx"
 
+#include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
 
 
@@ -20,25 +21,25 @@ namespace rpg2k
 		}
 		DataBase::~DataBase()
 		{
-		#if RPG2K_DEBUG
+#if RPG2K_DEBUG
 			debug::ANALYZE_RESULT << header() << ":" << endl;
-		#endif
+#endif
 		}
 
 		void DataBase::loadImpl()
 		{
 		// load chip infos
 			structure::Array2D const& chips = (*this)[20];
-			for(auto const& i : chips) {
+			for(structure::Array2D::const_iterator i = chips.begin(); i != chips.end(); ++i) {
 				terrain_.insert(std::make_pair(i->first, (*i->second)[3].toBinary().toVector<uint16_t>()));
 
-				std::vector<std::vector<uint8_t>>& dst = chipFlag_[i->first];
+				std::vector<std::vector<uint8_t> >& dst = chipFlag_[i->first];
 				dst.push_back((*i->second)[4].to<Binary>());
 				dst.push_back((*i->second)[5].to<Binary>());
 			}
 		// copying vocabulary
 			structure::Array1D const& vocSrc = (*this)[21];
-			for(auto const& i : vocSrc) {
+			for(structure::Array1D::const_iterator i = vocSrc.begin(); i != vocSrc.end(); ++i) {
 				if(i->first >= vocabulary_.size()) {
 					vocabulary_.resize(i->first + 1);
 				}
@@ -49,7 +50,7 @@ namespace rpg2k
 		{
 		// save chip info
 			structure::Array2D& chips = (*this)[20];
-			for(auto const& i : chips) {
+			for(structure::Array2D::iterator i = chips.begin(); i != chips.end(); ++i) {
 				if(!i->second->exists()) continue;
 
 				(*i->second)[3].toBinary().assign(terrain(i->first));
@@ -59,13 +60,13 @@ namespace rpg2k
 			}
 		// saving vocabulary
 			structure::Array1D& vocDst = (*this)[21];
-			for(auto const& i : boost::irange(size_t(0), vocabulary_.size())) {
+			BOOST_FOREACH(size_t const i, boost::irange(size_t(0), vocabulary_.size())) {
 				if(vocabulary_[i].empty()) continue;
 				vocDst[i] = vocabulary_[i];
 			}
 		}
 
-		std::vector<uint8_t> const& DataBase::chipFlag(unsigned id, ChipSet t) const
+		std::vector<uint8_t> const& DataBase::chipFlag(unsigned id, ChipSet::type t) const
 		{
 			ChipFlag::const_iterator it = chipFlag_.find(id);
 			rpg2k_assert(it != chipFlag_.end());
@@ -87,6 +88,3 @@ namespace rpg2k
 		}
 	} // namespace model
 } // namespace rpg2k
-
-
-

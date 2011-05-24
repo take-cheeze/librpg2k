@@ -11,6 +11,8 @@
 #include <cctype>
 #include <cstdio>
 
+#include <boost/foreach.hpp>
+
 using rpg2k::structure::Descriptor;
 using rpg2k::structure::Element;
 
@@ -38,7 +40,9 @@ namespace rpg2k
 		void Base::reset()
 		{
 			data_.clear();
-			for(auto const& i : this->descriptor()) { data_.push_back(new Element(i)); }
+			BOOST_FOREACH(Descriptor const& i, this->descriptor()) {
+				data_.push_back(new Element(i));
+			}
 		}
 
 		Element& Base::operator [](unsigned index)
@@ -74,7 +78,9 @@ namespace rpg2k
 			}
 			*/
 
-			for(auto const& i : this->descriptor()) { data_.push_back(new Element(i, ifs)); }
+			BOOST_FOREACH(Descriptor const& i, this->descriptor()) {
+				data_.push_back(new Element(i, ifs));
+			}
 
 			rpg2k_assert(stream::isEOF(ifs));
 
@@ -90,7 +96,7 @@ namespace rpg2k
 		void Base::serialize(std::ostream& s)
 		{
 			stream::writeHeader(s, this->header());
-			for(auto const& i : data_) { i.serialize(s); }
+			BOOST_FOREACH(Element const& i, data_) { i.serialize(s); }
 		}
 
 		DefineLoader::DefineLoader()
@@ -164,106 +170,105 @@ namespace rpg2k
 			std::stack<Descriptor::ArrayTable*> tableNest;
 
 			// if success continue else error
-			for(std::deque<String>::const_iterator it = token.begin(); it < token.end(); ++it) {
-				if(*it == "\n") { blockComment = false; line++; continue;
+			for(std::deque<String>::const_iterator i = token.begin(); i < token.end(); ++i) {
+				if(*i == "\n") { blockComment = false; line++; continue;
 				} else if(blockComment) { continue;
 				} else if(streamComment) {
-					if((*it == "*") && (*(++it) == "/")) { streamComment--; }
+					if((*i == "*") && (*(++i) == "/")) { streamComment--; }
 					continue;
-				} else if(*it == "/") {
-					++it;
-					if(*it == "*") { streamComment++; continue; }
-					else if(*it == "/") { blockComment = true; continue; }
+				} else if(*i == "/") {
+					++i;
+					if(*i == "*") { streamComment++; continue; }
+					else if(*i == "/") { blockComment = true; continue; }
 				} else if(nest.empty()) switch(prev) {
 					case TYPE: nextToken(NAME);
 					case NAME:
-						if(*it == ";") {
+						if(*i == ";") {
 							dst.push_back(new Descriptor(typeName));
 							nextToken(EXP_END);
-						} else if(isArray(typeName) && (*it == "{")) {
-							ArrayDefinePointer arrayDefine(new ArrayDefineType);
-							std::unique_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable);
-							tableNest.push(arrayTable.get());
-							nest.push(arrayDefine.get());
+						} else if(isArray(typeName) && (*i == "{")) {
+							ArrayDefineType* arrayDefine = new ArrayDefineType;
+							Descriptor::ArrayTable* arrayTable = new Descriptor::ArrayTable;
+							tableNest.push(arrayTable);
+							nest.push(arrayDefine);
 
-							dst.push_back(new Descriptor(typeName, std::move(arrayDefine), std::move(arrayTable)));
+							dst.push_back(new Descriptor(typeName, ArrayDefinePointer(arrayDefine), unique_ptr<Descriptor::ArrayTable>::type(arrayTable)));
 
 							nextToken(OPEN_STRUCT);
 						}
 						break;
 					case CLOSE_STRUCT:
-						if(*it == ";") { nextToken(EXP_END); } else break;
+						if(*i == ";") { nextToken(EXP_END); } else break;
 					case EXP_END:
-						typeName = *it;
+						typeName = *i;
 						nextToken(TYPE);
 					default: break;
 				} else switch(prev) {
 					case OPEN_INDEX: {
-						io::stream<io::array_source> ss(io::array_source(it->data(), it->size()));
+						io::stream<io::array_source> ss(io::array_source(i->data(), i->size()));
 						ss >> col;
 						if(nest.top()->find(col) != nest.top()->end()) { break; }
 						else { nextToken(INDEX); }
 					}
 					case INDEX:
-						if(*it == "]") { nextToken(CLOSE_INDEX1); } else break;
+						if(*i == "]") { nextToken(CLOSE_INDEX1); } else break;
 					case CLOSE_INDEX1:
-						if(*it == ":") { nextToken(CLOSE_INDEX2); } else break;
+						if(*i == ":") { nextToken(CLOSE_INDEX2); } else break;
 					case CLOSE_INDEX2:
-						typeName = *it;
+						typeName = *i;
 						nextToken(TYPE);
 					case TYPE:
-						if((*it == "dummy")
-						|| tableNest.top()->insert(std::make_pair(*it, col)).second) { nextToken(NAME); }
+						if((*i == "dummy")
+						|| tableNest.top()->insert(std::make_pair(*i, col)).second) { nextToken(NAME); }
 						else { break; }
 					case NAME:
-						if(*it == "=") { nextToken(EQUALS);
-						} else if(*it == ";") {
+						if(*i == "=") { nextToken(EQUALS);
+						} else if(*i == ";") {
 							if(isArray(typeName)) {
 								Descriptor const& def = this->get(typeName)[0];
 								nest.top()->insert(col, new Descriptor(
 									ElementType::instance().toString(def.type()),
 									ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
-									std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable()))));
+									unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable(def.arrayTable()))));
 							} else nest.top()->insert(col, new Descriptor(typeName));
 
 						nextToken(EXP_END);
-						} else if((*it == "{") && isArray(typeName)) {
-							ArrayDefinePointer arrayDefine(new ArrayDefineType);
-							ArrayDefineType* p = arrayDefine.get();
-							std::unique_ptr<Descriptor::ArrayTable> arrayTable(new Descriptor::ArrayTable);
-							tableNest.push(arrayTable.get());
+						} else if((*i == "{") && isArray(typeName)) {
+							ArrayDefineType* arrayDefine = new ArrayDefineType;
+							Descriptor::ArrayTable* arrayTable = new Descriptor::ArrayTable;
 
-							nest.top()->insert(col, new Descriptor(typeName, std::move(arrayDefine), std::move(arrayTable)));
-							nest.push(p);
+							nest.top()->insert(col, new Descriptor(typeName, ArrayDefinePointer(arrayDefine), unique_ptr<Descriptor::ArrayTable>::type(arrayTable)));
+							tableNest.push(arrayTable);
+							nest.push(arrayDefine);
 
 							nextToken(OPEN_STRUCT);
 						} else break;
 					case EQUALS:
 						if(isArray(typeName)) {
-							Descriptor const& def = this->get(*it)[0];
+							Descriptor const& def = this->get(*i)[0];
 							nest.top()->insert(col,
 								new Descriptor(typeName,
 								ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
-								std::unique_ptr<Descriptor::ArrayTable>(new Descriptor::ArrayTable(def.arrayTable()))));
-						} else nest.top()->insert(col, new Descriptor(typeName, *it));
+								unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable(def.arrayTable()))));
+						} else nest.top()->insert(col, new Descriptor(typeName, *i));
 						nextToken(DEFAULT);
 					case DEFAULT:
-						if(*it == ";") { nextToken(EXP_END); } else break;
+						if(*i == ";") { nextToken(EXP_END); } else break;
 					case OPEN_STRUCT:
-						if(*it == "[") { nextToken(OPEN_INDEX); }
-						else if(*it == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
+						if(*i == "[") { nextToken(OPEN_INDEX); }
+						else if(*i == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
 						else break;
 					case CLOSE_STRUCT:
-						if(*it == ";") { nextToken(EXP_END); } else break;
+						if(*i == ";") { nextToken(EXP_END); } else break;
 					case EXP_END:
-						if(*it == "[") { nextToken(OPEN_INDEX); }
-						else if(*it == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
+						if(*i == "[") { nextToken(OPEN_INDEX); }
+						else if(*i == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
 						else break;
 					default: break;
 				}
 
 				cout << "Error at line: " << line << endl;
-				cout << "\tToken: " << *it << endl;
+				cout << "\tToken: " << *i << endl;
 				rpg2k_assert(false);
 			}
 

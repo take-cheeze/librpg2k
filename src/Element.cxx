@@ -6,6 +6,8 @@
 #include "rpg2k/Event.hxx"
 #include "rpg2k/Stream.hxx"
 
+#include <boost/foreach.hpp>
+
 #include <stdexcept>
 
 
@@ -54,19 +56,19 @@ namespace rpg2k
 		void BerEnum::init(std::istream& s)
 		{
 			this->resize(stream::readBER(s) + 1);
-			for(auto& i : *this) { i = stream::readBER(s); }
+			BOOST_FOREACH(value_type& i, *this) i = stream::readBER(s);
 		}
 
 		size_t BerEnum::serializedSize() const
 		{
 			unsigned ret = stream::berSize(size() - 1);
-			for(auto const& i : *this) ret += stream::berSize(i);
+			BOOST_FOREACH(value_type const& i, *this) ret += stream::berSize(i);
 			return ret;
 		}
 		std::ostream& BerEnum::serialize(std::ostream& s) const
 		{
 			stream::writeBER(s, this->size() - 1);
-			for(auto const& i : *this) stream::writeBER(s, i);
+			BOOST_FOREACH(value_type const& i, *this) stream::writeBER(s, i);
 			return s;
 		}
 
@@ -253,7 +255,7 @@ namespace rpg2k
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
 				? owner.arrayDefine().find(index)->second : NULL)
 		, owner_(&owner.toElement()), indexOfArray1D_(index)
-		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
+		, indexOfArray2D_(owner.isArray2D()? int(owner.index()) : NOT_ARRAY)
 		{
 			init();
 		}
@@ -262,7 +264,7 @@ namespace rpg2k
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
 				? owner.arrayDefine().find(index)->second : NULL)
 		, owner_(&owner.toElement()), indexOfArray1D_(index)
-		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
+		, indexOfArray2D_(owner.isArray2D()? int(owner.index()) : NOT_ARRAY)
 		{
 			io::stream<stream::istream_range_source>
 				s(stream::istream_range_source(stream, size));
@@ -273,7 +275,7 @@ namespace rpg2k
 			owner.arrayDefine().find(index) != owner.arrayDefine().end()
 				? owner.arrayDefine().find(index)->second : NULL)
 		, owner_(&owner.toElement()), indexOfArray1D_(index)
-		, indexOfArray2D_(owner.isArray2D()? owner.index() : int(NOT_ARRAY))
+		, indexOfArray2D_(owner.isArray2D()? int(owner.index()) : NOT_ARRAY)
 		{
 			#if RPG2K_CHECK_AT_CONSTRUCTOR
 				rpg2k_analyze_assert(instance_.checkSerialize(b));
@@ -372,40 +374,40 @@ namespace rpg2k
 			return *descriptor_;
 		}
 
-		#define PP_castOperator(r, data, elem) \
-			Element::operator elem const&() const \
-			{ \
-				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
-				rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
-				return *impl_.BOOST_PP_CAT(elem, data); \
-			} \
-			Element::operator elem&() \
-			{ \
-				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
-				rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
-				return *impl_.BOOST_PP_CAT(elem, data); \
-			}
+#define PP_castOperator(r, data, elem) \
+	Element::operator elem const&() const \
+	{ \
+		rpg2k_assert(this->isDefined()); \
+		rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
+		rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
+		return *impl_.BOOST_PP_CAT(elem, data); \
+	} \
+	Element::operator elem&() \
+	{ \
+		rpg2k_assert(this->isDefined()); \
+		rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
+		rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
+		return *impl_.BOOST_PP_CAT(elem, data); \
+	}
 		BOOST_PP_SEQ_FOR_EACH(PP_castOperator, _, PP_rpg2kTypes)
-		#undef PP_castOperator
+#undef PP_castOperator
 
-		#define PP_castOperator(r, data, elem) \
-			Element::operator elem const&() const \
-			{ \
-				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
-				rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
-				return impl_.BOOST_PP_CAT(elem, data); \
-			} \
-			Element::operator elem&() \
-			{ \
-				rpg2k_assert(this->isDefined()); \
-				rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
-				rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
-				return impl_.BOOST_PP_CAT(elem, data); \
-			}
+#define PP_castOperator(r, data, elem) \
+	Element::operator elem const&() const \
+	{ \
+		rpg2k_assert(this->isDefined()); \
+		rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
+		rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
+		return impl_.BOOST_PP_CAT(elem, data); \
+	} \
+	Element::operator elem&() \
+	{ \
+		rpg2k_assert(this->isDefined()); \
+		rpg2k_assert(descriptor_->type() == ElementType::BOOST_PP_CAT(elem, data)); \
+		rpg2k_assert(this->exists_ || descriptor_->hasDefault()); \
+		return impl_.BOOST_PP_CAT(elem, data); \
+	}
 		BOOST_PP_SEQ_FOR_EACH(PP_castOperator, _, PP_basicTypes)
-		#undef PP_castOperator
+#undef PP_castOperator
 	} // namespace structure
 } // namespace rpg2k
