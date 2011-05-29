@@ -1,6 +1,6 @@
 #include <boost/array.hpp>
 #include <gtest/gtest.h>
-#include <rpg2k/Stream.hxx>
+#include <rpg2k/stream.hxx>
 
 #include <algorithm>
 #include <iostream>

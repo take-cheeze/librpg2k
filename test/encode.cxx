@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <rpg2k/Encode.hxx>
+#include <rpg2k/encode.hxx>
 
 using rpg2k::Encode;
 

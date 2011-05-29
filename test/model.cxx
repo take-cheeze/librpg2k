@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <rpg2k/DataBase.hxx>
-#include <rpg2k/MapTree.hxx>
-#include <rpg2k/MapUnit.hxx>
-#include <rpg2k/Model.hxx>
-#include <rpg2k/Project.hxx>
-#include <rpg2k/SaveData.hxx>
+#include <rpg2k/database.hxx>
+#include <rpg2k/map_tree.hxx>
+#include <rpg2k/map_unit.hxx>
+#include <rpg2k/model.hxx>
+#include <rpg2k/project.hxx>
+#include <rpg2k/save_data.hxx>
 
 #include <boost/scoped_ptr.hpp>
 

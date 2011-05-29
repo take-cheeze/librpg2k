@@ -1,6 +1,6 @@
 #include <boost/preprocessor/stringize.hpp>
 #include <gtest/gtest.h>
-#include <rpg2k/Descriptor.hxx>
+#include <rpg2k/descriptor.hxx>
 
 
 TEST(ElementType, Compare)
