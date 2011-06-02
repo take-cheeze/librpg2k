@@ -1,6 +1,4 @@
-#include "rpg2k/define/define.hxx"
-
-const char* rpg2k::define::event_state =
+namespace rpg2k { namespace define { const char* event_state =
 "array1d event_state \n"
 "{\n"
 "	[11]: int map_id;\n"
@@ -59,3 +57,4 @@ const char* rpg2k::define::event_state =
 "	[132]: binary dummy;\n"
 "};\n"
 ;
+} }

@@ -1,6 +1,4 @@
-#include "rpg2k/define/define.hxx"
-
-const char* rpg2k::define::LcfDataBase =
+namespace rpg2k { namespace define { const char* LcfDataBase =
 #line 1
 "array1d Grobal\n"
 "{\n"
@@ -630,3 +628,4 @@ const char* rpg2k::define::LcfDataBase =
 "	};\n"
 "};\n"
 ;
+} }

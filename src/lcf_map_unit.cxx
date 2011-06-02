@@ -1,6 +1,4 @@
-#include "rpg2k/define/define.hxx"
-
-const char* rpg2k::define::LcfMapUnit =
+namespace rpg2k { namespace define { const char* LcfMapUnit =
 "array1d Grobal\n"
 "{\n"
 "	[1]: int chip_set_id = 1;\n"
@@ -74,3 +72,4 @@ const char* rpg2k::define::LcfMapUnit =
 "	[91]: int saveTime;\n"
 "};\n"
 ;
+} }

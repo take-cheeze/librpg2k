@@ -1,6 +1,4 @@
-#include "rpg2k/define/define.hxx"
-
-const char* rpg2k::define::LcfSaveData =
+namespace rpg2k { namespace define { const char* LcfSaveData =
 "array1d Grobal\n"
 "{\n"
 "	[100]: array1d Preview\n"
@@ -272,3 +270,4 @@ const char* rpg2k::define::LcfSaveData =
 "\n"
 "};\n"
 ;
+} }

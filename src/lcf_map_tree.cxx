@@ -1,6 +1,4 @@
-#include "rpg2k/define/define.hxx"
-
-const char* rpg2k::define::LcfMapTree =
+namespace rpg2k { namespace define { const char* LcfMapTree =
 "array2d Grobal\n"
 "{\n"
 "	[1]: string name = \"\";\n"
@@ -52,3 +50,4 @@ const char* rpg2k::define::LcfMapTree =
 "	[33]: int airshipY = 0;\n"
 "};\n"
 ;
+} }

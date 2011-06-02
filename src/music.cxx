@@ -1,6 +1,4 @@
-#include "rpg2k/define/define.hxx"
-
-const char* rpg2k::define::music =
+namespace rpg2k { namespace define { const char* music =
 "array1d music\n"
 "{\n"
 "	[1]: string filename;\n"
@@ -10,3 +8,4 @@ const char* rpg2k::define::music =
 "	[5]: int balance = 50;\n"
 "};\n"
 ;
+} }
