@@ -18,169 +18,129 @@ namespace rpg2k
 {
 	namespace structure
 	{
-		namespace
-		{
-			// doesn't extract if the Element of Array1D is bigger than the next value
-			#if RPG2K_DEBUG // if debuging ALL Element will be extracted
-				static size_t const BIG_DATA_SIZE = ~0;
-			#else
-				static size_t const BIG_DATA_SIZE = 512;
-			#endif
-		} // namespace
-
-		Array1D::Array1D(Array1D const& src)
-		: BaseOfArray1D()
-		, arrayDefine_(src.arrayDefine_), this_(src.this_)
-		, exists_(src.exists_), owner_(src.owner_), index_(src.index_)
+		array1d::array1d(array1d const& src)
+		: base_of_array1d()
+		, this_(src.this_), exists_(src.exists_)
+		, owner_(src.owner_), index_(src.index_)
+		, array_define(src.array_define)
 		{
 			for(const_iterator i = src.begin(); i != src.end(); ++i) {
 				if(!i->second->exists()) continue;
 
-				Binary const bin = i->second->serialize();
+				binary const bin = i->second->serialize();
 				unsigned index = i->first;
 
-				this->insert(index, new Element(*this, i->first, bin));
+				this->insert(index, new element(*this, i->first, bin));
 			}
 		}
-		/*
-		Array1D::Array1D(ArrayDefine info)
-		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
+		array1d::array1d(element& e)
+		: this_(&e), owner_(NULL), index_(-1)
+		, array_define(e.definition().array_define())
 		{
 			exists_ = false;
 		}
-		Array1D::Array1D(ArrayDefine info, std::istream& s)
-		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
+		array1d::array1d(element& e, std::istream& s)
+		: this_(&e), owner_(NULL), index_(-1)
+		, array_define(e.definition().array_define())
 		{
 			init(s);
 		}
-		Array1D::Array1D(ArrayDefine info, std::istream& in, size_t const size)
-		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
-		{
-			io::stream<stream::istream_range_source>
-				s(stream::istream_range_source(in, size));
-			init(s);
-		}
-		Array1D::Array1D(ArrayDefine info, Binary const& b)
-		: arrayDefine_(info), this_(NULL), owner_(NULL), index_(-1)
+		array1d::array1d(element& e, binary const& b)
+		: this_(&e), owner_(NULL), index_(-1)
+		, array_define(e.definition().array_define())
 		{
 			io::stream<io::array_source> s(b.source());
 			init(s);
 		}
-		*/
-		Array1D::Array1D(Element& e)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
-		, owner_(NULL), index_(-1)
+		array1d::array1d(array2d& owner, unsigned index)
+		: this_(NULL), owner_(&owner), index_(index)
+		, array_define(owner.array_define)
 		{
 			exists_ = false;
 		}
-		Array1D::Array1D(Element& e, std::istream& s)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
-		, owner_(NULL), index_(-1)
+		array1d::array1d(array2d& owner, unsigned const index, std::istream& s)
+		: this_(NULL), owner_(&owner), index_(index)
+		, array_define(owner.array_define)
 		{
 			init(s);
 		}
-		Array1D::Array1D(Element& e, std::istream& in, size_t const size)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
-		, owner_(NULL), index_(-1)
-		{
-			io::stream<stream::istream_range_source>
-				s(stream::istream_range_source(in, size));
-			init(s);
-		}
-		Array1D::Array1D(Element& e, Binary const& b)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
-		, owner_(NULL), index_(-1)
-		{
-			io::stream<io::array_source> s(b.source());
-			init(s);
-		}
-		Array1D::Array1D(Array2D& owner, unsigned index)
-		: arrayDefine_(owner.arrayDefine()), this_(NULL)
-		, owner_(&owner), index_(index)
-		{
-			exists_ = false;
-		}
-		Array1D::Array1D(Array2D& owner, unsigned const index, std::istream& s)
-		: arrayDefine_(owner.arrayDefine()), this_(NULL)
-		, owner_(&owner), index_(index)
-		{
-			init(s);
-		}
-		void Array1D::init(std::istream& s)
+		void array1d::init(std::istream& s)
 		{
 			exists_ = true;
 
-			Binary bin;
+			binary bin;
 
 			while(true) {
-				unsigned index = stream::readBER(s);
+				unsigned index = stream::read_ber(s);
 
-				if(index == ARRAY_1D_END) break;
+				if(index == END_OF_ARRAY1D) break;
 
-				// stream::readWithSize(s, bin);
-				// insert(index, new Element(*this, index, bin));
+				stream::read_with_size(s, bin);
+				insert(index, new element(*this, index, bin));
 
-				size_t const size = stream::readBER(s);
-				std::streampos const pos = size + s.tellg();
-				insert(index, new Element(*this, index, s, size));
-				s.seekg(pos);
-
-				if(!toElement().hasOwner() && stream::isEOF(s)) return;
+				if(!to_element().has_owner() && stream::is_eof(s)) return;
 			}
 
-			rpg2k_analyze_assert(isArray2D() || stream::isEOF(s));
+			rpg2k_analyze_assert(is_array2d() || stream::is_eof(s));
 		}
 
-		bool Array1D::isElement() const
+		bool array1d::is_element() const
 		{
-			return (this_ != NULL) || (isArray2D() && owner_->isElement());
+			return (this_ != NULL) || (is_array2d() && owner_->is_element());
 		}
 
-		Element& Array1D::toElement() const
+		element& array1d::to_element()
 		{
-			rpg2k_assert(isElement());
+			rpg2k_assert(is_element());
 
-			if(isArray2D()) return owner_->toElement();
+			if(is_array2d()) return owner_->to_element();
+			else return *this_;
+		}
+		element const& array1d::to_element() const
+		{
+			rpg2k_assert(is_element());
+
+			if(is_array2d()) return owner_->to_element();
 			else return *this_;
 		}
 
-		Array1D const& Array1D::operator =(Array1D const& src)
+		array1d const& array1d::operator =(array1d const& src)
 		{
-			BaseOfArray1D::operator =(src);
+			base_of_array1d::operator =(src);
 			exists_ = src.exists_;
 
 			return *this;
 		}
 
-		Element& Array1D::operator [](unsigned index)
+		element& array1d::operator [](unsigned index)
 		{
 			iterator it = find(index);
 			return(it != end())
 				? *it->second
-				: *this->insert(index, new Element(*this, index)).first->second;
+				: *this->insert(index, new element(*this, index)).first->second;
 		}
-		Element const& Array1D::operator [](unsigned const index) const
+		element const& array1d::operator [](unsigned const index) const
 		{
-			return const_cast<Array1D&>(*this)[index];
+			return const_cast<array1d&>(*this)[index];
 		}
-		Element& Array1D::operator [](char const* index)
+		element& array1d::operator [](char const* index)
 		{
-			Descriptor::ArrayTable const& table = this->toElement().descriptor().arrayTable();
-			Descriptor::ArrayTable::const_iterator tableIt = table.find(index);
-			rpg2k_assert(tableIt != table.end());
-			unsigned indexNo = tableIt->second;
+			array_table_type const& table = this->to_element().definition().array_table();
+			array_table_type::const_iterator table_it = table.find(index);
+			rpg2k_assert(table_it != table.end());
+			unsigned index_no = table_it->second;
 
-			iterator it = this->find(indexNo);
+			iterator it = this->find(index_no);
 			return(it != end())
 				? *it->second
-				: *this->insert(indexNo, new Element(*this, indexNo)).first->second;
+				: *this->insert(index_no, new element(*this, index_no)).first->second;
 		}
-		Element const& Array1D::operator [](char const* index) const
+		element const& array1d::operator [](char const* index) const
 		{
-			return const_cast<Array1D&>(*this)[index];
+			return const_cast<array1d&>(*this)[index];
 		}
 
-		unsigned Array1D::count() const
+		unsigned array1d::count() const
 		{
 			unsigned ret = 0;
 			for(const_iterator i = begin(); i != end(); ++i) {
@@ -188,64 +148,63 @@ namespace rpg2k
 			}
 			return ret;
 		}
-		size_t Array1D::serializedSize() const
+		size_t array1d::serialized_size() const
 		{
 			size_t ret = 0;
 
 			for(const_iterator i = this->begin(); i != this->end(); ++i) {
 				if(!i->second->exists()) continue;
 
-				ret += stream::berSize(i->first);
-				size_t const size = i->second->serializedSize();
-				ret += stream::berSize(size);
+				ret += stream::ber_size(i->first);
+				size_t const size = i->second->serialized_size();
+				ret += stream::ber_size(size);
 				ret += size;
 			}
 
-			if(toElement().hasOwner()) ret += stream::berSize(ARRAY_1D_END);
+			if(to_element().has_owner()) ret += stream::ber_size(END_OF_ARRAY1D);
 
 			return ret;
 		}
-		std::ostream& Array1D::serialize(std::ostream& s) const
+		std::ostream& array1d::serialize(std::ostream& s) const
 		{
-			typedef BOOST_TYPEOF(*this->begin()) const_value_type;
-			std::vector<Element const*> result;
+			std::vector<element const*> result;
 			for(const_iterator i = begin(); i != end(); ++i) {
 				if(i->second->exists()) result.push_back(i->second);
 			}
 			boost::sort(result, sort_function);
-			BOOST_FOREACH(Element const* const i, result) {
-				stream::writeBER(s, i->indexOfArray1D());
-				stream::writeWithSize(s, *i);
+			BOOST_FOREACH(element const* const i, result) {
+				stream::write_ber(s, i->index_of_array1d());
+				stream::write_with_size(s, *i);
 			}
 
-			if(this->toElement().hasOwner() || this->isArray2D()) {
-				stream::writeBER(s, ARRAY_1D_END);
+			if(this->to_element().has_owner() || this->is_array2d()) {
+				stream::write_ber(s, END_OF_ARRAY1D);
 			}
 
 			return s;
 		}
 
-		unsigned const& Array1D::index() const { rpg2k_assert(isArray2D()); return index_; }
-		bool Array1D::exists() const { rpg2k_assert(isArray2D()); return exists_; }
-		Array2D& Array1D::owner() { rpg2k_assert(isArray2D()); return *owner_; }
-		Array2D const& Array1D::owner() const { rpg2k_assert(isArray2D()); return *owner_; }
+		unsigned const& array1d::index() const { rpg2k_assert(is_array2d()); return index_; }
+		bool array1d::exists() const { rpg2k_assert(is_array2d()); return exists_; }
+		array2d& array1d::owner() { rpg2k_assert(is_array2d()); return *owner_; }
+		array2d const& array1d::owner() const { rpg2k_assert(is_array2d()); return *owner_; }
 
-		void Array1D::substantiate()
+		void array1d::substantiate()
 		{
-			rpg2k_assert(isArray2D());
+			rpg2k_assert(is_array2d());
 
-			toElement().substantiate();
+			to_element().substantiate();
 			exists_ = true;
 		}
-		bool Array1D::exists(unsigned index) const
+		bool array1d::exists(unsigned index) const
 		{
 			const_iterator it = find(index);
 			return (it != end()) && it->second->exists();
 		}
 
-		bool Array1D::sort_function(Element const* l, Element const* r)
+		bool array1d::sort_function(element const* l, element const* r)
 		{
-			return l->indexOfArray1D() < r->indexOfArray1D();
+			return l->index_of_array1d() < r->index_of_array1d();
 		}
 	} // namespace structure
 } // namespace rpg2k

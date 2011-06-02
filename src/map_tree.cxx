@@ -6,67 +6,67 @@ namespace rpg2k
 {
 	namespace model
 	{
-		MapTree::MapTree(SystemString const& dir)
-		: Base(dir)
+		map_tree::map_tree(system_string const& dir)
+		: base(dir)
 		{
 			load();
 		}
-		MapTree::MapTree(SystemString const& dir, SystemString const& name)
-		: Base(dir, name)
+		map_tree::map_tree(system_string const& dir, system_string const& name)
+		: base(dir, name)
 		{
 			load();
 		}
 
-		MapTree::~MapTree()
+		map_tree::~map_tree()
 		{
-		#if RPG2K_DEBUG
+#if RPG2K_DEBUG
 			debug::ANALYZE_RESULT << header() << ":" << endl;
-		#endif
+#endif
 		}
 
-		void MapTree::loadImpl()
+		void map_tree::load_impl()
 		{
 		}
-		void MapTree::saveImpl()
+		void map_tree::save_impl()
 		{
-		}
-
-		structure::Array1D const& MapTree::operator [](unsigned mapID) const
-		{
-			return data().front().toArray2D()[mapID];
-		}
-		structure::Array1D& MapTree::operator [](unsigned mapID)
-		{
-			return data().front().toArray2D()[mapID];
 		}
 
-		bool MapTree::exists(unsigned const mapID) const
+		structure::array1d const& map_tree::operator [](unsigned map_id) const
 		{
-			return data().front().toArray2D().exists(mapID);
+			return data().front().to_array2d()[map_id];
+		}
+		structure::array1d& map_tree::operator [](unsigned map_id)
+		{
+			return data().front().to_array2d()[map_id];
 		}
 
-		bool MapTree::canTeleport(unsigned const mapID) const
+		bool map_tree::exists(unsigned const map_id) const
 		{
-			switch((*this)[mapID][31].to<int>()) {
-				case 0: return canTeleport((*this)[mapID][2]);
+			return data().front().to_array2d().exists(map_id);
+		}
+
+		bool map_tree::can_teleport(unsigned const map_id) const
+		{
+			switch((*this)[map_id][31].to<int>()) {
+				case 0: return can_teleport((*this)[map_id][2]);
 				case 1: return true ;
 				case 2: return false;
 				default: rpg2k_assert(false); return false;
 			}
 		}
-		bool MapTree::canEscape(unsigned const mapID) const
+		bool map_tree::can_escape(unsigned const map_id) const
 		{
-			switch((*this)[mapID][32].to<int>()) {
-				case 0: return canTeleport((*this)[mapID][2]);
+			switch((*this)[map_id][32].to<int>()) {
+				case 0: return can_escape((*this)[map_id][2]);
 				case 1: return true ;
 				case 2: return false;
 				default: rpg2k_assert(false); return false;
 			}
 		}
-		bool MapTree::canSave(unsigned mapID) const
+		bool map_tree::can_save(unsigned map_id) const
 		{
-			switch((*this)[mapID][33].to<int>()) {
-				case 0: return canTeleport((*this)[mapID][2]);
+			switch((*this)[map_id][33].to<int>()) {
+				case 0: return can_save((*this)[map_id][2]);
 				case 1: return true ;
 				case 2: return false;
 				default: rpg2k_assert(false); return false;

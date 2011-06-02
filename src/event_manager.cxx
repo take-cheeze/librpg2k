@@ -2,11 +2,9 @@
 #include "rpg2k/project.hxx"
 
 
-namespace rpg2k
-{
-	namespace model
-	{
-		EventManager::EventManager(Project& p)
+namespace rpg2k {
+	namespace model {
+		event_manager::event_manager(project& p)
 		: project_(p)
 		{
 		}

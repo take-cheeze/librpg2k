@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__STRUCTURE__DESCRIPTOR_HPP
-#define _INC__RPG2K__STRUCTURE__DESCRIPTOR_HPP
+#ifndef _INC_RPG2K__DESCRIPTOR_HXX_
+#define _INC_RPG2K__DESCRIPTOR_HXX_
 
 #include "define.hxx"
 #include "singleton.hxx"
@@ -16,95 +16,92 @@
 
 namespace rpg2k
 {
-	class Binary;
+	class binary;
 
 	namespace structure
 	{
-		class Array1D;
-		class Array2D;
-		class BerEnum;
-		class Element;
-		class Event;
+		class array1d;
+		class array2d;
+		class ber_enum;
+		class element;
+		class event;
 
-		class Descriptor;
-		typedef boost::ptr_unordered_map<unsigned, Descriptor> ArrayDefineType;
-		typedef ArrayDefineType const& ArrayDefine;
-		typedef unique_ptr<ArrayDefineType>::type ArrayDefinePointer;
+		class descriptor;
+		typedef boost::ptr_unordered_map<unsigned, descriptor> array_define_type;
+		typedef boost::unordered_map<string, int> array_table_type;
 
-		#define PP_basicTypes \
-			(int) \
-			(bool) \
-			(double) \
+#define PP_basic_types \
+	(int) \
+	(bool) \
+	(double) \
 
-		#define PP_rpg2kTypes \
-			(Array1D) \
-			(Array2D) \
-			(BerEnum) \
-			(Binary) \
-			(Event) \
-			(String) \
+#define PP_rpg2k_types \
+	(array1d) \
+	(array2d) \
+	(ber_enum) \
+	(binary) \
+	(event) \
+	(string) \
 
-		#define PP_allTypes PP_basicTypes PP_rpg2kTypes
+#define PP_all_types PP_basic_types PP_rpg2k_types
 
-		class ElementType : public ConstSingleton<ElementType>
+		class element_type : public singleton<element_type const>
 		{
-			friend class ConstSingleton<ElementType>;
+			friend class singleton<element_type const>;
 		public:
-			#define PP_enum(r, data, elem) BOOST_PP_CAT(elem, data),
-			enum Enum { BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_allTypes) };
-			#undef PP_enum
-			Enum toEnum(String const& name) const;
-			String const& toString(Enum e) const;
+#define PP_enum(r, data, elem) BOOST_PP_CAT(elem, data),
+			enum type { BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_all_types) };
+#undef PP_enum
+			type to_enum(string const& name) const;
+			string const& to_string(type e) const;
 		private:
-			ElementType();
+			element_type();
 
-			typedef boost::bimap<Enum, String> Table;
-			Table table_;
-		}; // class ElementType
-		class Descriptor
+			typedef boost::bimap<type, string> table;
+			table table_;
+		}; // class element_type
+
+		class descriptor
 		{
 		public:
-			Descriptor(Descriptor const& src);
-			Descriptor(String const& type);
-			Descriptor(String const& type, String const& val);
+			descriptor(descriptor const& src);
 
-			typedef boost::unordered_map<String, int> ArrayTable;
-			Descriptor(String const& type
-			, ArrayDefinePointer def, unique_ptr<ArrayTable>::type table);
+			descriptor(element_type::type t);
+			descriptor(element_type::type t, string const& val);
+			descriptor(element_type::type t
+			, unique_ptr<array_define_type>::type def
+			, unique_ptr<array_table_type>::type table);
 
-			~Descriptor();
+			~descriptor();
 
-			#define PP_castOperator(r, data, elem) \
-				operator elem const&() const;
-			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , PP_basicTypes)
-			#undef PP_castOperator
-			operator String const&() const;
+#define PP_cast_operator(r, data, elem) operator elem const&() const;
+			BOOST_PP_SEQ_FOR_EACH(PP_cast_operator, , PP_basic_types)
+#undef PP_cast_operator
+			operator string const&() const;
 			operator unsigned const&() const
 			{
-				return reinterpret_cast<unsigned const&>(static_cast<int const&>(*this));
+				return reinterpret_cast<unsigned const&>(this->operator int const&());
 			}
-			ArrayDefine arrayDefine() const;
-			ArrayTable const& arrayTable() const { return *arrayTable_; }
+			array_define_type const& array_define() const;
+			array_table_type const& array_table() const { return *array_table_; }
 
-			String const& typeName() const;
-			ElementType::Enum type() const { return type_; }
+			string const& type_name() const;
+			element_type::type const type;
 
-			bool hasDefault() const { return hasDefault_; }
+			bool has_default() const { return has_default_; }
 		private:
-			ElementType::Enum const type_;
-			bool const hasDefault_;
-
+			bool const has_default_;
 			union {
-				#define PP_enum(r, data, elem) elem BOOST_PP_CAT(elem, data);
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basicTypes)
-				#undef PP_enum
-				String const* String_;
-				boost::ptr_unordered_map<unsigned, Descriptor>* arrayDefine;
+#define PP_enum(r, data, elem) elem BOOST_PP_CAT(elem, data);
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
+#undef PP_enum
+				string const* string_;
+				boost::ptr_unordered_map<unsigned, descriptor>* array_define;
 			} impl_;
 
-			boost::scoped_ptr<ArrayTable> const arrayTable_;
-		}; // class Descriptor
+			boost::scoped_ptr<array_table_type> const array_table_;
+		}; // class descriptor
 	} // namespace structure
 } // namespace rpg2k
 
-#endif // _INC__RPG2K__STRUCTURE__DESCRIPTOR_HPP
+#endif // _INC_RPG2K__DESCRIPTOR_HXX_

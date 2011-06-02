@@ -10,20 +10,33 @@ ENDIF()
 
 # DEBUG define
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-	LIST(APPEND rpg2k_DEFINITIONS -D RPG2K_DEBUG=1)
+	LIST(APPEND rpg2k_DEFINITIONS "-D RPG2K_DEBUG=1")
 ELSE()
-	LIST(APPEND rpg2k_DEFINITIONS -D RPG2K_DEBUG=0)
+	LIST(APPEND rpg2k_DEFINITIONS "-D RPG2K_DEBUG=0")
 ENDIF()
 
 # Boost
 FIND_PACKAGE(Boost REQUIRED)
 
+# set warning flags
 IF((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-	LIST(APPEND rpg2k_DEFINITIONS
-		"-Wall" "-Wextra"
-		"-Wno-unused-variable" "-Wno-unused-parameter"
-	)
+	LIST(APPEND rpg2k_DEFINITIONS "-Wall" "-Wextra")
 ENDIF()
+
+# set endianness
+include(TestBigEndian)
+test_big_endian(is_big_endian)
+if(is_big_endian)
+	LIST(APPEND rpg2k_DEFINITIONS
+		"-D RPG2K_IS_BIG_ENDIAN=1"
+		"-D RPG2K_IS_LITTLE_ENDIAN=0"
+	)
+else()
+	LIST(APPEND rpg2k_DEFINITIONS
+		"-D RPG2K_IS_BIG_ENDIAN=0"
+		"-D RPG2K_IS_LITTLE_ENDIAN=1"
+	)
+endif()
 
 LIST(APPEND rpg2k_INCLUDE_DIRS
 	"${Boost_INCLUDE_DIRS}"

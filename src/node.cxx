@@ -5,46 +5,46 @@
 
 namespace rpg2k
 {
-	void Node::addChild(Priority const& p, Node& child) 
+	void node::add_child(node::priority const& p, node& child) 
 	{
-		this->children_->insert(Children::value_type(p, &child));
+		this->children->insert(children_type::value_type(p, &child));
 		child.parent_ = this;
 	}
-	void Node::remove(Node& child)
+	void node::remove(node& child)
 	{
-		this->children_->right.erase(&child);
+		this->children->right.erase(&child);
 		child.parent_ = NULL;
 	}
 
-	void Node::update()
+	void node::update()
 	{
-		this->updateThis();
+		this->update_this();
 
-		if(children_) BOOST_FOREACH(Children::left_value_type& i, children_->left) { i.second->update(); }
+		if(children) BOOST_FOREACH(children_type::left_value_type& i, children->left) { i.second->update(); }
 	}
-	void Node::draw(Graphics2D& g) const
+	void node::draw(graphics2d& g) const
 	{
 		this->draw(g);
 
-		if(children_) BOOST_FOREACH(Children::left_value_type& i, children_->left) { i.second->draw(g); }
+		if(children) BOOST_FOREACH(children_type::left_value_type& i, children->left) { i.second->draw(g); }
 	}
 
-	void NodeSwitcher::addChild(Key const& k, Node& child) 
+	void node_switcher::add_child(node_switcher::key const& k, node& child) 
 	{
-		this->switchList_.insert(SwitchList::value_type(k, &child));
+		this->switch_list_.insert(switch_list_type::value_type(k, &child));
 		child.parent_ = this;
 	}
-	void NodeSwitcher::remove(Node& child)
+	void node_switcher::remove(node& child)
 	{
-		this->switchList_.right.erase(&child);
+		this->switch_list_.right.erase(&child);
 		child.parent_ = NULL;
 	}
 
-	void NodeSwitcher::switchTo(Key const& k)
+	void node_switcher::switch_to(node_switcher::key const& k)
 	{
-		this->children()->clear();
-		SwitchList::left_map::const_iterator it = this->switchList_.left.find(k);
-		rpg2k_assert(it != this->switchList_.left.end());
-		Node::addChild(Priority(), *(it->second));
+		this->children->clear();
+		switch_list_type::left_map::const_iterator it = this->switch_list_.left.find(k);
+		rpg2k_assert(it != this->switch_list_.left.end());
+		node::add_child(priority(), *(it->second));
 	}
 } // namespace rpg2k

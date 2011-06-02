@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__EVENT_HPP
-#define _INC__RPG2K__EVENT_HPP
+#ifndef _INC_RPG2K__EVENT_HXX_
+#define _INC_RPG2K__EVENT_HXX_
 
 #include "define.hxx"
 
@@ -11,81 +11,43 @@
 
 namespace rpg2k
 {
-	class Binary;
+	class binary;
 
 	namespace structure
 	{
-		class StreamReader;
-		class StreamWriter;
-
-		class Instruction
+		class instruction : public std::vector<int32_t>
 		{
-		private:
-			unsigned code_, nest_;
-
-			String stringArgument_;
-			std::vector<int32_t> argument_;
 		public:
-			Instruction();
-			Instruction(std::istream& s);
+			instruction();
+			instruction(std::istream& s);
 
-			unsigned code() const { return code_; }
-			void setCode(unsigned c) { code_ = c; }
+			unsigned code, nest;
+			string string_argument;
 
-			unsigned nest() const { return nest_; }
-			void setNest(unsigned n) { nest_ = n; }
-
-			String const& string() const { return stringArgument_; }
-			void setString(String const& str) { stringArgument_ = str; }
-			operator String const&() const { return stringArgument_; }
-
-			std::vector<int32_t> const& args() const { return argument_; }
-			std::vector<int32_t> args() { return argument_; }
-
-			int32_t at(unsigned index) const;
-			int32_t operator [](unsigned index) const;
-			int32_t& at(unsigned index);
-			int32_t& operator [](unsigned index);
-
-			size_t argNum() const { return argument_.size(); }
-			void addArg(int32_t arg) { argument_.push_back(arg); }
-
-			size_t serializedSize() const;
+			size_t serialized_size() const;
 			std::ostream& serialize(std::ostream& s) const;
-		}; // class Instruction
+		}; // class instruction
 
-		class Element;
-		class Descriptor;
+		class element;
+		class descriptor;
 
-		class Event
+		class event : public std::deque<instruction>
 		{
 		protected:
 			void init(std::istream& s);
 		public:
-			Event() {}
-			explicit Event(Binary const& b);
+			event() {}
+			explicit event(binary const& b);
 
-			Instruction const& operator [](unsigned index) const { return data_[index]; }
-
-			unsigned size() const { return data_.size(); }
 			void resize(unsigned num);
 
-			size_t serializedSize() const;
-			size_t serializedSize(unsigned offset) const;
+			size_t serialized_size(unsigned offset = 0) const;
 			std::ostream& serialize(std::ostream& s) const;
 
-			typedef std::deque<Instruction> Data;
-			Data const& data() const { return data_; }
-
-			bool empty() const { return data_.empty(); }
-
-			typedef std::map<unsigned, unsigned> LabelTable;
-			LabelTable const& labelTable() const { return label_; }
-		private:
-			Data data_;
-			LabelTable label_;
-		}; // class Event
+			typedef std::map<unsigned, unsigned> label_table_type;
+			label_table_type label;
+		}; // class event
 	} // namespace structure
 } //o namespace rpg2k
 
-#endif
+#endif // _INC_RPG2K__EVENT_HXX_

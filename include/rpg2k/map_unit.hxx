@@ -1,51 +1,50 @@
-#ifndef _INC__RPG2K__MODEL__MAP_UNIT_HPP
-#define _INC__RPG2K__MODEL__MAP_UNIT_HPP
+#ifndef _INC_RPG2K__MAP_UNIT_HXX_
+#define _INC_RPG2K__MAP_UNIT_HXX_
 
 #include "model.hxx"
 
-namespace rpg2k
-{
-	namespace model
-	{
-		class MapUnit : public Base
+#include <boost/array.hpp>
+
+
+namespace rpg2k {
+	namespace model {
+		class map_unit : public base
 		{
 		private:
-			unsigned id_;
+			unsigned const id_;
 
-			std::vector<uint16_t> upper_;
-			std::vector<uint16_t> lower_;
+			boost::array<std::vector<uint16_t>, chip_set::END> chip_id_;
 
-			unsigned width_, height_;
-
-			virtual void saveImpl();
-			virtual void loadImpl();
+			virtual void save_impl();
+			virtual void load_impl();
 
 			virtual char const* header() const { return "LcfMapUnit"; }
-			virtual char const* defaultName() const { return "Map0000.lmu"; }
+			virtual char const* default_filename() const { return "Map0000.lmu"; }
 		public:
-			MapUnit();
-			MapUnit(SystemString const& dir, SystemString const& name);
-			MapUnit(SystemString const& dir, unsigned id);
-			virtual ~MapUnit();
+			map_unit();
+			map_unit(system_string const& dir, system_string const& name);
+			map_unit(system_string const& dir, unsigned id);
+			virtual ~map_unit();
 
 
 			unsigned id() const { return id_; }
 
-			int chipIDLw(unsigned x, unsigned y) const;
-			int chipIDUp(unsigned x, unsigned y) const;
-			int chipIDLw(vec2 const& pos) const { return chipIDLw(pos[0], pos[1]); }
-			int chipIDUp(vec2 const& pos) const { return chipIDUp(pos[0], pos[1]); }
+			int chip_id_lower(unsigned x, unsigned y) const;
+			int chip_id_upper(unsigned x, unsigned y) const;
+			int chip_id_lower(ivec2 const& pos) const { return chip_id_lower(pos.x(), pos.y()); }
+			int chip_id_upper(ivec2 const& pos) const { return chip_id_upper(pos.x(), pos.y()); }
 
-			unsigned width () const { return  width_; }
-			unsigned height() const { return height_; }
+			unsigned width, height;
 
-			structure::Array2D& event() { return (*this)[81]; }
-			structure::Array2D const& event() const { return (*this)[81]; }
+			structure::array2d& event() { return (*this)[81]; }
+			structure::array2d const& event() const { return (*this)[81]; }
 
-			std::vector<uint16_t> const& upper() const { return upper_; }
-			std::vector<uint16_t> const& lower() const { return lower_; }
+			std::vector<uint16_t> const& lower() const
+			{ return chip_id_[chip_set::LOWER]; }
+			std::vector<uint16_t> const& upper() const
+			{ return chip_id_[chip_set::UPPER]; }
 		};
 	} // namespace model
 } // namespace rpg2k
 
-#endif
+#endif // _INC_RPG2K__MAP_UNIT_HXX_

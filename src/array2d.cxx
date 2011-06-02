@@ -1,6 +1,7 @@
 #include "rpg2k/array1d.hxx"
 #include "rpg2k/array2d.hxx"
 #include "rpg2k/debug.hxx"
+#include "rpg2k/descriptor.hxx"
 #include "rpg2k/element.hxx"
 #include "rpg2k/stream.hxx"
 
@@ -13,124 +14,106 @@ namespace rpg2k
 {
 	namespace structure
 	{
-		Array2D::Array2D(Array2D const& src)
-		: BaseOfArray2D(), arrayDefine_(src.arrayDefine_)
-		, this_(src.this_)
+		array2d::array2d(array2d const& src)
+		: base_of_array2d(), this_(src.this_)
+		, array_define(src.array_define)
 		{
-			Binary const b = structure::serialize(src);
+			binary const b = structure::serialize(src);
 			io::stream<io::array_source> s(b.source());
 			this->init(s);
 		}
 
-		Array2D::Array2D(ArrayDefine info)
-		: arrayDefine_(info), this_(NULL)
-		{
-		}
-		Array2D::Array2D(ArrayDefine info, std::istream& s)
-		: arrayDefine_(info), this_(NULL)
+		array2d::array2d(array_define_type const& info)
+		: this_(NULL), array_define(info)
+		{}
+		array2d::array2d(array_define_type const& info, std::istream& s)
+		: this_(NULL), array_define(info)
 		{
 			init(s);
 		}
-		Array2D::Array2D(ArrayDefine info, std::istream& in, size_t const size)
-		: arrayDefine_(info), this_(NULL)
-		{
-			io::stream<stream::istream_range_source>
-				s(stream::istream_range_source(in, size));
-			init(s);
-		}
-		/*
-		Array2D::Array2D(ArrayDefine info, Binary const& b)
-		: arrayDefine_(info), this_(NULL)
+		array2d::array2d(array_define_type const& info, binary const& b)
+		: this_(NULL), array_define(info)
 		{
 			io::stream<io::array_source> s(b.source());
 
-			if(isInvalidArray2D(b)) { return; } // s.seek(PARTICULAR_DATA_SIZE);
+			if(is_invalid_array2d(b)) { return; }
 			else { this->init(s); }
 		}
-		*/
 
-		Array2D::Array2D(Element& e)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
-		{
-		}
-		Array2D::Array2D(Element& e, std::istream& s)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
+		array2d::array2d(element& e)
+			: this_(&e), array_define(e.definition().array_define())
+		{}
+		array2d::array2d(element& e, std::istream& s)
+		: this_(&e), array_define(e.definition().array_define())
 		{
 			init(s);
 		}
-		Array2D::Array2D(Element& e, std::istream& in, size_t const size)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
+		array2d::array2d(element& e, binary const& b)
+		: this_(&e), array_define(e.definition().array_define())
 		{
-			io::stream<stream::istream_range_source>
-				s(stream::istream_range_source(in, size));
-			init(s);
-		}
-		Array2D::Array2D(Element& e, Binary const& b)
-		: arrayDefine_(e.descriptor().arrayDefine()), this_(&e)
-		{
-			io::stream<io::array_source> s(io::array_source(reinterpret_cast<char const*>(b.data()), b.size()));
+			io::stream<io::array_source> s(b.source());
 
-			if(isInvalidArray2D(b)) return; // s.seek(PARTICULAR_DATA_SIZE);
-			init(s);
+			if(is_invalid_array2d(b)) return;
+			else init(s);
 		}
-		void Array2D::init(std::istream& s)
+		void array2d::init(std::istream& s)
 		{
-			BOOST_FOREACH(unsigned i, boost::irange(0u, stream::readBER(s))) {
+			BOOST_FOREACH(unsigned i, boost::irange(0u, stream::read_ber(s))) {
 				(void)i;
-				unsigned index = stream::readBER(s);
-				this->insert(index, new Array1D(*this, index, s));
+				unsigned index = stream::read_ber(s);
+				this->insert(index, new array1d(*this, index, s));
 			}
 
-			if(toElement().hasOwner()) rpg2k_analyze_assert(stream::isEOF(s));
+			if(to_element().has_owner()) rpg2k_analyze_assert(stream::is_eof(s));
 		}
 
 	/*
-	 *  Checking if the input Binary is particular Array2D.
-	 *  Particular Array2D is a Binary data that starts with 512 byte data of
+	 *  Checking if the input binary is particular array2d.
+	 *  Particular array2d is a binary data that starts with 512 byte data of
 	 * all value that is 0xff.
-	 *  Notice: Particular Array2D's size is not 512 byte. I misunderstood it.
+	 *  _notice: Particular array2d's size is not 512 byte. I misunderstood it.
 	 *  http://twitter.com/rgssws4m told me about this case.
 	 */
-		bool Array2D::isInvalidArray2D(Binary const& b)
+		bool array2d::is_invalid_array2d(binary const& b)
 		{
 			enum { PARTICULAR_DATA_SIZE = 512 };
 		// check the data size
 			if(b.size() < PARTICULAR_DATA_SIZE) return false;
-		// check the data inside Binary
-		// return true if it is particular Array2D
+		// check the data inside binary
+		// return true if it is particular array2d
 			return (boost::count(b, 0xff) < PARTICULAR_DATA_SIZE)
 				? false
-				: debug::Tracer::printBinary(b, clog), true;
+				: debug::tracer::print_binary(b, clog), true;
 		}
 
-		Element& Array2D::toElement() const
+		element& array2d::to_element() const
 		{
-			rpg2k_assert(isElement());
+			rpg2k_assert(is_element());
 			return *this_;
 		}
 
-		Array2D const& Array2D::operator =(Array2D const& src)
+		array2d const& array2d::operator =(array2d const& src)
 		{
-			BaseOfArray2D::operator =(src);
+			base_of_array2d::operator =(src);
 			return *this;
 		}
 
-		Array1D& Array2D::operator [](unsigned index)
+		array1d& array2d::operator [](unsigned index)
 		{
 			iterator it = this->find(index);
 			if(it != this->end()) return *it->second;
 			else {
-				return *insert(index, new Array1D(*this, index))->second;
+				return *insert(index, new array1d(*this, index))->second;
 			}
 		}
-		Array1D const& Array2D::operator [](unsigned const index) const
+		array1d const& array2d::operator [](unsigned const index) const
 		{
 			const_iterator it = this->find(index);
 			rpg2k_assert(it != this->end());
 			return *it->second;
 		}
 
-		unsigned Array2D::count() const
+		unsigned array2d::count() const
 		{
 			unsigned ret = 0;
 			for(const_iterator i = begin(); i != end(); ++i) {
@@ -138,42 +121,42 @@ namespace rpg2k
 			}
 			return ret;
 		}
-		size_t Array2D::serializedSize() const
+		size_t array2d::serialized_size() const
 		{
 			unsigned ret = 0;
 
-			ret += stream::berSize(count());
+			ret += stream::ber_size(count());
 			for(const_iterator i = this->begin(); i != this->end(); ++i) {
 				if(!i->second->exists()) continue;
 
-				ret += stream::berSize(i->first);
-				ret += i->second->serializedSize();
+				ret += stream::ber_size(i->first);
+				ret += i->second->serialized_size();
 			}
 
 			return ret;
 		}
-		std::ostream& Array2D::serialize(std::ostream& s) const
+		std::ostream& array2d::serialize(std::ostream& s) const
 		{
-			stream::writeBER(s, count());
+			stream::write_ber(s, count());
 			for(const_iterator i = this->begin(); i != this->end(); ++i) {
 				if(!i->second->exists()) continue;
 
-				stream::writeBER(s, i->first);
+				stream::write_ber(s, i->first);
 				i->second->serialize(s);
 			}
 			return s;
 		}
 
-		bool Array2D::exists(unsigned const index) const
+		bool array2d::exists(unsigned const index) const
 		{
 			const_iterator it = find(index);
 			return((it != end()) && it->second->exists());
 		}
-		bool Array2D::exists(unsigned index1, unsigned index2) const
+		bool array2d::exists(unsigned index1, unsigned index2) const
 		{
-			Array2D::const_iterator it1 = find(index1);
+			array2d::const_iterator it1 = find(index1);
 			if((it1 != end()) && it1->second->exists()) {
-				Array1D::const_iterator it2 = it1->second->find(index2);
+				array1d::const_iterator it2 = it1->second->find(index2);
 				return((it2 != it1->second->end()) && it2->second->exists());
 			}
 			return false;

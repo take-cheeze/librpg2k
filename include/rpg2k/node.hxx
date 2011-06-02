@@ -12,48 +12,46 @@
 
 namespace rpg2k
 {
-	class Graphics2D;
-	class NodeSwitcher;
+	class graphics2d;
+	class node_switcher;
 
-	class Node
+	class node
 	{
-		friend class NodeSwitcher;
+		friend class node_switcher;
 	public:
-		virtual ~Node() {}
+		virtual ~node() {}
 
-		typedef int Priority;
+		typedef int priority;
 
-		void addChild(Priority const& p, Node& child);
-		void remove(Node& child);
+		void add_child(priority const& p, node& child);
+		void remove(node& child);
 
 		void update();
-		void draw(Graphics2D& g) const;
-	protected:
-		typedef boost::bimap< boost::bimaps::multiset_of<Priority>
-		, boost::bimaps::unordered_set_of<Node*> > Children;
-		boost::scoped_ptr<Children> const& children() const { return children_; }
-		boost::scoped_ptr<Children>& children() { return children_; }
-	private:
-		Node* parent_;
-		boost::scoped_ptr<Children> children_;
-		virtual void updateThis() = 0;
-		virtual void drawThis(Graphics2D&) const {}
-	}; // class BasicNode
+		void draw(graphics2d& g) const;
 
-	class NodeSwitcher : public Node
+		typedef boost::bimap< boost::bimaps::multiset_of<priority>
+		, boost::bimaps::unordered_set_of<node*> > children_type;
+		boost::scoped_ptr<children_type> children;
+	private:
+		node* parent_;
+		virtual void update_this() = 0;
+		virtual void draw_this(graphics2d&) const {}
+	}; // class node
+
+	class node_switcher : public node
 	{
 	public:
-		typedef String Key;
+		typedef string key;
 
-		void addChild(Key const& k, Node& child);
-		void remove(Node& child);
+		void add_child(key const& k, node& child);
+		void remove(node& child);
 
-		void switchTo(Key const& k);
+		void switch_to(key const& k);
 	private:
-		typedef boost::bimap< boost::bimaps::set_of<Key>
-		, boost::bimaps::unordered_set_of<Node*> > SwitchList;
-		SwitchList switchList_;
-	}; // class BasicNodeSwitcher
+		typedef boost::bimap< boost::bimaps::set_of<key>
+		, boost::bimaps::unordered_set_of<node*> > switch_list_type;
+		switch_list_type switch_list_;
+	}; // class node_switcher
 } // namespace rpg2k
 
 #endif // _INC_RPG2K__NODE_HXX_

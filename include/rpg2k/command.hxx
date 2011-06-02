@@ -8,21 +8,21 @@ namespace rpg2k
 {
 	namespace model
 	{
-		#define PP_enumAllContextCommand(FUNC) \
-			FUNC(0) \
-			FUNC(10) \
+		#define PP_all_context_command \
+			(0) \
+			(10) \
 			\
-			FUNC(11210) \
+			(11210) \
 			\
-			FUNC(11310) \
-			FUNC(11320) \
-			FUNC(11330) \
+			(11310) \
+			(11320) \
+			(11330) \
 
-		#define PP_contextCommandProto(CODE) \
-			template<> void Context::command<CODE>(structure::Instruction const& inst);
-		PP_enumAllContextCommand(PP_contextCommandProto)
-		#undef PP_contextCommandProto
+#define PP_context_command_proto(r, data, elem) \
+	template<> void context::command<elem>(structure::instruction const& inst);
+		BOOST_PP_SEQ_FOR_EACH(PP_context_command_proto, , PP_all_context_command)
+#undef PP_context_command_proto
 	} // namespace model
 } // namespace rpg2k
 
-#endif
+#endif // _INC_RPG2K__COMMAND_HXX_

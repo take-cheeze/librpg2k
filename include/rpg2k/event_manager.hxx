@@ -12,21 +12,21 @@ namespace rpg2k
 {
 	namespace model
 	{
-		class Project;
+		class project;
 
-		class EventManager : public Node
+		class event_manager : public node
 		{
 		public:
-			EventManager(Project& proj);
+			event_manager(project& proj);
 		private:
-			Project& project_;
+			project& project_;
 
-			size_t commandCount_;
+			size_t command_count_;
 
-			typedef boost::ptr_multimap<EventStart, Context, std::greater<EventStart> > ContextList;
-			ContextList contextList_;
+			typedef boost::ptr_multimap<event_start::type, context, std::greater<event_start::type> > context_list;
+			context_list context_list_;
 
-			void updateThis();
+			void update_this();
 		};
 	} // namespace model
 } // namespace rpg2k

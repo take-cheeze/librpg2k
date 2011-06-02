@@ -5,11 +5,12 @@
 
 TEST(ElementType, Compare)
 {
-	using rpg2k::structure::ElementType;
+	using rpg2k::structure::element_type;
+	element_type const& elem_type = element_type::instance();
 
 	#define PP_enum(r, data, elem) \
-		ASSERT_EQ( ElementType::BOOST_PP_CAT(elem, data), ElementType::instance().toEnum(BOOST_PP_STRINGIZE(elem)) ); \
-		ASSERT_EQ( BOOST_PP_STRINGIZE(elem), ElementType::instance().toString(ElementType::BOOST_PP_CAT(elem, data)) );
-	BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_allTypes)
+		ASSERT_EQ(element_type::BOOST_PP_CAT(elem, data), elem_type.to_enum(BOOST_PP_STRINGIZE(elem))); \
+		ASSERT_EQ(BOOST_PP_STRINGIZE(elem), elem_type.to_string(element_type::BOOST_PP_CAT(elem, data)));
+	BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_all_types)
 	#undef PP_enum
 }

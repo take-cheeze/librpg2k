@@ -5,82 +5,80 @@
 #include <boost/range/irange.hpp>
 
 
-namespace rpg2k
-{
-	namespace model
-	{
-		DataBase::DataBase(SystemString const& dir)
-		: Base(dir)
+namespace rpg2k {
+	namespace model {
+		database::database(system_string const& dir)
+		: base(dir)
 		{
 			load();
 		}
-		DataBase::DataBase(SystemString const& dir, SystemString const& name)
-		: Base(dir, name)
+		database::database(system_string const& dir, system_string const& name)
+		: base(dir, name)
 		{
 			load();
 		}
-		DataBase::~DataBase()
+		database::~database()
 		{
-#if RPG2K_DEBUG
-			debug::ANALYZE_RESULT << header() << ":" << endl;
+#if RPG2KDEBUG
+			debug::ANALYZERESULT << header() << ":" << endl;
 #endif
 		}
 
-		void DataBase::loadImpl()
+		void database::load_impl()
 		{
 		// load chip infos
-			structure::Array2D const& chips = (*this)[20];
-			for(structure::Array2D::const_iterator i = chips.begin(); i != chips.end(); ++i) {
-				terrain_.insert(std::make_pair(i->first, (*i->second)[3].toBinary().toVector<uint16_t>()));
+			structure::array2d const& chips = (*this)[20];
+			for(structure::array2d::const_iterator i = chips.begin(); i != chips.end(); ++i) {
+				terrain_.insert(std::make_pair(i->first, (*i->second)[3].to_binary().to_vector<uint16_t>()));
 
-				std::vector<std::vector<uint8_t> >& dst = chipFlag_[i->first];
-				dst.push_back((*i->second)[4].to<Binary>());
-				dst.push_back((*i->second)[5].to<Binary>());
+				std::vector<std::vector<uint8_t> >& dst = chip_flag_[i->first];
+				dst.push_back((*i->second)[4].to<binary>());
+				dst.push_back((*i->second)[5].to<binary>());
 			}
 		// copying vocabulary
-			structure::Array1D const& vocSrc = (*this)[21];
-			for(structure::Array1D::const_iterator i = vocSrc.begin(); i != vocSrc.end(); ++i) {
+			structure::array1d const& voc_src = (*this)[21];
+			for(structure::array1d::const_iterator i = voc_src.begin(); i != voc_src.end(); ++i) {
 				if(i->first >= vocabulary_.size()) {
 					vocabulary_.resize(i->first + 1);
 				}
-				vocabulary_[i->first] = i->second->toString();
+				vocabulary_[i->first] = i->second->to_string();
 			}
 		}
-		void DataBase::saveImpl()
+		void database::save_impl()
 		{
 		// save chip info
-			structure::Array2D& chips = (*this)[20];
-			for(structure::Array2D::iterator i = chips.begin(); i != chips.end(); ++i) {
+			structure::array2d& chips = (*this)[20];
+			for(structure::array2d::iterator i = chips.begin(); i != chips.end(); ++i) {
 				if(!i->second->exists()) continue;
 
-				(*i->second)[3].toBinary().assign(terrain(i->first));
+				(*i->second)[3].to_binary().assign(terrain(i->first));
 
-				(*i->second)[4].toBinary().assign(upperChipFlag(i->first));
-				(*i->second)[5].toBinary().assign(lowerChipFlag(i->first));
+				(*i->second)[4].to_binary().assign(upper_chip_flag(i->first));
+				(*i->second)[5].to_binary().assign(lower_chip_flag(i->first));
 			}
 		// saving vocabulary
-			structure::Array1D& vocDst = (*this)[21];
+			structure::array1d& voc_dst = (*this)[21];
 			BOOST_FOREACH(size_t const i, boost::irange(size_t(0), vocabulary_.size())) {
 				if(vocabulary_[i].empty()) continue;
-				vocDst[i] = vocabulary_[i];
+				voc_dst[i] = vocabulary_[i];
 			}
 		}
 
-		std::vector<uint8_t> const& DataBase::chipFlag(unsigned id, ChipSet::type t) const
+		std::vector<uint8_t> const& database::chip_flag(unsigned id, chip_set::type t) const
 		{
-			ChipFlag::const_iterator it = chipFlag_.find(id);
-			rpg2k_assert(it != chipFlag_.end());
+			chip_flag_type::const_iterator it = chip_flag_.find(id);
+			rpg2k_assert(it != chip_flag_.end());
 			rpg2k_assert(rpg2k::within<unsigned>(int(t), it->second.size()));
 			return it->second[int(t)];
 		}
-		std::vector<uint16_t> const& DataBase::terrain(unsigned const id) const
+		std::vector<uint16_t> const& database::terrain(unsigned const id) const
 		{
-			Terrain::const_iterator it = terrain_.find(id);
+			terrain_type::const_iterator it = terrain_.find(id);
 			rpg2k_assert(it != terrain_.end());
 			return it->second;
 		}
 
-		String const& DataBase::vocabulary(unsigned const index) const
+		string const& database::vocabulary(unsigned const index) const
 		{
 			rpg2k_assert(index < vocabulary_.size());
 			// rpg2k_assert(!vocabulary_[index].empty());

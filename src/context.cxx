@@ -2,16 +2,13 @@
 #include "rpg2k/project.hxx"
 
 
-namespace rpg2k
-{
-	namespace model
-	{
-		Context::Context(Project& p, unsigned evID, EventStart t)
+namespace rpg2k {
+	namespace model {
+		context::context(project& p, unsigned ev_id, event_start::type t)
 		: owner_(p)
-		, eventID_(evID), type_(t)
-		{
-		}
-		void Context::ret() 
+		, event_id_(ev_id), type_(t)
+		{}
+		void context::ret() 
 		{
 			event_.pop();
 		}

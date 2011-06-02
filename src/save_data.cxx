@@ -14,239 +14,235 @@ namespace rpg2k
 {
 	namespace model
 	{
-		SaveData::SaveData()
-		: Base(SystemString(), SystemString()), id_(-1)
+		save_data::save_data()
+		: base(system_string(), system_string()), id_(-1)
 		{
-			Base::reset();
+			base::reset();
 
 		// reset map chip info
-			resetReplace();
+			reset_replace();
 		}
-		SaveData::SaveData(SystemString const& dir, SystemString const& name)
-		: Base(dir, name), id_(0)
+		save_data::save_data(system_string const& dir, system_string const& name)
+		: base(dir, name), id_(0)
 		{
 			load();
 		}
-		SaveData::SaveData(SystemString const& dir, unsigned const id)
-		: Base(dir, ""), id_(id)
+		save_data::save_data(system_string const& dir, unsigned const id)
+		: base(dir, ""), id_(id)
 		{
-			std::string fileName;
-			ntfmt::sink_string(fileName)
+			std::string filename;
+			ntfmt::sink_string(filename)
 				<< "Save" << ntfmt::fmt(id, "%02d") << ".lsd";
-			setFileName(fileName);
+			set_filename(filename);
 
-			checkExists();
+			check_exists();
 
 			if(!exists()) return;
 
 			load();
 		}
-		SaveData::~SaveData()
+		save_data::~save_data()
 		{
-#if RPG2K_DEBUG
-			debug::ANALYZE_RESULT << header() << ": " << int(id_) << endl;
+#if RPG2KDEBUG
+			debug::ANALYZERESULT << header() << ": " << int(id_) << endl;
 #endif
 		}
 
-		SaveData const& SaveData::operator =(SaveData const& src)
+		save_data const& save_data::operator =(save_data const& src)
 		{
 			this->data() = src.data();
 
 			this->item_ = src.item_;
 
 			this->variable_ = src.variable_;
-			this->switch_   = src.switch_  ;
+			this->flag_   = src.flag_  ;
 
 			this->member_ = src.member_;
 
-			this->chipReplace_ = src.chipReplace_;
+			this->chip_replace_ = src.chip_replace_;
 
 			return *this;
 		}
 
-		void SaveData::loadImpl()
+		void save_data::load_impl()
 		{
-			structure::Array1D& sys    = (*this)[101];
-			structure::Array1D& status = (*this)[109];
-			structure::Array1D& event  = (*this)[111];
+			structure::array1d& sys    = (*this)[101];
+			structure::array1d& status = (*this)[109];
+			structure::array1d& event  = (*this)[111];
 
 		// item
 			{
-				int itemTypeNum = status[11];
-				std::vector<uint16_t> id  = status[12].toBinary().toVector<uint16_t>();
-				std::vector<uint8_t > num = status[13].toBinary().toVector<uint8_t>();
-				std::vector<uint8_t > use = status[14].toBinary().toVector<uint8_t>();
+				int item_type_num = status[11];
+				std::vector<uint16_t> id  = status[12].to_binary().to_vector<uint16_t>();
+				std::vector<uint8_t > num = status[13].to_binary().to_vector<uint8_t>();
+				std::vector<uint8_t > use = status[14].to_binary().to_vector<uint8_t>();
 
-				BOOST_FOREACH(int const i, boost::irange(0, itemTypeNum)) {
+				BOOST_FOREACH(int const i, boost::irange(0, item_type_num)) {
 					if(!num[i]) continue;
 
-					Item info = { num[i], use[i] };
+					item_type info = { num[i], use[i] };
 					item_.insert(std::make_pair(id[i], info));
 				}
 			}
 		// switch and variable
-			// switch_.resize(sys[31].to_int());
-			switch_ = sys[32].toBinary().toVector<uint8_t>();
+			// flag_.resize(sys[31].to_int());
+			flag_ = sys[32].to_binary().to_vector<uint8_t>();
 			// variable_.resize(sys[33].to_int());
-			variable_ = sys[34].toBinary().toVector<int32_t>();
+			variable_ = sys[34].to_binary().to_vector<int32_t>();
 		// member
 			member_.resize(status[1].to_int());
-			member_ = status[2].toBinary().toVector<uint16_t>();
+			member_ = status[2].to_binary().to_vector<uint16_t>();
 		// chip replace
-			chipReplace_.resize(int(ChipSet::END));
-			BOOST_FOREACH(int const i, boost::irange(0, int(ChipSet::END)))
-			{ chipReplace_[i] = event[21 + i].toBinary(); }
+			BOOST_FOREACH(int const i, boost::irange(0, int(chip_set::END)))
+				{ chip_replace_[i] = event[21 + i].to_binary().to_array<uint8_t, CHIP_REPLACE_MAX>(); }
 		}
 
-		void SaveData::saveImpl()
+		void save_data::save_impl()
 		{
-			structure::Array1D& status = (*this)[109];
-			structure::Array1D& sys = (*this)[101];
+			structure::array1d& status = (*this)[109];
+			structure::array1d& sys = (*this)[101];
 
 		// item
 			{
-				int itemNum = item_.size();
-				status[11] = itemNum;
+				int item_num = item_.size();
+				status[11] = item_num;
 
-				std::vector<uint16_t> id (itemNum);
-				std::vector<uint8_t > num(itemNum);
-				std::vector<uint8_t > use(itemNum);
+				std::vector<uint16_t> id (item_num);
+				std::vector<uint8_t > num(item_num);
+				std::vector<uint8_t > use(item_num);
 
 				int i = 0;
-				BOOST_FOREACH(ItemTable::value_type const p, item_) {
+				BOOST_FOREACH(item_table::value_type const p, item_) {
 					id [i] = p.first;
 					num[i] = p.second.num;
 					use[i] = p.second.use;
 
 					i++;
 				}
-				status[12].toBinary().assign(id);
-				status[13].toBinary().assign(num);
-				status[14].toBinary().assign(use);
+				status[12].to_binary().assign(id);
+				status[13].to_binary().assign(num);
+				status[14].to_binary().assign(use);
 			}
 		// switch and variable
-			sys[31] = int(switch_.size());
-			sys[32].toBinary().assign(switch_);
+			sys[31] = int(flag_.size());
+			sys[32].to_binary().assign(flag_);
 			sys[33] = int(variable_.size());
-			sys[34].toBinary().assign(variable_);
+			sys[34].to_binary().assign(variable_);
 		// member
-			(*this)[109].toArray1D()[1] = int(member_.size());
-			(*this)[109].toArray1D()[2].toBinary().assign(member_);
+			(*this)[109].to_array1d()[1] = int(member_.size());
+			(*this)[109].to_array1d()[2].to_binary().assign(member_);
 		// chip replace
-			BOOST_FOREACH(int const i, boost::irange(int(ChipSet::BEGIN), int(ChipSet::END)))
-			{ (*this)[111].toArray1D()[21 + i].toBinary().assign(chipReplace_[i]); }
+			BOOST_FOREACH(int const i, boost::irange(int(chip_set::BEGIN), int(chip_set::END)))
+			{ (*this)[111].to_array1d()[21 + i].to_binary().assign(chip_replace_[i]); }
 		}
 
-		bool SaveData::addMember(unsigned const charID)
+		bool save_data::add_member(unsigned const char_id)
 		{
 			if((member_.size() > rpg2k::MEMBER_MAX)
-			|| boost::find(member_, charID) == member_.end()) return false;
+			|| boost::find(member_, char_id) == member_.end()) return false;
 			else {
-				member_.push_back(charID);
+				member_.push_back(char_id);
 				return true;
 			}
 		}
-		bool SaveData::removeMember(unsigned const charID)
+		bool save_data::remove_member(unsigned const char_id)
 		{
-			std::vector<uint16_t>::iterator it = std::find(member_.begin(), member_.end(), charID);
+			std::vector<uint16_t>::iterator it = std::find(member_.begin(), member_.end(), char_id);
 			if(it != member_.end()) {
 				member_.erase(it);
 				return true;
 			} else return false;
 		}
 
-		bool SaveData::flag(unsigned const id) const
+		bool save_data::flag(unsigned const id) const
 		{
-			return (id < switch_.size()) ? switch_[id - ID_MIN] : bool(SWITCH_DEF_VAL);
+			return (id < flag_.size()) ? flag_[id - ID_MIN] : bool(FLAG_DEFAULT);
 		}
-		void SaveData::setFlag(unsigned id, bool data)
+		void save_data::set_flag(unsigned id, bool data)
 		{
-			if(id >= switch_.size()) switch_.resize(id, SWITCH_DEF_VAL);
-			switch_[id - ID_MIN] = data;
+			if(id >= flag_.size()) flag_.resize(id, FLAG_DEFAULT);
+			flag_[id - ID_MIN] = data;
 		}
 
-		int32_t SaveData::var(unsigned const id) const
+		int32_t save_data::var(unsigned const id) const
 		{
-			return (id < variable_.size()) ? variable_[id - ID_MIN] : VAR_DEF_VAL;
+			return (id < variable_.size()) ? variable_[id - ID_MIN] : VARIABLE_DEFAULT;
 		}
-		void SaveData::setVar(unsigned const id, int32_t const data)
+		void save_data::set_var(unsigned const id, int32_t const data)
 		{
-			if(id >= variable_.size()) variable_.resize(id, int32_t(VAR_DEF_VAL));
+			if(id >= variable_.size()) variable_.resize(id, int32_t(VARIABLE_DEFAULT));
 			variable_[id - ID_MIN] = data;
 		}
 
-		int SaveData::money() const
+		int save_data::money() const
 		{
-			return (*this)[109].toArray1D()[21];
+			return (*this)[109].to_array1d()[21];
 		}
-		void SaveData::setMoney(int const data)
+		void save_data::set_money(int const data)
 		{
-			if(data < MONEY_MIN) (*this)[109].toArray1D()[21] = int(MONEY_MIN);
-			else if(MONEY_MAX < data) (*this)[109].toArray1D()[21] = int(MONEY_MAX);
-			else (*this)[109].toArray1D()[21] = data;
+			if(data < MONEY_MIN) (*this)[109].to_array1d()[21] = int(MONEY_MIN);
+			else if(MONEY_MAX < data) (*this)[109].to_array1d()[21] = int(MONEY_MAX);
+			else (*this)[109].to_array1d()[21] = data;
 		}
 
-		unsigned SaveData::itemNum(unsigned const id) const
+		unsigned save_data::item_num(unsigned const id) const
 		{
-			ItemTable::const_iterator it = item_.find(id);
-			return (it == item_.end())? unsigned(ITEM_MIN) : it->second.num;
+			item_table::const_iterator i = item_.find(id);
+			return (i == item_.end())? unsigned(ITEM_MIN) : i->second.num;
 		}
-		void SaveData::setItemNum(unsigned const id, unsigned const val)
+		void save_data::set_item_num(unsigned const id, unsigned const val)
 		{
-			unsigned const validVal = std::min(unsigned(ITEM_MAX), val);
+			unsigned const valid_val = std::min(unsigned(ITEM_MAX), val);
 
 			if(item_.find(id) == item_.end()) {
-				Item const i = { uint8_t(validVal), 0 };
+				item_type const i = { uint8_t(valid_val), 0 };
 				item_.insert(std::make_pair(id, i));
-			} else item_[id].num = validVal;
+			} else item_[id].num = valid_val;
 
-			if(validVal == ITEM_MIN) item_.erase(id);
+			if(valid_val == ITEM_MIN) item_.erase(id);
 		}
 
-		unsigned SaveData::itemUse(unsigned const id) const
+		unsigned save_data::item_use(unsigned const id) const
 		{
-			ItemTable::const_iterator it = item_.find(id);
-			return (it == item_.end()) ? unsigned(ITEM_MIN) : it->second.use;
+			item_table::const_iterator t = item_.find(id);
+			return (t == item_.end()) ? unsigned(ITEM_MIN) : t->second.use;
 		}
-		void SaveData::setItemUse(unsigned const id, unsigned const val)
+		void save_data::set_item_use(unsigned const id, unsigned const val)
 		{
-			ItemTable::iterator it = item_.find(id);
-			if(it != item_.end()) it->second.use = val;
+			item_table::iterator i = item_.find(id);
+			if(i != item_.end()) i->second.use = val;
 		}
 
-		unsigned SaveData::member(unsigned const index) const
+		unsigned save_data::member(unsigned const index) const
 		{
 			rpg2k_assert(rpg2k::within<unsigned>(index, member_.size()));
 			return member_[index];
 		}
 
-		structure::EventState& SaveData::eventState(unsigned id)
+		structure::event_state& save_data::event_state(unsigned id)
 		{
 			switch(id) {
 				case ID_PARTY: case ID_BOAT: case ID_SHIP: case ID_AIRSHIP:
-					return reinterpret_cast<structure::EventState&>(
+					return reinterpret_cast<structure::event_state&>(
 						(*this)[104 + (id-ID_PARTY)]);
-				case ID_THIS: id = currentEventID(); // TODO
+				case ID_THIS: id = current_event_id(); // TODO
 				default:
-					return reinterpret_cast<structure::EventState&>(
-						(*this)[111].toArray1D()[11].toArray2D()[id]);
+					return reinterpret_cast<structure::event_state&>(
+						(*this)[111].to_array1d()[11].to_array2d()[id]);
 			}
 		}
 
-		void SaveData::replace(ChipSet::type const type, unsigned const dstNo, unsigned const srcNo)
+		void save_data::replace(chip_set::type const type, unsigned const dst_no, unsigned const src_no)
 		{
-			rpg2k_assert(rpg2k::within<unsigned>(dstNo, CHIP_REPLACE_MAX));
-			rpg2k_assert(rpg2k::within<unsigned>(srcNo, CHIP_REPLACE_MAX));
+			rpg2k_assert(rpg2k::within<unsigned>(dst_no, CHIP_REPLACE_MAX));
+			rpg2k_assert(rpg2k::within<unsigned>(src_no, CHIP_REPLACE_MAX));
 
-			std::swap(chipReplace_[int(type)][srcNo], chipReplace_[int(type)][dstNo]);
+			std::swap(chip_replace_[int(type)][src_no], chip_replace_[int(type)][dst_no]);
 		}
-		void SaveData::resetReplace()
+		void save_data::reset_replace()
 		{
-			chipReplace_.clear();
-			chipReplace_.resize(int(ChipSet::END));
-			BOOST_FOREACH(int const i, boost::irange(int(ChipSet::BEGIN), int(ChipSet::END))) {
-				chipReplace_[i].resize(CHIP_REPLACE_MAX);
-				boost::copy(boost::irange(0, int(CHIP_REPLACE_MAX)), back_inserter(chipReplace_[i]));
+			BOOST_FOREACH(chip_replace_type::value_type& i, chip_replace_) {
+				boost::copy(boost::irange(0, int(CHIP_REPLACE_MAX)), i.begin());
 			}
 		}
 	} // namespace model

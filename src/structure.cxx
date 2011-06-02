@@ -14,33 +14,33 @@ namespace
 
 namespace rpg2k
 {
-	std::ostream& operator <<(std::ostream& os, String const& str)
+	std::ostream& operator <<(std::ostream& os, string const& str)
 	{
-		return(os << str.toSystem().c_str());
+		return(os << str.to_system().c_str());
 	}
-	std::ostream& operator <<(std::ostream& os, SystemString const& str)
+	std::ostream& operator <<(std::ostream& os, system_string const& str)
 	{
 		return(os << str.c_str());
 	}
 
-	CharSet::Dir::type toCharSetDir(EventDir::type const dir)
+	char_set_dir::type to_char_set_dir(event_dir::type const dir)
 	{
 		switch(dir) {
-			case EventDir::DOWN : return CharSet::Dir::DOWN ;
-			case EventDir::LEFT : return CharSet::Dir::LEFT ;
-			case EventDir::RIGHT: return CharSet::Dir::RIGHT;
-			case EventDir::UP   : return CharSet::Dir::UP   ;
-			default: return CharSet::Dir::DOWN;
+			case event_dir::DOWN : return char_set_dir::DOWN ;
+			case event_dir::LEFT : return char_set_dir::LEFT ;
+			case event_dir::RIGHT: return char_set_dir::RIGHT;
+			case event_dir::UP   : return char_set_dir::UP   ;
+			default: return char_set_dir::DOWN;
 		}
 	}
-	EventDir::type toEventDir(CharSet::Dir::type const key)
+	event_dir::type to_event_dir(char_set_dir::type const key)
 	{
 		switch(key) {
-			case CharSet::Dir::UP   : return EventDir::UP   ;
-			case CharSet::Dir::LEFT : return EventDir::LEFT ;
-			case CharSet::Dir::RIGHT: return EventDir::RIGHT;
-			case CharSet::Dir::DOWN : return EventDir::DOWN ;
-			default: return EventDir::DOWN;
+			case char_set_dir::UP   : return event_dir::UP   ;
+			case char_set_dir::LEFT : return event_dir::LEFT ;
+			case char_set_dir::RIGHT: return event_dir::RIGHT;
+			case char_set_dir::DOWN : return event_dir::DOWN ;
+			default: return event_dir::DOWN;
 		}
 	}
 
@@ -65,22 +65,22 @@ namespace rpg2k
 		return (random(max - min + 1) + min);
 	}
 
-	SystemString String::toSystem() const
+	system_string string::to_system() const
 	{
-		return Encode::instance().toSystem(*this);
+		return encode::instance().to_system(*this);
 	}
-	std::ostream& String::serialize(std::ostream& os) const
+	std::ostream& string::serialize(std::ostream& os) const
 	{
 		return os.write(this->c_str(), this->size());
 	}
-	String SystemString::toRPG2k () const
+	string system_string::to_rpg2k() const
 	{
-		return Encode::instance().toRPG2k(*this);
+		return encode::instance().to_rpg2k(*this);
 	}
 
-	bool Binary::isBER() const
+	bool binary::is_ber() const
 	{
-		if(!size() || ((size() > (sizeof(uint32_t) * CHAR_BIT) / stream::BER_BIT + 1))) return false;
+		if(!size() || ((size() > (sizeof(uint32_t) * 8) / stream::BER_BIT + 1))) return false;
 
 		const_reverse_iterator it = std::vector<uint8_t>::rbegin();
 		if(*it > stream::BER_SIGN) return false;
@@ -89,24 +89,24 @@ namespace rpg2k
 
 		return true;
 	}
-	bool Binary::isString() const
+	bool binary::is_string() const
 	{
 		BOOST_FOREACH(uint8_t const i, *this) if(std::iscntrl(i)) return false;
 		try {
-			String(reinterpret_cast<char const*>(this->data()), this->size()).toSystem();
+			string(reinterpret_cast<char const*>(this->data()), this->size()).to_system();
 			return true;
-		} catch(debug::AnalyzeException const&) { return false; }
+		} catch(debug::analyze_exception const&) { return false; }
 	}
 
-	Binary::operator int() const
+	binary::operator int() const
 	{
-		rpg2k_assert(isBER());
+		rpg2k_assert(is_ber());
 
 		namespace io = boost::iostreams;
 		io::stream<io::array_source> s(this->source());
-		return rpg2k_integer(stream::readBER(s));
+		return rpg2k_integer(stream::read_ber(s));
 	}
-	Binary::operator bool() const
+	binary::operator bool() const
 	{
 		rpg2k_assert(size() == sizeof(bool));
 		switch(static_cast<int>(*this)) {
@@ -116,35 +116,35 @@ namespace rpg2k
 		}
 		return false;
 	}
-	Binary::operator double() const
+	binary::operator double() const
 	{
 		rpg2k_assert(size() == sizeof(double));
 		return *(reinterpret_cast<double const*>(this->data()));
 	}
 
-	Binary& Binary::operator =(int const num)
+	binary& binary::operator =(int const num)
 	{
-		this->resize(stream::berSize(num));
+		this->resize(stream::ber_size(num));
 		namespace io = boost::iostreams;
 		io::stream<io::array_sink> s(this->sink());
-		stream::writeBER(s, rpg2k_integer(num));
+		stream::write_ber(s, rpg2k_integer(num));
 		return *this;
 	}
-	Binary& Binary::operator =(bool const b)
+	binary& binary::operator =(bool const b)
 	{
 		resize(sizeof(bool));
 		(*this)[0] = b;
 		return *this;
 	}
-	Binary& Binary::operator =(double const d)
+	binary& binary::operator =(double const d)
 	{
 		resize(sizeof(double));
 		*((double*)this->data()) = d;
 		return *this;
 	}
 
-	size_t Binary::serializedSize() const { return this->size(); }
-	std::ostream& Binary::serialize(std::ostream& s) const
+	size_t binary::serialized_size() const { return this->size(); }
+	std::ostream& binary::serialize(std::ostream& s) const
 	{
 		return s.write(reinterpret_cast<char const*>(this->data()), this->size());
 	}

@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__MODEL__DATA_BASE_HPP
-#define _INC__RPG2K__MODEL__DATA_BASE_HPP
+#ifndef _INC_RPG2K__DATABASE_HXX_
+#define _INC_RPG2K__DATABASE_HXX_
 
 #include "model.hxx"
 
@@ -11,70 +11,70 @@ namespace rpg2k
 {
 	namespace model
 	{
-		class DataBase : public Base
+		class database : public base
 		{
 		private:
-			typedef std::map< unsigned, std::vector<uint16_t> > Terrain;
-			Terrain terrain_;
-			typedef std::map< unsigned, std::vector< std::vector<uint8_t> > > ChipFlag;
-			ChipFlag chipFlag_;
+			typedef std::map<unsigned, std::vector<uint16_t> > terrain_type;
+			terrain_type terrain_;
+			typedef std::map<unsigned, std::vector<std::vector<uint8_t> > > chip_flag_type;
+			chip_flag_type chip_flag_;
 
-			std::vector<String> vocabulary_;
+			std::vector<string> vocabulary_;
 
-			virtual void loadImpl();
-			virtual void saveImpl();
+			virtual void load_impl();
+			virtual void save_impl();
 
 			virtual char const* header() const { return "LcfDataBase"; }
-			virtual char const* defaultName() const { return "RPG_RT.ldb"; }
+			virtual char const* default_filename() const { return "RPG_RT.ldb"; }
 		public:
-			DataBase(SystemString const& dir);
-			DataBase(SystemString const& dir, SystemString const& name);
-			virtual ~DataBase();
+			database(system_string const& dir);
+			database(system_string const& dir, system_string const& name);
+			virtual ~database();
 
-			structure::Array2D& character() { return (*this)[11]; }
-			structure::Array2D& skill() { return (*this)[12]; }
-			structure::Array2D& item() { return (*this)[13]; }
-			structure::Array2D& enemy() { return (*this)[14]; }
-			structure::Array2D& enemyGroup() { return (*this)[15]; }
-			structure::Array2D& terrain() { return (*this)[16]; }
-			structure::Array2D& attribute() { return (*this)[17]; }
-			structure::Array2D& condition() { return (*this)[18]; }
-			structure::Array2D& battleAnime() { return (*this)[19]; }
-			structure::Array2D& chipSet() { return (*this)[20]; }
-			structure::Array1D& system() { return (*this)[22]; }
-			structure::Array2D& flag() { return (*this)[23]; }
-			structure::Array2D& variable() { return (*this)[24]; }
-			structure::Array2D& commonEvent() { return (*this)[25]; }
+			structure::array2d& character() { return (*this)[11]; }
+			structure::array2d& skill() { return (*this)[12]; }
+			structure::array2d& item() { return (*this)[13]; }
+			structure::array2d& enemy() { return (*this)[14]; }
+			structure::array2d& enemy_group() { return (*this)[15]; }
+			structure::array2d& terrain() { return (*this)[16]; }
+			structure::array2d& attribute() { return (*this)[17]; }
+			structure::array2d& condition() { return (*this)[18]; }
+			structure::array2d& battle_anime() { return (*this)[19]; }
+			structure::array2d& chip_set() { return (*this)[20]; }
+			structure::array1d& system() { return (*this)[22]; }
+			structure::array2d& flag() { return (*this)[23]; }
+			structure::array2d& variable() { return (*this)[24]; }
+			structure::array2d& common_event() { return (*this)[25]; }
 
-			structure::Array2D const& character() const { return (*this)[11]; }
-			structure::Array2D const& skill() const { return (*this)[12]; }
-			structure::Array2D const& item() const { return (*this)[13]; }
-			structure::Array2D const& enemy() const { return (*this)[14]; }
-			structure::Array2D const& enemyGroup() const { return (*this)[15]; }
-			structure::Array2D const& terrain() const { return (*this)[16]; }
-			structure::Array2D const& attribute() const { return (*this)[17]; }
-			structure::Array2D const& condition() const { return (*this)[18]; }
-			structure::Array2D const& battleAnime() const { return (*this)[19]; }
-			structure::Array2D const& chipSet() const { return (*this)[20]; }
-			structure::Array1D const& system() const { return (*this)[22]; }
-			structure::Array2D const& flag() const { return (*this)[23]; }
-			structure::Array2D const& variable() const { return (*this)[24]; }
-			structure::Array2D const& commonEvent() const { return (*this)[25]; }
+			structure::array2d const& character() const { return (*this)[11]; }
+			structure::array2d const& skill() const { return (*this)[12]; }
+			structure::array2d const& item() const { return (*this)[13]; }
+			structure::array2d const& enemy() const { return (*this)[14]; }
+			structure::array2d const& enemy_group() const { return (*this)[15]; }
+			structure::array2d const& terrain() const { return (*this)[16]; }
+			structure::array2d const& attribute() const { return (*this)[17]; }
+			structure::array2d const& condition() const { return (*this)[18]; }
+			structure::array2d const& battle_anime() const { return (*this)[19]; }
+			structure::array2d const& chip_set() const { return (*this)[20]; }
+			structure::array1d const& system() const { return (*this)[22]; }
+			structure::array2d const& flag() const { return (*this)[23]; }
+			structure::array2d const& variable() const { return (*this)[24]; }
+			structure::array2d const& common_event() const { return (*this)[25]; }
 
-			String const& vocabulary(unsigned index) const;
+			string const& vocabulary(unsigned index) const;
 
 			std::vector<uint16_t> const& terrain(unsigned id) const;
-			std::vector<uint8_t> const& chipFlag(unsigned id, ChipSet::type t) const;
-			std::vector<uint8_t> const& lowerChipFlag(unsigned id) const
+			std::vector<uint8_t> const& chip_flag(unsigned id, chip_set::type t) const;
+			std::vector<uint8_t> const& lower_chip_flag(unsigned id) const
 			{
-				return chipFlag(id, ChipSet::LOWER);
+				return chip_flag(id, chip_set::LOWER);
 			}
-			std::vector<uint8_t> const& upperChipFlag(unsigned id) const
+			std::vector<uint8_t> const& upper_chip_flag(unsigned id) const
 			{
-				return chipFlag(id, ChipSet::UPPER);
+				return chip_flag(id, chip_set::UPPER);
 			}
-		}; // class DataBase
+		}; // class database
 	} // namespace model
 } // namespace rpg2k
 
-#endif // _INC__RPG2K__MODEL__DATA_BASE_HPP
+#endif // _INC_RPG2K__DATABASE_HXX_

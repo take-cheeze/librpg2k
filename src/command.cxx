@@ -5,35 +5,35 @@ namespace rpg2k
 {
 	namespace model
 	{
-		#define PP_contextCommandProto(CODE) \
-			template<> void Context::command<CODE>(structure::Instruction const&)
+		#define PP_context_command_proto(CODE) \
+			template<> void context::command<CODE>(structure::instruction const&)
 
-		PP_contextCommandProto(0) // event terminater
+		PP_context_command_proto(0) // event terminater
 		{
 			this->ret();
 		}
-		PP_contextCommandProto(10) // branch terminater
+		PP_context_command_proto(10) // branch terminater
 		{
 		}
 
-		PP_contextCommandProto(11210) // render battle animation on field
-		{
-			// TODO
-		}
-
-		PP_contextCommandProto(11310) // change party's transparancy state
-		{
-			// TODO
-		}
-		PP_contextCommandProto(11320) // flash effect to event
-		{
-			// TODO
-		}
-		PP_contextCommandProto(11330) // set event action
+		PP_context_command_proto(11210) // render battle animation on field
 		{
 			// TODO
 		}
 
-		#undef PP_contextCommandProto
+		PP_context_command_proto(11310) // change party's transparancy state
+		{
+			// TODO
+		}
+		PP_context_command_proto(11320) // flash effect to event
+		{
+			// TODO
+		}
+		PP_context_command_proto(11330) // set event action
+		{
+			// TODO
+		}
+
+		#undef PP_context_command_proto
 	} // namespace model
 } // namespace rpg2k

@@ -20,35 +20,32 @@
 #include "rpg2k/stream.hxx"
 
 // demangling header
-#if (RPG2K_IS_GCC || RPG2K_IS_CLANG)
+#if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
 	#include <cxxabi.h>
 #elif RPG2K_IS_MSVC
 	extern "C"
-	char * _unDName(
-		char * outputString,
+	char * unDName(
+		char * outputstring,
 		const char * name,
-		int maxStringLength,
+		int maxstringLength,
 		void * (* pAlloc)(size_t),
 		void (* pFree)(void *),
-		unsigned short disableFlags
+		unsigned short disable_flags
 	);
 #else
 	#error "Demangle not supported"
 #endif
-
-using rpg2k::structure::Array1D;
-using rpg2k::structure::Array2D;
-using rpg2k::structure::Element;
-using rpg2k::structure::ElementType;
 
 
 namespace rpg2k
 {
 	namespace debug
 	{
-		std::string error(int const errNo)
+		using namespace structure;
+
+		std::string error(int const err_no)
 		{
-			char const* message = strerror(errNo);
+			char const* message = strerror(err_no);
 			switch(errno) {
 				case EINVAL: rpg2k_assert(false);
 				default: return message;
@@ -59,9 +56,9 @@ namespace rpg2k
 			if(atexit(func) != 0) rpg2k_assert(false);
 		}
 
-		std::string demangleTypeInfo(std::type_info const& info)
+		std::string demangle_typeInfo(std::type_info const& info)
 		{
-			#if (RPG2K_IS_GCC || RPG2K_IS_CLANG)
+			#if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
 				int status;
 				char* const readable = abi::__cxa_demangle(info.name(), NULL, NULL, &status);
 
@@ -75,7 +72,7 @@ namespace rpg2k
 				std::string ret = readable; // char* to string
 				std::free(readable);
 			#elif RPG2K_IS_MSVC
-				char* const readable = _unDName(0, info.name(), 0, std::malloc, std::free, 0x2800);
+				char* const readable = unDName(0, info.name(), 0, std::malloc, std::free, 0x2800);
 				rpg2k_assert(readable);
 				std::string ret = readable; // char* to string
 				std::free(readabl);
@@ -86,94 +83,87 @@ namespace rpg2k
 
 		std::ofstream ANALYZE_RESULT("analyze.txt");
 
-		std::ostream& Tracer::printTrace(structure::Element const& e, bool const info, std::ostream& ostrm)
+		std::ostream& tracer::print_trace(element const& e, bool const detail, std::ostream& ostrm)
 		{
-			std::stack<Element const*> st;
+			std::stack<element const*> st;
 
-			for(Element const* buf = &e; buf->hasOwner(); buf = &(buf->owner())) {
+			for(element const* buf = &e; buf->has_owner(); buf = &(buf->owner())) {
 				st.push(buf);
 			}
 
 			for(; !st.empty(); st.pop()) {
-				Element const& top = *st.top();
+				element const& top = *st.top();
 
-				ElementType::Enum const ownerType = top.owner().descriptor().type();
+				element_type::type const owner_type = top.owner().definition().type;
 
 				ostrm << std::dec << std::setfill(' ');
-				if(ownerType == ElementType::Array2D_) ostrm
-					<< "[" << std::setw(4) << top.indexOfArray2D() << "]";
-				ostrm << ElementType::instance().toString(ownerType)
-					<< "[" << std::setw(4) << top.indexOfArray1D() << "]";
+				if(owner_type == element_type::array2d_) ostrm
+					<< "[" << std::setw(4) << top.index_of_array2d() << "]";
+				ostrm << element_type::instance().to_string(owner_type)
+					<< "[" << std::setw(4) << top.index_of_array1d() << "]";
 				ostrm << ": ";
 			}
 
-			if(info) { Tracer::printInfo(e, ostrm); }
+			if(detail) { tracer::print_detail(e, ostrm); }
 
 			return ostrm;
 		}
 
-		std::ostream& Tracer::printInfo(structure::Element const& e, std::ostream& ostrm)
+		std::ostream& tracer::print_detail(element const& e, std::ostream& ostrm)
 		{
-			using structure::ArrayDefinePointer;
-			using structure::ArrayDefineType;
-			using structure::Descriptor;
+			if(e.is_defined()) {
+				ostrm << e.definition().type_name() << ": ";
 
-			if(e.isDefined()) {
-				ostrm << e.descriptor().typeName() << ": ";
-
-				switch(e.descriptor().type()) {
-					case ElementType::Binary_: printBinary(e, ostrm); break;
-					case ElementType::Event_ : printEvent (e, ostrm); break;
-					case ElementType::String_: printString(e, ostrm); break;
-					case ElementType::bool_  : printBool  (e.to<bool>(), ostrm); break;
-					case ElementType::double_: printDouble(e, ostrm); break;
-					case ElementType::int_   : printInt   (e, ostrm); break;
+				switch(e.definition().type) {
+#define PP_enum(r, data, elem) \
+	case element_type::BOOST_PP_CAT(elem, data): \
+		BOOST_PP_CAT(print_, elem)(e.BOOST_PP_CAT(to_, elem)(), ostrm); break;
+					BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (binary)(event)(string)(bool)(double)(int))
+#undef PP_enum
 					default: break;
 				}
 			} else {
-				Binary const bin = e.serialize();
+				binary const bin = e.serialize();
 				if(bin.size() == 0) {
 					ostrm << "This data is empty." << endl;
 					return ostrm;
 				}
-			// Binary
-				ostrm << endl << "Binary: ";
-				printBinary(bin, ostrm);
-			// Event
+			// binary
+				ostrm << endl << "binary: ";
+				print_binary(bin, ostrm);
+			// event
 				try {
-					structure::Event event(bin);
-					ostrm << endl << "Event: ";
-					printEvent(event, ostrm);
+					event event(bin);
+					ostrm << endl << "event: ";
+					print_event(event, ostrm);
 				} catch(...) {}
 			// BER number
-				if(bin.isBER()) {
+				if(bin.is_ber()) {
 					ostrm << endl << "BER: ";
-					printInt(bin, ostrm);
+					print_int(bin, ostrm);
 				}
 			// string
-				if(bin.isString()) {
+				if(bin.is_string()) {
 					ostrm << endl << "string: ";
-					printString(static_cast<String>(bin), ostrm);
+					print_string(static_cast<string>(bin), ostrm);
 				}
-			// Array1D
+			// array1d
 				try {
-					unique_ptr<Element>::type p(new Element(Descriptor(
-						ElementType::instance().toString(ElementType::Array1D_),
-						ArrayDefinePointer(new ArrayDefineType),
-						unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable())), bin));
-					ostrm << endl << "---Array1D check start---" << endl;
-					p.reset(); // trigger Element's destructor
-					ostrm << "---Array1D check end  ---";
+					unique_ptr<element>::type p(new element(descriptor(element_type::array1d_
+					, unique_ptr<array_define_type>::type(new array_define_type)
+					, unique_ptr<array_table_type>::type(new array_table_type())), bin));
+					ostrm << endl << "---array1d check start---" << endl;
+					p.reset(); // trigger element's destructor
+					ostrm << "---array1d check end  ---";
 				} catch(...) {}
-			// Array2D
+			// array2d
 				try {
-					unique_ptr<Element>::type p(new Element(Descriptor(
-						ElementType::instance().toString(ElementType::Array2D_),
-						ArrayDefinePointer(new ArrayDefineType),
-						unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable())), bin));
-					ostrm << endl << "---Array2D check start---" << endl;
-					p.reset(); // trigger Element's destructor
-					ostrm << "---Array2D check end  ---";
+					unique_ptr<element>::type p(new element(descriptor(element_type::array2d_
+					, unique_ptr<array_define_type>::type(new array_define_type)
+					, unique_ptr<array_table_type>::type(new array_table_type())), bin));
+					ostrm << endl << "---array2d check start---" << endl;
+					p.reset(); // trigger element's destructor
+					ostrm << "---array2d check end  ---";
 				} catch(...) {}
 			}
 
@@ -182,77 +172,77 @@ namespace rpg2k
 			return ostrm;
 		}
 
-		std::ostream& Tracer::printArray1D(structure::Array1D const& val, std::ostream& ostrm)
+		std::ostream& tracer::print_array1d(array1d const& val, std::ostream& ostrm)
 		{
-			std::vector<Element const*> buf;
-			for(structure::Array1D::const_iterator i = val.begin(); i != val.end(); ++i) {
+			std::vector<element const*> buf;
+			for(array1d::const_iterator i = val.begin(); i != val.end(); ++i) {
 				buf.push_back(i->second);
 			}
-			boost::sort(buf, structure::Array1D::sort_function);
-			BOOST_FOREACH(Element const* i, buf) { printTrace(*i, true, ostrm); }
+			boost::sort(buf, array1d::sort_function);
+			BOOST_FOREACH(element const* i, buf) { print_trace(*i, true, ostrm); }
 			return ostrm;
 		}
-		std::ostream& Tracer::printArray2D(structure::Array2D const& val, std::ostream& ostrm)
+		std::ostream& tracer::print_array2d(array2d const& val, std::ostream& ostrm)
 		{
-			for(structure::Array2D::const_iterator i = val.begin(); i != val.end(); ++i) {
-				printArray1D(*i->second, ostrm);
+			for(array2d::const_iterator i = val.begin(); i != val.end(); ++i) {
+				print_array1d(*i->second, ostrm);
 			}
 			return ostrm;
 		}
-		std::ostream& Tracer::printInt(int const val, std::ostream& ostrm)
+		std::ostream& tracer::print_int(int const& val, std::ostream& ostrm)
 		{
 			ostrm << std::dec << val;
 			return ostrm;
 		}
-		std::ostream& Tracer::printBool(bool const val, std::ostream& ostrm)
+		std::ostream& tracer::print_bool(bool const& val, std::ostream& ostrm)
 		{
 			ostrm << std::boolalpha << val;
 			return ostrm;
 		}
-		std::ostream& Tracer::printDouble(double const val, std::ostream& ostrm)
+		std::ostream& tracer::print_double(double const& val, std::ostream& ostrm)
 		{
 			ostrm << std::showpoint << val;
 			return ostrm;
 		}
-		std::ostream& Tracer::printString(String const& val, std::ostream& ostrm)
+		std::ostream& tracer::print_string(string const& val, std::ostream& ostrm)
 		{
 			ostrm << "\"" << val << "\"";
 			return ostrm;
 		}
-		std::ostream& Tracer::printEvent(structure::Event const& val, std::ostream& ostrm)
+		std::ostream& tracer::print_event(event const& val, std::ostream& ostrm)
 		{
 			ostrm << std::dec << std::setfill(' ');
-			ostrm << "size = " << val.serializedSize() << "; data = {";
+			ostrm << "size = " << val.serialized_size() << "; data = {";
 
-			BOOST_FOREACH(structure::Instruction const& i, val.data()) {
+			BOOST_FOREACH(instruction const& i, val) {
 				ostrm << endl << "\t";
-				printInstruction(i, ostrm, true);
+				print_instruction(i, ostrm, true);
 			}
 
 			ostrm << endl << "}";
 
 			return ostrm;
 		}
-		std::ostream& Tracer::printInstruction(structure::Instruction const& inst
-		, std::ostream& ostrm, bool indent)
+		std::ostream& tracer::print_instruction(instruction const& inst
+		, std::ostream& ostrm, bool const indent)
 		{
 			if(indent)
-				BOOST_FOREACH(int const i, boost::irange(0, int(inst.nest()))) { (void) i; ostrm << "\t"; }
+				BOOST_FOREACH(int const i, boost::irange(0, int(inst.nest))) { (void) i; ostrm << "\t"; }
 			ostrm << "{ "
-				<< "nest: " << std::setw(4) << std::dec << inst.nest() << ", "
-				<< "code: " << std::setw(5) << std::dec << inst.code() << ", "
-				<< "string: \"" << inst.string() << "\", "
-				<< "integer[" << inst.argNum() << "]: "
+				<< "nest: " << std::setw(4) << std::dec << inst.nest << ", "
+				<< "code: " << std::setw(5) << std::dec << inst.code << ", "
+				<< "string: \"" << inst.string_argument << "\", "
+				<< "integer[" << inst.size() << "]: "
 				;
 				ostrm << "{ ";
-					std::copy(inst.args().begin(), inst.args().end()
+					std::copy(inst.begin(), inst.end()
 					, std::ostream_iterator<int32_t>(ostrm, ", "));
 				ostrm << "}, ";
 			ostrm << "}";
 
 			return ostrm;
 		}
-		std::ostream& Tracer::printBinary(Binary const& val, std::ostream& ostrm)
+		std::ostream& tracer::print_binary(binary const& val, std::ostream& ostrm)
 		{
 			ostrm << std::setfill(' ') << std::dec;
 			ostrm << "size = " << val.size() << "; data = { ";

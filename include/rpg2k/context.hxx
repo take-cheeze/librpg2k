@@ -1,5 +1,5 @@
-#ifndef _INC_RPG2K__CONTEXT__HXX
-#define _INC_RPG2K__CONTEXT__HXX
+#ifndef _INC_RPG2K__CONTEXT_HXX_
+#define _INC_RPG2K__CONTEXT_HXX_
 
 #include <stack>
 
@@ -10,53 +10,52 @@ namespace rpg2k
 {
 	namespace structure
 	{
-		class Event;
-		class Instruction;
+		class event;
+		class instruction;
 	}
 
 	namespace model
 	{
-		class Project;
+		class project;
 
-		class Waiter
+		class waiter
 		{
 		public:
-			Waiter() : count_(0) {}
+			waiter() : count_(0) {}
 			void update() { --count_; }
 		private:
 			size_t count_;
 		};
 
-		class Context
+		class context
 		{
 		public:
-			Context(Project& p, unsigned evID, EventStart t);
+			context(project& p, unsigned ev_id, event_start::type t);
 
-			typedef void (Context::*Command)(structure::Instruction const&);
+			typedef void (context::*command_type)(structure::instruction const&);
 			template<unsigned Code>
-			void command(structure::Instruction const& inst);
+			void command(structure::instruction const& inst);
 		protected:
 			void ret(); // return
 
 		private:
-			Project& owner_;
-			unsigned const eventID_;
-			EventStart const type_;
-			Waiter waiter_;
-			struct EventStream
+			project& owner_;
+			unsigned const event_id_;
+			event_start::type const type_;
+			waiter waiter_;
+			struct event_stream
 			{
-				structure::Event const* event;
+				structure::event const* event;
 				size_t pointer;
 			};
-			std::stack<EventStream> event_;
-			struct LoopState
+			std::stack<event_stream> event_;
+			struct loop_state
 			{
 				size_t nest, pointer;
 			};
-			std::stack<LoopState> loop_;
-			
-		}; // class Context
+			std::stack<loop_state> loop_;
+		}; // class context
 	} // namespace model
 } // namespace rpg2k
 
-#endif // _INC_RPG2K__CONTEXT__HXX
+#endif // _INC_RPG2K__CONTEXT_HXX_

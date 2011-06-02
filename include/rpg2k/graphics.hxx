@@ -11,18 +11,16 @@
 
 namespace rpg2k
 {
-	class Rect;
-
-	class Texture
+	class texture
 	{
 	public:
-		Texture(uintptr_t const data) : data_(data) {}
-		virtual ~Texture() {}
+		texture(uintptr_t const data) : data_(data) {}
+		virtual ~texture() {}
 
 		template<typename T>
-		T& toRef() { return reinterpret_cast<T&>(this->data_); }
+		T& to_ref() { return reinterpret_cast<T&>(this->data_); }
 		template<typename T>
-		T const& toRef() const { return reinterpret_cast<T const&>(this->data_); }
+		T const& to_ref() const { return reinterpret_cast<T const&>(this->data_); }
 
 		template<typename T>
 		T to() const { return reinterpret_cast<T>(this->data_); }
@@ -30,29 +28,32 @@ namespace rpg2k
 		uintptr_t data_;
 	};
 
-	typedef unique_ptr<Texture>::type (*TextureLoader)(SystemString const& path);
+	typedef unique_ptr<texture>::type (*texture_loader)(system_string const& path);
 
-	class MaterialPool
+	class material_pool
 	{
 	public:
-		MaterialPool(SystemString const& base);
+		material_pool(system_string const& base);
 	private:
-		typedef boost::ptr_unordered_map<rpg2k::String, Texture> Pool;
-		typedef boost::ptr_vector<Pool> PoolList; PoolList poolList_;
-		typedef std::vector<TextureLoader> LoaderList; LoaderList loaderList_;
+		typedef boost::ptr_unordered_map<rpg2k::string, texture> pool;
+		typedef boost::ptr_vector<pool> pool_list; pool_list pool_list_;
+		typedef std::vector<texture_loader> loader_list; loader_list loader_list_;
 	};
  
-	class Graphics2D
+	class graphics2d
 	{
 	public:
-		virtual ~Graphics2D();
+		virtual ~graphics2d();
 
-		virtual void drawTexture(Texture const& img, vec2 const& dstP) = 0;
-		virtual void drawTexture(Texture const& img, Rect const& src, vec2 const& dstP) = 0;
-		virtual void drawTexture(Texture const& img, Rect const& src, Rect const& dst) = 0;
+		virtual void draw(texture const& tex, vec2 const& dst_pos) = 0;
+		virtual void draw(texture const& tex
+		, vec2 const& src_pos, vec2 const& src_size, vec2 const& dst_pos) = 0;
+		virtual void draw(texture const& tex
+		, vec2 const& src_pos, vec2 const& src_size
+		, vec2 const& dst_pos, vec2 const& dst_size) = 0;
 
-		virtual void drawTextureCenter(Texture const& img, vec2 const& dstP) = 0;
-	}; // class Graphics2D
+		virtual void draw_center(texture const& tex, vec2 const& dst_pos) = 0;
+	}; // class graphics2d
 } // namespace rpg2k
 
 #endif // _INC_RPG2K__GRAPHICS_HXX_

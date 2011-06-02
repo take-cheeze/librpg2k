@@ -1,4 +1,6 @@
 #include <boost/array.hpp>
+#include <boost/range/irange.hpp>
+
 #include <gtest/gtest.h>
 #include <rpg2k/stream.hxx>
 
@@ -14,30 +16,24 @@ namespace io = boost::iostreams;
 
 TEST(BER, berSize)
 {
-	ASSERT_EQ(rpg2k::stream::berSize(0), 1);
-	ASSERT_EQ(rpg2k::stream::berSize(128), 2);
-	ASSERT_EQ(rpg2k::stream::berSize(16384), 3);
+	ASSERT_EQ(rpg2k::stream::ber_size(0), 1);
+	ASSERT_EQ(rpg2k::stream::ber_size(128), 2);
+	ASSERT_EQ(rpg2k::stream::ber_size(16384), 3);
 }
 
 TEST(BER, ReadWrite)
 {
 	std::srand(std::time(NULL));
 
-	boost::array<uint8_t, (sizeof(unsigned) * CHAR_BIT) / rpg2k::stream::BER_BIT + 1> buff;
-	for(unsigned i = 0; i < 10; ++i) {
+	boost::array<uint8_t, (sizeof(unsigned) * 8) / rpg2k::stream::BER_BIT + 1> buf;
+	BOOST_FOREACH(unsigned const& i, boost::irange(0, 10)) {
 		unsigned const target = std::rand();
 
-		io::stream<io::array_sink> os(io::array_sink(reinterpret_cast<char*>(buff.data()), buff.size()));
-		rpg2k::stream::writeBER(os, target);
+		io::stream<io::array_sink> os(io::array_sink(reinterpret_cast<char*>(buf.data()), buf.size()));
+		rpg2k::stream::write_ber(os, target);
 
-		/*
-		std::cout << target << ": ";
-		std::copy(buff.begin(), buff.begin() + rpg2k::stream::berSize(target), std::ostream_iterator<unsigned>(std::cout, ", "));
-		std::cout << std::endl;
-		*/
-
-		io::stream<io::array_source> is(io::array_source(reinterpret_cast<char const*>(buff.data()), buff.size()));
-		ASSERT_EQ(target, rpg2k::stream::readBER(is));
+		io::stream<io::array_source> is(io::array_source(reinterpret_cast<char const*>(buf.data()), buf.size()));
+		ASSERT_EQ(target, rpg2k::stream::read_ber(is));
 	}
 }
 

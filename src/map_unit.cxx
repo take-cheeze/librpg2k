@@ -8,68 +8,68 @@ namespace rpg2k
 {
 	namespace model
 	{
-		MapUnit::MapUnit()
-		: Base("")
+		map_unit::map_unit()
+			: base(""), id_(0)
 		{
-			Base::reset();
+			base::reset();
 		}
-		MapUnit::MapUnit(SystemString const& dir, SystemString const& name)
-		: Base(dir, name), id_(0)
+		map_unit::map_unit(system_string const& dir, system_string const& name)
+		: base(dir, name), id_(0)
 		{
 			load();
 		}
-		MapUnit::MapUnit(SystemString const& dir, unsigned const id)
-		: Base(dir, SystemString()), id_(id)
+		map_unit::map_unit(system_string const& dir, unsigned const id)
+		: base(dir, system_string()), id_(id)
 		{
-			std::string fileName;
-			ntfmt::sink_string(fileName)
+			std::string filename;
+			ntfmt::sink_string(filename)
 				<< "Map" << ntfmt::fmt(id, "%04d") << ".lmu";
-			setFileName(fileName);
+			set_filename(filename);
 
-			checkExists();
+			check_exists();
 
 			load();
 		}
-		void MapUnit::loadImpl()
+		void map_unit::load_impl()
 		{
 			rpg2k_assert(rpg2k::within<unsigned>(0, id_, MAP_UNIT_MAX+1));
 
-			lower_ = (*this)[71].toBinary().toVector<uint16_t>();
-			upper_ = (*this)[72].toBinary().toVector<uint16_t>();
+			chip_id_[chip_set::LOWER] = (*this)[71].to_binary().to_vector<uint16_t>();
+			chip_id_[chip_set::UPPER] = (*this)[72].to_binary().to_vector<uint16_t>();
 
-			width_  = (*this)[2];
-			height_ = (*this)[3];
+			this->width  = (*this)[2];
+			this->height = (*this)[3];
 		}
 
-		MapUnit::~MapUnit()
+		map_unit::~map_unit()
 		{
-		#if RPG2K_DEBUG
+#if RPG2K_DEBUG
 			debug::ANALYZE_RESULT << header() << ":" << int(id_) << endl;
-		#endif
+#endif
 		}
 
-		void MapUnit::saveImpl()
+		void map_unit::save_impl()
 		{
-			(*this)[71].toBinary().assign(lower_);
-			(*this)[72].toBinary().assign(upper_);
+			(*this)[71].to_binary().assign(lower());
+			(*this)[72].to_binary().assign(upper());
 
-			(*this)[2] = width_ ;
-			(*this)[3] = height_;
+			(*this)[2] = this->width ;
+			(*this)[3] = this->height;
 		}
 
-		int MapUnit::chipIDLw(unsigned const x, unsigned const y) const
+		int map_unit::chip_id_lower(unsigned const x, unsigned const y) const
 		{
-			rpg2k_assert(rpg2k::within(x, width ()));
-			rpg2k_assert(rpg2k::within(y, height()));
+			rpg2k_assert(rpg2k::within(x, this->width ));
+			rpg2k_assert(rpg2k::within(y, this->height));
 
-			return lower_[width()*y + x];
+			return lower()[this->width*y + x];
 		}
-		int MapUnit::chipIDUp(unsigned const x, unsigned const y) const
+		int map_unit::chip_id_upper(unsigned const x, unsigned const y) const
 		{
-			rpg2k_assert(rpg2k::within(x, width ()));
-			rpg2k_assert(rpg2k::within(y, height()));
+			rpg2k_assert(rpg2k::within(x, this->width ));
+			rpg2k_assert(rpg2k::within(y, this->height));
 
-			return upper_[width()*y + x];
+			return upper()[this->width*y + x];
 		}
 	} // namespace model
 } // namespace rpg2k

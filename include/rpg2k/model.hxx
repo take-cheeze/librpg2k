@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__MODEL_HPP
-#define _INC__RPG2K__MODEL_HPP
+#ifndef _INC_RPG2K__MODEL_HXX_
+#define _INC_RPG2K__MODEL_HXX_
 
 #include <deque>
 
@@ -20,87 +20,87 @@ namespace rpg2k
 
 	namespace model
 	{
-		bool fileExists(SystemString const& fileName);
+		bool file_exists(system_string const& filename);
 
-		class Base
+		class base
 		{
 		private:
 			bool exists_;
 
-			SystemString fileDir_, fileName_;
-			boost::ptr_vector<structure::Element> data_;
+			system_string file_dir_, filename_;
+			boost::ptr_vector<structure::element> data_;
 
-			virtual void loadImpl() = 0;
-			virtual void saveImpl() = 0;
+			virtual void load_impl() = 0;
+			virtual void save_impl() = 0;
 
 			virtual char const* header() const = 0;
-			virtual char const* defaultName() const = 0;
+			virtual char const* default_filename() const = 0;
 		protected:
-			void setFileName(SystemString const& name) { fileName_ = name; }
-			boost::ptr_vector<structure::Element>& data() { return data_; }
-			boost::ptr_vector<structure::Element> const& data() const { return data_; }
+			void set_filename(system_string const& name) { filename_ = name; }
+			boost::ptr_vector<structure::element>& data() { return data_; }
+			boost::ptr_vector<structure::element> const& data() const { return data_; }
 
-			void checkExists();
+			void check_exists();
 
-			boost::ptr_vector<structure::Descriptor> const& descriptor() const;
+			boost::ptr_vector<structure::descriptor> const& definition() const;
 
-			Base(SystemString const& dir);
-			Base(SystemString const& dir, SystemString const& name);
+			base(system_string const& dir);
+			base(system_string const& dir, system_string const& name);
 
-			Base(Base const& src);
-			Base const& operator =(Base const& src);
+			base(base const& src);
+			base const& operator =(base const& src);
 
 			void load();
 		public:
-			virtual ~Base() {}
+			virtual ~base() {}
 
 			bool exists() const { return exists_; }
 
 			void reset();
 
-			structure::Element& operator [](unsigned index);
-			structure::Element const& operator [](unsigned index) const;
+			structure::element& operator [](unsigned index);
+			structure::element const& operator [](unsigned index) const;
 
-			SystemString const& fileName() const { return fileName_; }
-			SystemString const& directory() const { return fileDir_; }
-			SystemString fullPath() const
+			system_string const& filename() const { return filename_; }
+			system_string const& directory() const { return file_dir_; }
+			system_string full_path() const
 			{
-				return SystemString(fileDir_).append(PATH_SEPR).append(fileName_);
+				return system_string(file_dir_).append(PATH_SEPR).append(filename_);
 			} // not absolute
 
-			void saveAs(SystemString const& filename);
-			void save() { saveAs(fullPath()); }
+			void save_as(system_string const& filename);
+			void save() { save_as(full_path()); }
 
 			void serialize(std::ostream& s);
-		}; // class Base
+		}; // class base
 
-		class DefineLoader : public Singleton<DefineLoader>
+		class define_loader : public singleton<define_loader>
 		{
-			friend class Singleton<DefineLoader>;
+			friend class singleton<define_loader>;
 		private:
-			typedef std::map< String, boost::ptr_vector<structure::Descriptor> > DefineBuffer;
-			DefineBuffer defineBuff_;
-			typedef std::map<String, const char*> DefineText;
-			DefineText defineText_;
-			std::set<String> isArray_;
+			typedef std::map<string, boost::ptr_vector<structure::descriptor> > define_buffer;
+			define_buffer define_buff_;
+			typedef std::map<string, const char*> define_text;
+			define_text define_text_;
+			std::set<string> is_array_;
 		protected:
-			void parse(boost::ptr_vector<structure::Descriptor>& dst, std::deque<String> const& token);
-			void load(boost::ptr_vector<structure::Descriptor>& dst, String const& name);
+			void parse(boost::ptr_vector<structure::descriptor>& dst, std::deque<string> const& token);
+			void load(boost::ptr_vector<structure::descriptor>& dst, string const& name);
 
-			DefineLoader();
-			DefineLoader(DefineLoader const& dl);
+			define_loader();
+			define_loader(define_loader const& dl);
 		public:
-			boost::ptr_vector<structure::Descriptor> const& get(String const& name);
-			structure::ArrayDefine arrayDefine(String const& name);
+			boost::ptr_vector<structure::descriptor> const& get(string const& name);
+			structure::array_define_type const& array_define(string const& name);
 
-			bool isArray(String const& typeName) const
+			bool is_array(string const& type_name) const
 			{
-				return isArray_.find(typeName) != isArray_.end();
+				return is_array_.find(type_name) != is_array_.end();
 			}
 
-			static void toToken(std::deque<String>& token, std::istream& stream);
-		}; // class DefineLoader
+			static void to_token(std::deque<string>& token, std::istream& stream);
+		}; // class define_loader
 	} // namespace model
 } // namespace rpg2k
 
-#endif
+#endif // _INC_RPG2K__MODEL_HXX_

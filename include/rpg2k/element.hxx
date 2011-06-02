@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__MODEL__ELEMENT_HPP
-#define _INC__RPG2K__MODEL__ELEMENT_HPP
+#ifndef _INC_RPG2K__ELEMENT_HXX_
+#define _INC_RPG2K__ELEMENT_HXX_
 
 #include <vector>
 
@@ -11,90 +11,88 @@ namespace rpg2k
 {
 	namespace structure
 	{
-		class EventState;
-		class Music;
-		class Sound;
+		class event_state;
+		class music;
+		class sound;
 
-		class Element
+		class element
 		{
 		private:
 			static int const NOT_ARRAY = -1;
-			Descriptor const* const descriptor_;
+			descriptor const* const descriptor_;
 
 			bool exists_;
 
-			Element* const owner_;
-			int const indexOfArray1D_;
-			int const indexOfArray2D_;
+			element* const owner_;
+			int const index_of_array1d_;
+			int const index_of_array2d_;
 
 			union {
-#define PP_types(r, data, elem) elem* BOOST_PP_CAT(elem, _);
-				BOOST_PP_SEQ_FOR_EACH(PP_types, , PP_rpg2kTypes)
+#define PP_types(r, data, elem) elem* BOOST_PP_CAT(elem, data);
+				BOOST_PP_SEQ_FOR_EACH(PP_types, _, PP_rpg2k_types)
 #undef PP_types
-#define PP_types(r, data, elem) elem BOOST_PP_CAT(elem, _);
-				BOOST_PP_SEQ_FOR_EACH(PP_types, , PP_basicTypes)
+#define PP_types(r, data, elem) elem BOOST_PP_CAT(elem, data);
+				BOOST_PP_SEQ_FOR_EACH(PP_types, _, PP_basic_types)
 #undef PP_types
 			} impl_;
 
 			void init();
-			void init(Binary const& b);
+			void init(binary const& b);
 			void init(std::istream& s);
 		public:
-			Element();
-			Element(Element const& e);
-			Element(Descriptor const& info);
-			Element(Descriptor const& info, std::istream& s);
-			Element(Descriptor const& info, std::istream& s, size_t size);
-			Element(Descriptor const& info, Binary const& b);
+			element();
+			element(element const& e);
 
-			Element(Array1D const& owner, unsigned index);
-			Element(Array1D const& owner, unsigned index, std::istream& s, size_t size);
-			Element(Array1D const& owner, unsigned index , Binary const& b);
+			element(descriptor const& info);
+			element(descriptor const& info, std::istream& s);
+			element(descriptor const& info, binary const& b);
 
-			~Element();
+			element(array1d& owner, unsigned index);
+			element(array1d& owner, unsigned index , binary const& b);
 
-			bool isDefined() const { return descriptor_ != NULL; }
-			Descriptor const& descriptor() const;
+			~element();
 
-			bool hasOwner() const { return owner_ != NULL; }
-			Element& owner();
-			Element const& owner() const;
+			bool is_defined() const { return descriptor_ != NULL; }
+			descriptor const& definition() const;
+
+			bool has_owner() const { return owner_ != NULL; }
+			element& owner();
+			element const& owner() const;
 
 			bool exists() const { return exists_; }
 			void substantiate();
 
-			size_t serializedSize() const;
+			size_t serialized_size() const;
 			std::ostream& serialize(std::ostream& s) const;
-			Binary serialize() const;
+			binary serialize() const;
 
+#if RPG2K_IS_CLANG
 			template<class T>
 			T& to() { return this->operator T&(); }
 			template<class T>
 			T const& to() const { return this->operator T const&(); }
+#else
+			template<class T>
+			T& to() { return static_cast<T&>(*this); }
+			template<class T>
+			T const& to() const { return static_cast<T const&>(*this); }
+#endif
 
-#define PP_castOperator(r, data, elem) \
+#define PP_cast_operator(r, data, elem) \
 	operator elem const&() const; \
 	operator elem&(); \
 	elem& BOOST_PP_CAT(to_, elem)() { return to<elem>(); } \
 	elem const& BOOST_PP_CAT(to_, elem)() const { return to<elem>(); }
-			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , PP_basicTypes)
-#undef PP_castOperator
+			BOOST_PP_SEQ_FOR_EACH(PP_cast_operator, , PP_all_types)
+#undef PP_cast_operator
 
-#define PP_castOperator(r, data, elem) \
-	operator elem const&() const; \
-	operator elem&(); \
-	elem& BOOST_PP_CAT(to, elem)() { return to<elem>(); } \
-	elem const& BOOST_PP_CAT(to, elem)() const { return to<elem>(); }
-			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , PP_rpg2kTypes)
-#undef PP_castOperator
-
-#define PP_castOperator(r, data, elem) \
-	operator elem const&() const { return reinterpret_cast<elem const&>(toArray1D()); } \
-	operator elem&() { return reinterpret_cast<elem&>(toArray1D()); } \
-	elem& BOOST_PP_CAT(to, elem)() { return to<elem>(); } \
-	elem const& BOOST_PP_CAT(to, elem)() const { return to<elem>(); }
-			BOOST_PP_SEQ_FOR_EACH(PP_castOperator, , (Music)(Sound)(EventState))
-#undef PP_castOperator
+#define PP_cast_operator(r, data, elem) \
+	operator elem const&() const { return reinterpret_cast<elem const&>(to_array1d()); } \
+	operator elem&() { return reinterpret_cast<elem&>(to_array1d()); } \
+	elem& BOOST_PP_CAT(to_, elem)() { return to<elem>(); } \
+	elem const& BOOST_PP_CAT(to_, elem)() const { return to<elem>(); }
+			BOOST_PP_SEQ_FOR_EACH(PP_cast_operator, , (music)(sound)(event_state))
+#undef PP_cast_operator
 
 			operator unsigned&() { return reinterpret_cast<unsigned&>(to<int>()); }
 			operator unsigned const&() const { return reinterpret_cast<unsigned const&>(to<int>()); }
@@ -107,38 +105,38 @@ namespace rpg2k
 			}
 			template<typename T>
 			T const& operator =(T const& src) { this->assign(src); return static_cast<T&>(*this); }
-			Element& operator =(Element const& src);
+			element& operator =(element const& src);
 
-			unsigned indexOfArray1D() const {
-				rpg2k_assert(indexOfArray1D_ != NOT_ARRAY);
-				return indexOfArray1D_;
+			unsigned index_of_array1d() const {
+				rpg2k_assert(index_of_array1d_ != NOT_ARRAY);
+				return index_of_array1d_;
 			}
-			unsigned indexOfArray2D() const {
-				rpg2k_assert(indexOfArray2D_ != NOT_ARRAY);
-				return indexOfArray2D_;
+			unsigned index_of_array2d() const {
+				rpg2k_assert(index_of_array2d_ != NOT_ARRAY);
+				return index_of_array2d_;
 			}
-		}; // class Element
+		}; // class element
 
 		template<> inline
-		unsigned const& Element::operator =(unsigned const& num) { (*this) = int(num); return *this; }
+		unsigned const& element::operator =(unsigned const& num) { (*this) = int(num); return *this; }
 		template<> inline
-		unsigned const& Element::to<unsigned>() const { return reinterpret_cast< unsigned const& >(to<int>()); }
+		unsigned const& element::to<unsigned>() const { return reinterpret_cast< unsigned const& >(to<int>()); }
 		template<> inline
-		unsigned& Element::to<unsigned>() { return reinterpret_cast< unsigned& >(to<int>()); }
+		unsigned& element::to<unsigned>() { return reinterpret_cast< unsigned& >(to<int>()); }
 
-		class BerEnum : public std::vector<unsigned>
+		class ber_enum : public std::vector<unsigned>
 		{
 		protected:
 			void init(std::istream& s);
 		public:
-			BerEnum() {}
-			BerEnum(std::istream& s);
-			BerEnum(Binary const& b);
+			ber_enum() {}
+			ber_enum(std::istream& s);
+			ber_enum(binary const& b);
 
-			size_t serializedSize() const;
+			size_t serialized_size() const;
 			std::ostream& serialize(std::ostream& s) const;
-		}; // class BerEnum
+		}; // class ber_enum
 	} // namespace structure
 } // namespace rpg2k
 
-#endif
+#endif // _INC_RPG2K__ELEMENT_HXX_

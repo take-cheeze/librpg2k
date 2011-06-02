@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__MODEL__ARRAY_1D_HPP
-#define _INC__RPG2K__MODEL__ARRAY_1D_HPP
+#ifndef _INC_RPG2K__ARRAY1D_HXX_
+#define _INC_RPG2K__ARRAY1D_HXX_
 
 #include <map>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
@@ -11,73 +11,66 @@ namespace rpg2k
 {
 	namespace structure
 	{
-		class Array2D;
-		class Element;
+		class array2d;
+		class element;
 
-		typedef boost::ptr_unordered_map<unsigned, Element> BaseOfArray1D;
+		typedef boost::ptr_unordered_map<unsigned, element> base_of_array1d;
 
-		class Array1D : public BaseOfArray1D
+		class array1d : public base_of_array1d
 		{
 		private:
-			ArrayDefine arrayDefine_;
-
-			Element* const this_;
+			element* const this_;
 
 			bool exists_;
-			Array2D* const owner_;
+			array2d* const owner_;
 			unsigned const index_;
-
-			enum { ARRAY_1D_END = 0, };
 		protected:
-			Array1D();
+			array1d();
 
 			void init(std::istream& s);
 		public:
-			Array1D(Array1D const& array);
-			/*
-			Array1D(ArrayDefine info);
-			Array1D(ArrayDefine info, std::istream& s);
-			Array1D(ArrayDefine info, std::istream& s, size_t size);
-			Array1D(ArrayDefine info, Binary const& b);
-			*/
-			Array1D(Element& e);
-			Array1D(Element& e, std::istream& s);
-			Array1D(Element& e, std::istream& s, size_t size);
-			Array1D(Element& e, Binary const& b);
+			enum { END_OF_ARRAY1D = 0, };
 
-			Array1D(Array2D& owner, unsigned index);
-			Array1D(Array2D& owner, unsigned index, std::istream& f);
+			array1d(array1d const& array);
 
-			Array1D const& operator =(Array1D const& src);
+			array1d(element& e);
+			array1d(element& e, std::istream& s);
+			array1d(element& e, binary const& b);
 
-			bool isArray2D() const { return owner_ != NULL; }
+			array1d(array2d& owner, unsigned index);
+			array1d(array2d& owner, unsigned index, std::istream& f);
+
+			array1d const& operator =(array1d const& src);
+
+			bool is_array2d() const { return owner_ != NULL; }
 			unsigned const& index() const;
-			Array2D& owner();
-			Array2D const& owner() const;
+			array2d& owner();
+			array2d const& owner() const;
 
-			Element& operator [](unsigned index);
-			Element const& operator [](unsigned index) const;
+			element& operator [](unsigned index);
+			element const& operator [](unsigned index) const;
 
-			Element& operator [](char const* index);
-			Element const& operator [](char const* index) const;
+			element& operator [](char const* index);
+			element const& operator [](char const* index) const;
 
 			bool exists() const;
 			bool exists(unsigned index) const;
 
 			unsigned count() const;
-			size_t serializedSize() const;
+			size_t serialized_size() const;
 			std::ostream& serialize(std::ostream& s) const;
 
 			void substantiate();
 
-			ArrayDefine arrayDefine() const { return arrayDefine_; }
+			array_define_type const& array_define;
 
-			bool isElement() const;
-			Element& toElement() const;
+			bool is_element() const;
+			element& to_element();
+			element const& to_element() const;
 
-			static bool sort_function(Element const* l, Element const* r);
-		}; // class Array1D
+			static bool sort_function(element const* l, element const* r);
+		}; // class array1d
 	} // namespace structure
 } // namespace rpg2k
 
-#endif
+#endif //_INC_RPG2K__ARRAY1D_HXX_

@@ -1,5 +1,5 @@
-#ifndef _INC__RPG2K__MODEL__MAP_TREE_HPP
-#define _INC__RPG2K__MODEL__MAP_TREE_HPP
+#ifndef _INC_RPG2K__MAP_TREE_HXX_
+#define _INC_RPG2K__MAP_TREE_HXX_
 
 #include "model.hxx"
 
@@ -7,33 +7,33 @@ namespace rpg2k
 {
 	namespace model
 	{
-		class MapTree : public Base
+		class map_tree : public base
 		{
 		private:
-			virtual void loadImpl();
-			virtual void saveImpl();
+			virtual void load_impl();
+			virtual void save_impl();
 
 			virtual char const* header() const { return "LcfMapTree"; }
-			virtual char const* defaultName() const { return "RPG_RT.lmt"; }
+			virtual char const* default_filename() const { return "RPG_RT.lmt"; }
 		protected:
-			using Base::operator []; // since LMT's first element is Array2D
+			using base::operator []; // since LMT's first element is array2d
 		public:
-			MapTree(SystemString const& dir);
-			MapTree(SystemString const& dir, SystemString const& name);
-			virtual ~MapTree();
+			map_tree(system_string const& dir);
+			map_tree(system_string const& dir, system_string const& name);
+			virtual ~map_tree();
 
-			structure::Array1D const& operator [](unsigned mapID) const;
-			structure::Array1D& operator [](unsigned mapID);
+			structure::array1d const& operator [](unsigned map_id) const;
+			structure::array1d& operator [](unsigned map_id);
 
-			bool exists(unsigned mapID) const;
+			bool exists(unsigned map_id) const;
 
-			bool canTeleport(unsigned mapID) const;
-			bool canEscape  (unsigned mapID) const;
-			bool canSave    (unsigned mapID) const;
+			bool can_teleport(unsigned map_id) const;
+			bool can_escape  (unsigned map_id) const;
+			bool can_save    (unsigned map_id) const;
 
-			structure::Array1D const& startPoint() const { return data().back(); }
+			structure::array1d const& start_point() const { return data().back(); }
 		};
 	} // namespace model
 } // namespace rpg2k
 
-#endif
+#endif // _INC_RPG2K__MAP_TREE_HXX_

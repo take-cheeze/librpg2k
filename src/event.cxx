@@ -5,96 +5,82 @@
 #include <boost/range/irange.hpp>
 
 
-namespace rpg2k
-{
-	namespace structure
-	{
-		Instruction::Instruction()
-		: code_(-1)
+namespace rpg2k {
+	namespace structure {
+		instruction::instruction()
+		: code(-1)
+		{}
+		instruction::instruction(std::istream& s)
 		{
+			code = stream::read_ber(s);
+			nest = stream::read_ber(s);
+
+			binary b;
+			stream::read_with_size(s, b);
+			string_argument.assign(reinterpret_cast<char const*>(b.data()), b.size());
+
+			int const arg_num = stream::read_ber(s);
+
+			this->resize(arg_num, VARIABLE_DEFAULT);
+			BOOST_FOREACH(int32_t& i, *this) {
+				i = stream::read_ber(s);
+			}
 		}
-		Instruction::Instruction(std::istream& s)
-		{
-			code_ = stream::readBER(s);
-			nest_ = stream::readBER(s);
 
-			Binary b;
-			stream::readWithSize(s, b);
-			stringArgument_.assign(reinterpret_cast<char const*>(b.data()), b.size());
-
-			int const argNum = stream::readBER(s);
-
-			argument_.resize(argNum, VAR_DEF_VAL);
-			BOOST_FOREACH(int32_t& i, argument_) { i = stream::readBER(s); }
-		}
-
-		int32_t Instruction::at(unsigned index) const
-		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
-		int32_t Instruction::operator [](unsigned index) const
-		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
-		int32_t& Instruction::at(unsigned index)
-		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
-		int32_t& Instruction::operator [](unsigned index)
-		{ rpg2k_assert(index < argument_.size()); return argument_[index]; }
-
-		size_t Instruction::serializedSize() const
+		size_t instruction::serialized_size() const
 		{
 			unsigned ret =
-				stream::berSize(code_) + stream::berSize(nest_) +
-				stream::berSize(stringArgument_.size()) + stringArgument_.size() +
-				stream::berSize(argument_.size());
-			BOOST_FOREACH(int32_t const& i, argument_) ret += stream::berSize(i);
+				stream::ber_size(code) + stream::ber_size(nest) +
+				stream::ber_size(string_argument.size()) +
+				string_argument.size() +
+				stream::ber_size(this->size());
+			BOOST_FOREACH(int32_t const& i, *this) {
+				ret += stream::ber_size(i);
+			}
 			return ret;
 		}
-		std::ostream& Instruction::serialize(std::ostream& s) const
+		std::ostream& instruction::serialize(std::ostream& s) const
 		{
-			stream::writeBER(s, code_);
-			stream::writeBER(s, nest_);
-			stream::writeWithSize(s, stringArgument_);
-			stream::writeBER(s, argument_.size());
-			BOOST_FOREACH(int32_t const& i, argument_) stream::writeBER(s, i);
+			stream::write_ber(s, code);
+			stream::write_ber(s, nest);
+			stream::write_with_size(s, string_argument);
+			stream::write_ber(s, this->size());
+			BOOST_FOREACH(int32_t const& i, *this) {
+				stream::write_ber(s, i);
+			}
 			return s;
 		}
 
-		Event::Event(Binary const& b)
+		event::event(binary const& b)
 		{
 			io::stream<io::array_source> s(b.source());
 			init(s);
 		}
 
-		void Event::init(std::istream& s)
+		void event::init(std::istream& s)
 		{
-			while(!stream::isEOF(s)) {
-				data_.push_back(Instruction(s));
-				if(data_.back().code() == 12110) { // check for label
-					if(!label_.insert(std::make_pair(data_.back()[0], data_.size() - 1)).second) {
+			while(!stream::is_eof(s)) {
+				this->push_back(instruction(s));
+				if(this->back().code == 12110) { // check for label
+					if(!label.insert(std::make_pair(this->back()[0], this->size() - 1)).second) {
 						rpg2k_assert(false);
 					}
 				}
 			}
 		}
 
-		size_t Event::serializedSize() const
-		{
-			return this->serializedSize(0);
-		}
-		size_t Event::serializedSize(unsigned const offset) const
+		size_t event::serialized_size(unsigned const offset) const
 		{
 			unsigned ret = 0;
-			BOOST_FOREACH(Data::const_iterator i, boost::irange(data_.begin() + offset, data_.end())) {
-				ret += i->serializedSize();
+			BOOST_FOREACH(const_iterator i, boost::irange(this->begin() + offset, this->end())) {
+				ret += i->serialized_size();
 			}
 			return ret;
 		}
-		std::ostream& Event::serialize(std::ostream& s) const
+		std::ostream& event::serialize(std::ostream& s) const
 		{
-			BOOST_FOREACH(Data::value_type const& i, data_) { i.serialize(s); }
+			BOOST_FOREACH(value_type const& i, *this) { i.serialize(s); }
 			return s;
-		}
-
-		void Event::resize(unsigned size)
-		{
-			data_.resize(size);
 		}
 	} // namespace structure
 } // namespace rpg2k

@@ -13,256 +13,258 @@
 
 #include <boost/foreach.hpp>
 
-using rpg2k::structure::Descriptor;
-using rpg2k::structure::Element;
+using rpg2k::structure::descriptor;
+using rpg2k::structure::element;
 
 
 namespace rpg2k
 {
 	namespace model
 	{
-		bool fileExists(SystemString const& fileName)
+		bool file_exists(system_string const& filename)
 		{
-			return std::ifstream(fileName.c_str()).good();
+			return std::ifstream(filename.c_str()).good();
 		}
 
-		Base::Base(SystemString const& dir)
-		: fileDir_(dir)
+		base::base(system_string const& dir)
+		: file_dir_(dir)
 		{
-			checkExists();
+			check_exists();
 		}
-		Base::Base(SystemString const& dir, SystemString const& name)
-		: fileDir_(dir), fileName_(name)
+		base::base(system_string const& dir, system_string const& name)
+		: file_dir_(dir), filename_(name)
 		{
-			checkExists();
+			check_exists();
 		}
 
-		void Base::reset()
+		void base::reset()
 		{
 			data_.clear();
-			BOOST_FOREACH(Descriptor const& i, this->descriptor()) {
-				data_.push_back(new Element(i));
+			BOOST_FOREACH(descriptor const& i, this->definition()) {
+				data_.push_back(new element(i));
 			}
 		}
 
-		Element& Base::operator [](unsigned index)
+		element& base::operator [](unsigned index)
 		{
-			return data_.front().toArray1D()[index];
+			return data_.front().to_array1d()[index];
 		}
-		Element const& Base::operator [](unsigned index) const
+		element const& base::operator [](unsigned index) const
 		{
-			return data_.front().toArray1D()[index];
-		}
-
-		boost::ptr_vector<Descriptor> const& Base::descriptor() const
-		{
-			return DefineLoader::instance().get(header());
+			return data_.front().to_array1d()[index];
 		}
 
-		void Base::checkExists()
+		boost::ptr_vector<descriptor> const& base::definition() const
 		{
-			exists_ = fileExists(fullPath());
+			return define_loader::instance().get(header());
 		}
 
-		void Base::load()
+		void base::check_exists()
 		{
-			if(fileName_.empty()) fileName_ = defaultName();
+			exists_ = file_exists(full_path());
+		}
+
+		void base::load()
+		{
+			if(filename_.empty()) filename_ = default_filename();
 			rpg2k_assert(exists());
 
-			std::ifstream ifs(fullPath().c_str(), stream::INPUT_FLAG);
+			std::ifstream ifs(full_path().c_str(), stream::INPUT_FLAG);
 
-			if(!stream::checkHeader(ifs, this->header())) rpg2k_assert(false);
+			if(!stream::check_header(ifs, this->header())) rpg2k_assert(false);
 			/*
 			if(this->header() == std::string("LcfMapTree")) {
 				// TODO
 			}
 			*/
 
-			BOOST_FOREACH(Descriptor const& i, this->descriptor()) {
-				data_.push_back(new Element(i, ifs));
+			BOOST_FOREACH(descriptor const& i, this->definition()) {
+				data_.push_back(new element(i, ifs));
 			}
 
-			rpg2k_assert(stream::isEOF(ifs));
+			rpg2k_assert(stream::is_eof(ifs));
 
-			loadImpl();
+			load_impl();
 		}
-		void Base::saveAs(SystemString const& filename)
+		void base::save_as(system_string const& filename)
 		{
 			exists_ = true;
-			saveImpl();
+			save_impl();
 			std::ofstream ofs(filename.c_str(), stream::OUTPUT_FLAG);
 			serialize(ofs);
+			if(this->header() == string("LcfMapUnit")) {
+				stream::write_ber(ofs, structure::array1d::END_OF_ARRAY1D);
+			}
 		}
-		void Base::serialize(std::ostream& s)
+		void base::serialize(std::ostream& s)
 		{
-			stream::writeHeader(s, this->header());
-			BOOST_FOREACH(Element const& i, data_) { i.serialize(s); }
-		}
-
-		DefineLoader::DefineLoader()
-		{
-			isArray_.insert("Music");
-			isArray_.insert("Sound");
-			isArray_.insert("EventState");
-
-			isArray_.insert("Array1D");
-			isArray_.insert("Array2D");
-
-			#define PP_insert(arg) \
-				defineText_.insert(std::make_pair(String(#arg), define::arg))
-			PP_insert(EventState);
-			PP_insert(LcfDataBase);
-			PP_insert(LcfMapTree);
-			PP_insert(LcfMapUnit);
-			PP_insert(LcfSaveData);
-			PP_insert(Music);
-			PP_insert(Sound);
-			#undef PP_insert
+			stream::write_header(s, this->header());
+			BOOST_FOREACH(element const& i, data_) { i.serialize(s); }
 		}
 
-		boost::ptr_vector<Descriptor> const& DefineLoader::get(String const& name)
+		define_loader::define_loader()
 		{
-			DefineBuffer::const_iterator it = defineBuff_.find(name);
-			if(it == defineBuff_.end()) {
-				boost::ptr_vector<Descriptor>& ret = defineBuff_[name];
+			is_array_.insert("music");
+			is_array_.insert("sound");
+			is_array_.insert("event_state");
+
+			is_array_.insert("array1d");
+			is_array_.insert("array2d");
+
+#define PP_insert(r, data, elem) \
+	define_text_.insert(std::make_pair(string(BOOST_PP_STRINGIZE(elem)), define::elem));
+			BOOST_PP_SEQ_FOR_EACH(PP_insert, , 
+				(LcfDataBase)(LcfMapTree)(LcfMapUnit)(LcfSaveData)
+				(event_state)(music)(sound))
+#undef PP_insert
+		}
+
+		boost::ptr_vector<descriptor> const& define_loader::get(string const& name)
+		{
+			define_buffer::const_iterator it = define_buff_.find(name);
+			if(it == define_buff_.end()) {
+				boost::ptr_vector<descriptor>& ret = define_buff_[name];
 				load(ret, name);
 				return ret;
 			} else return it->second;
 		}
-		structure::ArrayDefine DefineLoader::arrayDefine(String const& name)
+		structure::array_define_type const& define_loader::array_define(string const& name)
 		{
-			return get(name).front().arrayDefine();
+			return get(name).front().array_define();
 		}
 
-		void DefineLoader::load(boost::ptr_vector<structure::Descriptor>& dst, String const& name)
+		void define_loader::load(boost::ptr_vector<structure::descriptor>& dst, string const& name)
 		{
-			DefineText::const_iterator it = defineText_.find(name);
-			rpg2k_assert(it != defineText_.end());
+			define_text::const_iterator it = define_text_.find(name);
+			rpg2k_assert(it != define_text_.end());
 
 			namespace io = boost::iostreams;
 			io::stream<io::array_source> stream(io::array_source(it->second, std::strlen(it->second)));
-			std::deque<String> token;
-			toToken(token, stream);
+			std::deque<string> token;
+			to_token(token, stream);
 			parse(dst, token);
 		}
 
 		// parser for define Stream
 
-		#define nextToken(curType) prev = curType; continue
+		#define next_token(cur_type) prev = cur_type; continue
 
-		void DefineLoader::parse(boost::ptr_vector<structure::Descriptor>& dst
-		, std::deque<String> const& token)
+		void define_loader::parse(boost::ptr_vector<structure::descriptor>& dst
+		, std::deque<string> const& token)
 		{
-			bool blockComment = false;
-			unsigned int streamComment = 0, line = 1, col = 0;
-			String typeName;
+			bool block_comment = false;
+			unsigned int stream_comment = 0, line = 1, col = 0;
+			structure::element_type::type type;
+			string type_name;
 
-			enum TokenType
+			enum token_type
 			{
-				OPEN_INDEX = 0, INDEX, CLOSE_INDEX1, CLOSE_INDEX2,
+				OPEN_INDEX, INDEX, CLOSE_INDEX_1, CLOSE_INDEX_2,
 				TYPE, NAME, EQUALS, DEFAULT,
 				OPEN_STRUCT, CLOSE_STRUCT,
 				EXP_END,
 			} prev = EXP_END;
 
 			using namespace structure;
-			std::stack<ArrayDefineType*> nest;
-			std::stack<Descriptor::ArrayTable*> tableNest;
+			std::stack<array_define_type*> nest;
+			std::stack<array_table_type*> table_nest;
 
 			// if success continue else error
-			for(std::deque<String>::const_iterator i = token.begin(); i < token.end(); ++i) {
-				if(*i == "\n") { blockComment = false; line++; continue;
-				} else if(blockComment) { continue;
-				} else if(streamComment) {
-					if((*i == "*") && (*(++i) == "/")) { streamComment--; }
+			for(std::deque<string>::const_iterator i = token.begin(); i < token.end(); ++i) {
+				if(*i == "\n") { block_comment = false; line++; continue;
+				} else if(block_comment) { continue;
+				} else if(stream_comment) {
+					if((*i == "*") && (*(++i) == "/")) { stream_comment--; }
 					continue;
 				} else if(*i == "/") {
 					++i;
-					if(*i == "*") { streamComment++; continue; }
-					else if(*i == "/") { blockComment = true; continue; }
+					if(*i == "*") { stream_comment++; continue; }
+					else if(*i == "/") { block_comment = true; continue; }
 				} else if(nest.empty()) switch(prev) {
-					case TYPE: nextToken(NAME);
+					case TYPE: next_token(NAME);
 					case NAME:
 						if(*i == ";") {
-							dst.push_back(new Descriptor(typeName));
-							nextToken(EXP_END);
-						} else if(isArray(typeName) && (*i == "{")) {
-							ArrayDefineType* arrayDefine = new ArrayDefineType;
-							Descriptor::ArrayTable* arrayTable = new Descriptor::ArrayTable;
-							tableNest.push(arrayTable);
-							nest.push(arrayDefine);
+							dst.push_back(new descriptor(type));
+							next_token(EXP_END);
+						} else if(is_array(type_name) && (*i == "{")) {
+							array_define_type* array_define = new array_define_type;
+							array_table_type* array_table = new array_table_type;
+							table_nest.push(array_table);
+							nest.push(array_define);
 
-							dst.push_back(new Descriptor(typeName, ArrayDefinePointer(arrayDefine), unique_ptr<Descriptor::ArrayTable>::type(arrayTable)));
+							dst.push_back(new descriptor(type, unique_ptr<array_define_type>::type(array_define), unique_ptr<array_table_type>::type(array_table)));
 
-							nextToken(OPEN_STRUCT);
+							next_token(OPEN_STRUCT);
 						}
 						break;
 					case CLOSE_STRUCT:
-						if(*i == ";") { nextToken(EXP_END); } else break;
+						if(*i == ";") { next_token(EXP_END); } else break;
 					case EXP_END:
-						typeName = *i;
-						nextToken(TYPE);
+						type = structure::element_type::instance().to_enum(*i);
+						type_name = *i;
+						next_token(TYPE);
 					default: break;
 				} else switch(prev) {
 					case OPEN_INDEX: {
 						io::stream<io::array_source> ss(io::array_source(i->data(), i->size()));
 						ss >> col;
 						if(nest.top()->find(col) != nest.top()->end()) { break; }
-						else { nextToken(INDEX); }
+						else { next_token(INDEX); }
 					}
 					case INDEX:
-						if(*i == "]") { nextToken(CLOSE_INDEX1); } else break;
-					case CLOSE_INDEX1:
-						if(*i == ":") { nextToken(CLOSE_INDEX2); } else break;
-					case CLOSE_INDEX2:
-						typeName = *i;
-						nextToken(TYPE);
+						if(*i == "]") { next_token(CLOSE_INDEX_1); } else break;
+					case CLOSE_INDEX_1:
+						if(*i == ":") { next_token(CLOSE_INDEX_2); } else break;
+					case CLOSE_INDEX_2:
+						type = structure::element_type::instance().to_enum(*i);
+						type_name = *i;
+						next_token(TYPE);
 					case TYPE:
 						if((*i == "dummy")
-						|| tableNest.top()->insert(std::make_pair(*i, col)).second) { nextToken(NAME); }
+						|| table_nest.top()->insert(std::make_pair(*i, col)).second) { next_token(NAME); }
 						else { break; }
 					case NAME:
-						if(*i == "=") { nextToken(EQUALS);
+						if(*i == "=") { next_token(EQUALS);
 						} else if(*i == ";") {
-							if(isArray(typeName)) {
-								Descriptor const& def = this->get(typeName)[0];
-								nest.top()->insert(col, new Descriptor(
-									ElementType::instance().toString(def.type()),
-									ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
-									unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable(def.arrayTable()))));
-							} else nest.top()->insert(col, new Descriptor(typeName));
+							if(is_array(type_name)) {
+								descriptor const& def = this->get(type_name)[0];
+								nest.top()->insert(col, new descriptor(
+									def.type,
+									unique_ptr<array_define_type>::type(new array_define_type(def.array_define())),
+									unique_ptr<array_table_type>::type(new array_table_type(def.array_table()))));
+							} else nest.top()->insert(col, new descriptor(type));
 
-						nextToken(EXP_END);
-						} else if((*i == "{") && isArray(typeName)) {
-							ArrayDefineType* arrayDefine = new ArrayDefineType;
-							Descriptor::ArrayTable* arrayTable = new Descriptor::ArrayTable;
+						next_token(EXP_END);
+						} else if((*i == "{") && is_array(type_name)) {
+							array_define_type* array_define = new array_define_type;
+							array_table_type* array_table = new array_table_type;
 
-							nest.top()->insert(col, new Descriptor(typeName, ArrayDefinePointer(arrayDefine), unique_ptr<Descriptor::ArrayTable>::type(arrayTable)));
-							tableNest.push(arrayTable);
-							nest.push(arrayDefine);
+							nest.top()->insert(col, new descriptor(type, unique_ptr<array_define_type>::type(array_define), unique_ptr<array_table_type>::type(array_table)));
+							table_nest.push(array_table);
+							nest.push(array_define);
 
-							nextToken(OPEN_STRUCT);
+							next_token(OPEN_STRUCT);
 						} else break;
 					case EQUALS:
-						if(isArray(typeName)) {
-							Descriptor const& def = this->get(*i)[0];
+						if(is_array(type_name)) {
+							descriptor const& def = this->get(*i)[0];
 							nest.top()->insert(col,
-								new Descriptor(typeName,
-								ArrayDefinePointer(new ArrayDefineType(def.arrayDefine())),
-								unique_ptr<Descriptor::ArrayTable>::type(new Descriptor::ArrayTable(def.arrayTable()))));
-						} else nest.top()->insert(col, new Descriptor(typeName, *i));
-						nextToken(DEFAULT);
+								new descriptor(type,
+								unique_ptr<array_define_type>::type(new array_define_type(def.array_define())),
+								unique_ptr<array_table_type>::type(new array_table_type(def.array_table()))));
+						} else nest.top()->insert(col, new descriptor(type, *i));
+						next_token(DEFAULT);
 					case DEFAULT:
-						if(*i == ";") { nextToken(EXP_END); } else break;
+						if(*i == ";") { next_token(EXP_END); } else break;
 					case OPEN_STRUCT:
-						if(*i == "[") { nextToken(OPEN_INDEX); }
-						else if(*i == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
+						if(*i == "[") { next_token(OPEN_INDEX); }
+						else if(*i == "}") { nest.pop(); table_nest.pop(); next_token(CLOSE_STRUCT); }
 						else break;
 					case CLOSE_STRUCT:
-						if(*i == ";") { nextToken(EXP_END); } else break;
+						if(*i == ";") { next_token(EXP_END); } else break;
 					case EXP_END:
-						if(*i == "[") { nextToken(OPEN_INDEX); }
-						else if(*i == "}") { nest.pop(); tableNest.pop(); nextToken(CLOSE_STRUCT); }
+						if(*i == "[") { next_token(OPEN_INDEX); }
+						else if(*i == "}") { nest.pop(); table_nest.pop(); next_token(CLOSE_STRUCT); }
 						else break;
 					default: break;
 				}
@@ -272,45 +274,45 @@ namespace rpg2k
 				rpg2k_assert(false);
 			}
 
-			rpg2k_assert(streamComment == 0);
+			rpg2k_assert(stream_comment == 0);
 		}
 
-		#undef nextToken
+		#undef next_token
 
-		void DefineLoader::toToken(std::deque<String>& token, std::istream& stream)
+		void define_loader::to_token(std::deque<string>& token, std::istream& stream)
 		{
-			String strBuf;
+			string str_buf;
 
 			while(true) {
 				int buf = stream.get();
 
 				if(buf == -1) {
-					if(!strBuf.empty()) token.push_back(strBuf);
+					if(!str_buf.empty()) token.push_back(str_buf);
 					break;
 				} else if(buf == '\"') {
-					if(!strBuf.empty() && (*strBuf.begin() == '\"')) {
-						strBuf.push_back(buf);
-						token.push_back(strBuf);
-						strBuf.clear();
+					if(!str_buf.empty() && (*str_buf.begin() == '\"')) {
+						str_buf.push_back(buf);
+						token.push_back(str_buf);
+						str_buf.clear();
 					} else {
-						if(!strBuf.empty()) {
-							token.push_back(strBuf);
-							strBuf.clear();
+						if(!str_buf.empty()) {
+							token.push_back(str_buf);
+							str_buf.clear();
 						}
-						strBuf.push_back(buf);
+						str_buf.push_back(buf);
 					}
-				} else if(!strBuf.empty() && (*strBuf.begin() == '\"')) { strBuf.push_back(buf);
+				} else if(!str_buf.empty() && (*str_buf.begin() == '\"')) { str_buf.push_back(buf);
 				} else if(std::isalpha(buf) || std::isdigit(buf) || (buf == '_')) {
-					strBuf.push_back(buf);
+					str_buf.push_back(buf);
 				} else {
-					if(!strBuf.empty()) {
-						token.push_back(strBuf);
-						strBuf.clear();
+					if(!str_buf.empty()) {
+						token.push_back(str_buf);
+						str_buf.clear();
 					}
 					switch(buf) {
 						case ' ': case '\t': case '\r': break;
 						default:
-							token.push_back(String(1, buf));
+							token.push_back(string(1, buf));
 							break;
 					}
 				}

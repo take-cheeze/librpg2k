@@ -18,7 +18,7 @@
 using namespace rpg2k::model;
 
 
-bool compareFile(rpg2k::SystemString const& l, rpg2k::SystemString const& r)
+bool compare_file(rpg2k::system_string const& l, rpg2k::system_string const& r)
 {
 	std::ifstream lstream(l.c_str()), rstream(r.c_str());
 	if(lstream || rstream) return false;
@@ -32,30 +32,30 @@ bool compareFile(rpg2k::SystemString const& l, rpg2k::SystemString const& r)
 TEST(MapUnit, OpenAndClose)
 {
 	char const* const LMU_TEST_FILE = "./Map0001.lmu.test";
-	boost::scoped_ptr<MapUnit> lmu;
+	boost::scoped_ptr<map_unit> lmu;
 
-	lmu.reset(new MapUnit("./TestGame", 1));
-	lmu->saveAs(LMU_TEST_FILE);
+	lmu.reset(new map_unit("./TestGame", 1));
+	lmu->save_as(LMU_TEST_FILE);
 
-	lmu.reset(new MapUnit(".", "Map0001.lmu.test"));
+	lmu.reset(new map_unit(".", "Map0001.lmu.test"));
 	lmu.reset();
 
-	ASSERT_TRUE(compareFile("./TestGame/Map0001.lmu", LMU_TEST_FILE));
+	ASSERT_TRUE(compare_file("./TestGame/Map0001.lmu", LMU_TEST_FILE));
 
 	std::remove(LMU_TEST_FILE);
 }
 TEST(MapTree, OpenAndClose)
 {
 	char const* const LMT_TEST_FILE = "./RPG_RT.lmt.test";
-	boost::scoped_ptr<MapTree> lmt;
+	boost::scoped_ptr<map_tree> lmt;
 
-	lmt.reset(new MapTree("./TestGame"));
-	lmt->saveAs(LMT_TEST_FILE);
+	lmt.reset(new map_tree("./TestGame"));
+	lmt->save_as(LMT_TEST_FILE);
 
-	lmt.reset(new MapTree(".", "RPG_RT.lmt.test"));
+	lmt.reset(new map_tree(".", "RPG_RT.lmt.test"));
 	lmt.reset();
 
-	ASSERT_TRUE(compareFile("./TestGame/RPG_RT.lmt", LMT_TEST_FILE));
+	ASSERT_TRUE(compare_file("./TestGame/RPG_RT.lmt", LMT_TEST_FILE));
 
 	std::remove(LMT_TEST_FILE);
 }
@@ -63,15 +63,15 @@ TEST(MapTree, OpenAndClose)
 TEST(SaveData, OpenAndClose)
 {
 	char const* const LSD_TEST_FILE = "./Save01.lsd.test";
-	boost::scoped_ptr<SaveData> lsd;
+	boost::scoped_ptr<save_data> lsd;
 
 	lsd.reset(new SaveData("./TestGame", 1));
-	lsd->saveAs(LSD_TEST_FILE);
+	lsd->save_as(LSD_TEST_FILE);
 
-	lsd.reset(new SaveData("./", "Save01.lsd.test"));
+	lsd.reset(new save_data("./", "Save01.lsd.test"));
 	lsd.reset();
 
-	ASSERT_TRUE(compareFile("./TestGame/Save01.lsd", LSD_TEST_FILE));
+	ASSERT_TRUE(compare_file("./TestGame/Save01.lsd", LSD_TEST_FILE));
 
 	std::remove(LSD_TEST_FILE);
 }
@@ -85,17 +85,13 @@ TEST(DataBase, OpenAndClose)
 
 TEST(DefineLoader, CheckDefines)
 {
-	DefineLoader& defLod = DefineLoader::instance();
+	define_loader& def_lod = define_loader::instance();
 
-	#define PP_test(arg) defLod.get(#arg)
-	PP_test(EventState);
-	PP_test(LcfDataBase);
-	PP_test(LcfMapTree);
-	PP_test(LcfMapUnit);
-	PP_test(LcfSaveData);
-	PP_test(Music);
-	PP_test(Sound);
-	#undef PP_test
+#define PP_enum(r, data, elem) def_lod.get(BOOST_PP_STRINGIZE(elem));
+	BOOST_PP_SEQ_FOR_EACH(PP_enum, ,
+		(LcfDataBase)(LcfMapUnit)(LcfMapUnit)(LcfSaveData)
+		(event_state)(music)(sound))
+#undef PP_elem
 }
 
 /*

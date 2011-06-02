@@ -8,7 +8,7 @@ namespace rpg2k
 {
 	namespace stream
 	{
-		unsigned berSize(unsigned num)
+		unsigned ber_size(unsigned num)
 		{
 			unsigned ret = 0;
 			do {
@@ -18,7 +18,7 @@ namespace rpg2k
 			return ret;
 		}
 
-		bool isEOF(std::istream& is)
+		bool is_eof(std::istream& is)
 		{
 			bool const ret = (is.get() == EOF);
 			is.unget();
@@ -26,41 +26,41 @@ namespace rpg2k
 			return ret;
 		}
 
-		String readHeader(std::istream& is)
+		string read_header(std::istream& is)
 		{
 			is.seekg(0, std::ios_base::beg);
-			Binary buf;
-			readWithSize(is, buf);
-			return static_cast<String>(buf);
+			binary buf;
+			read_with_size(is, buf);
+			return static_cast<string>(buf);
 		}
-		std::ostream& writeHeader(std::ostream& os, String const& header)
+		std::ostream& write_header(std::ostream& os, string const& header)
 		{
 			os.seekp(0, std::ios_base::beg);
-			return writeWithSize(os, header);
+			return write_with_size(os, header);
 		}
 
-		bool checkHeader(std::istream& is,  String const& header)
+		bool check_header(std::istream& is,  string const& header)
 		{
-			return(readHeader(is) == header);
+			return(read_header(is) == header);
 		}
 
-		std::ostream& writeBER(std::ostream& os, unsigned num)
+		std::ostream& write_ber(std::ostream& os, unsigned num)
 		{
 			// BER output buffer
-			boost::array<uint8_t, (sizeof(num) * CHAR_BIT) / BER_BIT + 1> buff;
-			size_t const size = berSize(num);
+			boost::array<uint8_t, (sizeof(num) * 8) / BER_BIT + 1> buf;
+			size_t const size = ber_size(num);
 			int index = size;
 		// set data
-			buff[--index] = num & BER_MASK; // BER terminator
+			buf[--index] = num & BER_MASK; // BER terminator
 			num >>= BER_BIT;
 			while(num) {
-				buff[--index] = (num & BER_MASK) | BER_SIGN;
+				buf[--index] = (num & BER_MASK) | BER_SIGN;
 				num >>= BER_BIT;
 			}
 		// write data
-			return os.write(reinterpret_cast<char const*>(buff.data()), size);
+			return os.write(reinterpret_cast<char const*>(buf.data()), size);
 		}
-		unsigned readBER(std::istream& is)
+		unsigned read_ber(std::istream& is)
 		{
 			unsigned ret = 0;
 			uint8_t data;
@@ -73,9 +73,9 @@ namespace rpg2k
 			return ret;
 		}
 
-		std::istream& readWithSize(std::istream& is, Binary& dst)
+		std::istream& read_with_size(std::istream& is, binary& dst)
 		{
-			dst.resize(readBER(is));
+			dst.resize(read_ber(is));
 			return is.read(reinterpret_cast<char*>(dst.data()), dst.size());
 		}
 	} // namespace structure
