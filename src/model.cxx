@@ -1,7 +1,6 @@
 #include "rpg2k/debug.hxx"
 #include "rpg2k/model.hxx"
 #include "rpg2k/stream.hxx"
-#include "rpg2k/define/define.hxx"
 
 #include <algorithm>
 #include <fstream>
@@ -19,6 +18,17 @@ using rpg2k::structure::element;
 
 namespace rpg2k
 {
+	namespace define
+	{
+		extern const char* event_state;
+		extern const char* LcfDataBase;
+		extern const char* LcfMapTree;
+		extern const char* LcfMapUnit;
+		extern const char* LcfSaveData;
+		extern const char* music;
+		extern const char* sound;
+	}
+
 	namespace model
 	{
 		bool file_exists(system_string const& filename)
