@@ -191,13 +191,26 @@ namespace rpg2k
 		END,
 	}; };
 
-	struct skill { enum type {
-		BEGIN,
-		NORMAL = BEGIN,
-		TELEPORT, ESCAPE,
-		SWITCH,
-		END,
-	}; };
+	struct skill {
+		enum type { NORMAL, TELEPORT, ESCAPE, FLAG, };
+		enum range {
+			ENEMY, ENEMY_GROUP,
+			SELF, PARTY_MEMBER, PARTY,
+		};
+	};
+
+	struct enemy {
+		enum basic_action {
+			ATTACK, DOUBLE_STRIKE,
+			DEFEND, WAIT_AND_SEE,
+			CHARGE_POWER, SELF_DESTRUCTION, RUN_AWAY, 
+			DO_NOTHING,
+		};
+		enum term {
+			ALWAYS, FLAG, TURN, GROUP_MEMBER_NUMBER,
+			SELF_HP, SELF_MP, PARTY_AVERAGE_LEVEL, PARTY_CONSUMPTION,
+		};
+	};
 
 	struct window { enum type { NORMAL, NO_FRAME, }; };
 	struct wallpaper { enum type { ZOOM, TILE, }; };

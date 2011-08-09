@@ -1,9 +1,3 @@
-#include "rpg2k/array1d.hxx"
-#include "rpg2k/array2d.hxx"
-#include "rpg2k/debug.hxx"
-#include "rpg2k/element.hxx"
-#include "rpg2k/stream.hxx"
-
 #include <iterator>
 #include <vector>
 
@@ -13,11 +7,16 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/typeof/typeof.hpp>
 
+#include "rpg2k.hxx"
+#include "rpg2k/array1d.hxx"
+#include "rpg2k/array2d.hxx"
+#include "rpg2k/debug.hxx"
+#include "rpg2k/element.hxx"
+#include "rpg2k/stream.hxx"
 
-namespace rpg2k
-{
-	namespace structure
-	{
+
+namespace rpg2k {
+	namespace structure {
 		array1d::array1d(array1d const& src)
 		: base_of_array1d()
 		, this_(src.this_), exists_(src.exists_)
