@@ -1,5 +1,6 @@
-/librpg2kLib.a
 analyze.txt
+
+/include/rpg2k.pch
 
 /test/encode
 /test/model
