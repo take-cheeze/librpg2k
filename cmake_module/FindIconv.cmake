@@ -1,5 +1,5 @@
-# ICONV_INCLUDE_DIR - include path of iconv.h
-# ICONV_LIBRARY - library name of iconv.(may be empty)
+# ICONV_INCLUDE_DIR - include path to iconv.h
+# ICONV_LIBRARY - library of iconv.(may be empty)
 
 find_path(ICONV_INCLUDE_DIR iconv.h)
 find_library(ICONV_LIBRARY iconv)
