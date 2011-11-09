@@ -42,15 +42,18 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/test CXX_TEST_SOURCES)
-foreach(i ${CXX_TEST_SOURCES})
-  string(REGEX REPLACE ".*/\([a-z_]*\).cxx" "\\1" exe ${i})
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ntfmt NTFMT_TEST_SOURCES)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ntfmt/test NTFMT_SAMPLE_SOURCES)
+foreach(i ${CXX_TEST_SOURCES} ${NTFMT_TEST_SOURCES} ${NTFMT_SAMPLE_SOURCES})
+  string(REGEX REPLACE ".*/\([a-z_0-9]*\).[a-z]+$" "\\1" exe ${i})
   add_executable(test_${exe} ${i})
   target_link_libraries(test_${exe}
     ${rpg2k_LIBRARIES} ${libs}
     ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   add_test(
     NAME ${exe}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${exe})
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${exe}
+      --gtest_output=xml:${EXECUTABLE_OUTPUT_PATH}/test_${target}.xml
+      --gtest_color=yes)
   add_dependencies(test_${exe} ${PROJECT_NAME})
 endforeach()

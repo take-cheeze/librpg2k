@@ -35,9 +35,7 @@ LIST(APPEND rpg2k_INCLUDE_DIRS
   ${rpg2k_PATH}/ntfmt
   ${rpg2k_PATH}/pugixml/src)
 LIST(APPEND rpg2k_LIBRARIES rpg2k pugixml)
-LIST(APPEND rpg2k_LIBRARY_DIRS
-  ${rpg2k_PATH}/lib
-  ${rpg2k_PATH}/pugixml/scripts)
+LIST(APPEND rpg2k_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/lib)
 
 foreach(i Iconv Boost)
   find_package(${i} REQUIRED)
