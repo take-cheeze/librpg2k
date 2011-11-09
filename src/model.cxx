@@ -9,6 +9,7 @@
 
 #include <cctype>
 #include <cstdio>
+#include <cstring>
 
 #include <boost/foreach.hpp>
 
@@ -157,7 +158,7 @@ namespace rpg2k
 
 		// parser for define Stream
 
-		#define next_token(cur_type) prev = cur_type; continue
+#define next_token(cur_type) prev = cur_type; continue
 
 		void define_loader::parse(boost::ptr_vector<structure::descriptor>& dst
 		, std::deque<string> const& token)
@@ -287,7 +288,7 @@ namespace rpg2k
 			rpg2k_assert(stream_comment == 0);
 		}
 
-		#undef next_token
+#undef next_token
 
 		void define_loader::to_token(std::deque<string>& token, std::istream& stream)
 		{

@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 PROJECT("rpg2k" CXX C)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
 # pugixml
 ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/pugixml/scripts)
 
@@ -35,40 +37,20 @@ add_dependencies(${PROJECT_NAME} rpg2k.pch)
 # test
 enable_testing()
 
+find_package(Threads REQUIRED)
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
-
-# gtest-config
-find_program(GTEST_CONFIG "gtest-config")
-if(NOT GTEST_CONFIG)
-  message(FATAL_ERROR "gtest-config not found")
-else()
-  message(STATUS "gtest-config found")
-endif()
-# cxx_flags
-execute_process(
-  COMMAND ${GTEST_CONFIG} "--cppflags" "--cxxflags"
-  OUTPUT_VARIABLE GTEST_CXX_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-LIST(APPEND CMAKE_CXX_FLAGS ${GTEST_CXX_FLAGS})
-# link_flags
-execute_process(
-  COMMAND ${GTEST_CONFIG} "--ldflags" "--libs"
-  OUTPUT_VARIABLE GTEST_LINK_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-list(APPEND LINK_FLAGS ${GTEST_LINK_FLAGS})
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/test CXX_TEST_SOURCES)
 foreach(i ${CXX_TEST_SOURCES})
   string(REGEX REPLACE ".*/\([a-z_]*\).cxx" "\\1" exe ${i})
   add_executable(test_${exe} ${i})
   target_link_libraries(test_${exe}
-    ${rpg2k_LIBRARIES}
-    ${libs}
-    ${GTEST_BOTH_LIBRARIES}
-    )
+    ${rpg2k_LIBRARIES} ${libs}
+    ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   add_test(
     NAME ${exe}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${exe}
-    )
+    COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${exe})
   add_dependencies(test_${exe} ${PROJECT_NAME})
 endforeach()

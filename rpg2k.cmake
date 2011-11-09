@@ -18,11 +18,6 @@ ENDIF()
 # Boost
 FIND_PACKAGE(Boost REQUIRED)
 
-# set warning flags
-IF((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-  LIST(APPEND rpg2k_DEFINITIONS -Wall -Wextra)
-ENDIF()
-
 # set endianness
 include(TestBigEndian)
 test_big_endian(is_big_endian)
@@ -35,27 +30,22 @@ else()
 endif()
 
 LIST(APPEND rpg2k_INCLUDE_DIRS
-  ${Boost_INCLUDE_DIRS}
   ${rpg2k_PATH}/include
   ${rpg2k_PATH}/glsl_type/include
   ${rpg2k_PATH}/ntfmt
   ${rpg2k_PATH}/pugixml/src)
-LIST(APPEND rpg2k_LIBRARIES
-  rpg2k
-  pugixml
-  ${Boost_LIBRARIES})
+LIST(APPEND rpg2k_LIBRARIES rpg2k pugixml)
 LIST(APPEND rpg2k_LIBRARY_DIRS
   ${rpg2k_PATH}/lib
   ${rpg2k_PATH}/pugixml/scripts)
-find_path(rpg2k_ICONV_INCLUDE_DIR "iconv.h")
-if(NOT rpg2k_ICONV_INCLUDE_DIR)
-  message(FATAL_ERROR "iconv not found")
-else()
-  message(STATUS "iconv found")
-endif()
-LIST(APPEND rpg2k_INCLUDE_DIRS ${rpg2k_ICONV_INCLUDE_DIR})
-find_library(rpg2k_ICONV_LIBRARY "iconv")
-LIST(APPEND rpg2k_LIBRARIES ${rpg2k_ICONV_LIBRARY})
+
+foreach(i Iconv Boost)
+  find_package(${i} REQUIRED)
+  list(APPEND rpg2k_INCLUDE_DIRS
+    ${${i}_INCLUDE_DIRS} ${${i}_INCLUDE_DIR})
+  list(APPEND rpg2k_LIBRARY_DIRS
+    ${${i}_LIBRARIES} ${${i}_LIBRARY})
+endforeach()
 
 include(${rpg2k_PATH}/PrecompiledHeader.cmake)
 precompiled_header_definition(

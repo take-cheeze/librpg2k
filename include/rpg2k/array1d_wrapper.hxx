@@ -36,11 +36,11 @@ namespace rpg2k
 
 			string const& char_set() const { return (*this)[73]; }
 			int char_set_pos() const { return (*this)[74]; }
-			char_set_dir::type char_set_dir() const { return char_set_dir::type((*this)[75].to<int>()); }
-			char_set_pat::type char_set_pat() const { return char_set_pat::MIDDLE; }
+			rpg2k::char_set_dir::type char_set_dir() const { return rpg2k::char_set_dir::type((*this)[75].to<int>()); }
+			rpg2k::char_set_pat::type char_set_pat() const { return rpg2k::char_set_pat::MIDDLE; }
 
-			char_set_dir::type event_dir() const { return char_set_dir::type((*this)[21].to<int>()); }
-			char_set_dir::type  talk_dir() const { return char_set_dir::type((*this)[22].to<int>()); }
+			rpg2k::char_set_dir::type event_dir() const { return rpg2k::char_set_dir::type((*this)[21].to<int>()); }
+			rpg2k::char_set_dir::type  talk_dir() const { return rpg2k::char_set_dir::type((*this)[22].to<int>()); }
 
 			// char_set_dir char_set_dir() const;
 		}; // class event_state
