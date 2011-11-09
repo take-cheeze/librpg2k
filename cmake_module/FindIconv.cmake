@@ -1,3 +1,6 @@
+# ICONV_INCLUDE_DIR - include path of iconv.h
+# ICONV_LIBRARY - library name of iconv.(may be empty)
+
 find_path(ICONV_INCLUDE_DIR iconv.h)
 find_library(ICONV_LIBRARY iconv)
 if(EXISTS ${ICONV_INCLUDE_DIR})
@@ -10,7 +13,7 @@ if(EXISTS ${ICONV_INCLUDE_DIR})
   if((${APPLE}) AND (${ICONV_LIBRARY} MATCHES "/usr/lib"))
     string(REPLACE "/usr/lib" "/opt/local/lib" macports_iconv_library ${ICONV_LIBRARY})
     if(EXISTS ${macports_iconv_library})
-      list(APPEND EASYRPG_PLAYER_LIBRARIES ${macports_iconv_library})
+      set(ICONV_LIBRARY ${macports_iconv_library})
     endif()
   endif()
 else()
