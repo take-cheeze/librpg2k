@@ -25,9 +25,7 @@ class database : public base
   char const* header() const { return "LcfDataBase"; }
   char const* default_filename() const { return "RPG_RT.ldb"; }
  public:
-  database(system_string const& dir);
-  database(system_string const& dir, system_string const& name);
-  ~database();
+  database(boost::filesystem::path const& p);
 
   structure::array2d& character() { return (*this)[11]; }
   structure::array2d& skill() { return (*this)[12]; }

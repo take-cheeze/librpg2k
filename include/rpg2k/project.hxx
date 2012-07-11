@@ -17,11 +17,12 @@
 
 namespace rpg2k {
 namespace model {
+
 class project : boost::noncopyable {
  public:
   class character_type;
  private:
-  system_string base_dir_, rtp_dir_;
+  boost::filesystem::path base_dir_, rtp_dir_;
 
   typedef boost::ptr_unordered_map<unsigned, map_unit> map_unit_table;
   map_unit_table lmu_;
@@ -34,11 +35,11 @@ class project : boost::noncopyable {
  protected:
   void init();
  public:
-  project(system_string base_dir=".");
+  project(boost::filesystem::path const& base_dir=".");
 
   string const& game_title() const { return lmt[0][1]; }
 
-  system_string const& game_dir() const { return base_dir_; }
+  boost::filesystem::path const& game_dir() const { return base_dir_; }
 
   unsigned current_map_id();
 
@@ -171,6 +172,7 @@ class project::character_type
  private:
   bool can_level_up() const { return(exp() > next_level_exp()); }
 }; // class character_type
+
 } // namespace model
 } // namespace rpg2k
 

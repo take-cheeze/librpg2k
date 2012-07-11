@@ -1,7 +1,7 @@
 #include "rpg2k/debug.hxx"
 #include "rpg2k/map_unit.hxx"
 
-#include "ntfmt_string.hpp"
+#include <boost/format.hpp>
 
 
 namespace rpg2k
@@ -13,19 +13,15 @@ namespace rpg2k
 		{
 			base::reset();
 		}
-		map_unit::map_unit(system_string const& dir, system_string const& name)
-		: base(dir, name), id_(0)
+		map_unit::map_unit(boost::filesystem::path const& p)
+		: base(p), id_(0)
 		{
 			load();
 		}
-		map_unit::map_unit(system_string const& dir, unsigned const id)
-		: base(dir, system_string()), id_(id)
+		map_unit::map_unit(boost::filesystem::path const& dir, unsigned const id)
+		: base(dir), id_(id)
 		{
-			std::string filename;
-			ntfmt::sink_string(filename)
-				<< "Map" << ntfmt::fmt(id, "%04d") << ".lmu";
-			set_filename(filename);
-
+			set_path(dir / (boost::format("Map%04d.lmu") % id_).str());
 			check_exists();
 
 			load();
@@ -41,11 +37,9 @@ namespace rpg2k
 			this->height = (*this)[3];
 		}
 
-		map_unit::~map_unit()
+		string map_unit::analyze_prefix() const
 		{
-#if RPG2K_DEBUG
-			debug::ANALYZE_RESULT << header() << ":" << int(id_) << endl;
-#endif
+			return string(header()).append((boost::format(" %04d:") % int(id_)).str());
 		}
 
 		void map_unit::save_impl()

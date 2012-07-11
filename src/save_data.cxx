@@ -1,10 +1,9 @@
-#include "ntfmt_string.hpp"
-
 #include "rpg2k/debug.hxx"
 #include "rpg2k/save_data.hxx"
 #include "rpg2k/structure.hxx"
 
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/range/algorithm/find.hpp>
@@ -15,37 +14,31 @@ namespace rpg2k
 	namespace model
 	{
 		save_data::save_data()
-		: base(system_string(), system_string()), id_(-1)
+		: base(""), id_(-1)
 		{
 			base::reset();
 
-		// reset map chip info
+      // reset map chip info
 			reset_replace();
 		}
-		save_data::save_data(system_string const& dir, system_string const& name)
-		: base(dir, name), id_(0)
+		save_data::save_data(boost::filesystem::path const& p)
+		: base(p), id_(0)
 		{
 			load();
 		}
-		save_data::save_data(system_string const& dir, unsigned const id)
-		: base(dir, ""), id_(id)
+		save_data::save_data(boost::filesystem::path const& dir, unsigned const id)
+		: base(dir), id_(id)
 		{
-			std::string filename;
-			ntfmt::sink_string(filename)
-				<< "Save" << ntfmt::fmt(id, "%02d") << ".lsd";
-			set_filename(filename);
-
+			set_path(dir /(boost::format("Save%02d.lsd") % this->id_).str());
 			check_exists();
 
 			if(!exists()) return;
 
 			load();
 		}
-		save_data::~save_data()
+    string save_data::analyze_prefix() const
 		{
-#if RPG2KDEBUG
-			debug::ANALYZERESULT << header() << ": " << int(id_) << endl;
-#endif
+			return string(header()).append((boost::format(" %02d:") % int(id_)).str());
 		}
 
 		save_data const& save_data::operator =(save_data const& src)

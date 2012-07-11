@@ -64,12 +64,13 @@ namespace rpg2k
 		{
 			unsigned ret = 0;
 			uint8_t data;
-		// extract
+      // extract
 			do {
+        rpg2k_analyze_assert(!is_eof(is));
 				is.read(reinterpret_cast<char*>(&data), 1);
 				ret = (ret << BER_BIT) | (data & BER_MASK);
 			} while(data >= BER_SIGN);
-		// result
+      // result
 			return ret;
 		}
 

@@ -7,21 +7,10 @@
 
 namespace rpg2k {
 	namespace model {
-		database::database(system_string const& dir)
-		: base(dir)
+  database::database(boost::filesystem::path const& p)
+		: base(p)
 		{
 			load();
-		}
-		database::database(system_string const& dir, system_string const& name)
-		: base(dir, name)
-		{
-			load();
-		}
-		database::~database()
-		{
-#if RPG2KDEBUG
-			debug::ANALYZERESULT << header() << ":" << endl;
-#endif
 		}
 
 		void database::load_impl()

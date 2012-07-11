@@ -7,7 +7,6 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/typeof/typeof.hpp>
 
-#include "rpg2k.hxx"
 #include "rpg2k/array1d.hxx"
 #include "rpg2k/array2d.hxx"
 #include "rpg2k/debug.hxx"

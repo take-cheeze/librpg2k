@@ -7,7 +7,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/range/irange.hpp>
-#include <boost/range/algorithm/count_if.hpp>
+#include <boost/range/algorithm/count.hpp>
 
 
 namespace rpg2k
@@ -77,13 +77,16 @@ namespace rpg2k
 		bool array2d::is_invalid_array2d(binary const& b)
 		{
 			enum { PARTICULAR_DATA_SIZE = 512 };
-		// check the data size
+
+      // check the data size
 			if(b.size() < PARTICULAR_DATA_SIZE) return false;
-		// check the data inside binary
-		// return true if it is particular array2d
-			return (boost::count(b, 0xff) < PARTICULAR_DATA_SIZE)
-				? false
-				: debug::tracer::print_binary(b, clog), true;
+
+      // check the data inside binary
+      // return true if it is particular array2d
+      for(size_t i = 0; i < std::min<size_t>(PARTICULAR_DATA_SIZE, b.size()); ++i) {
+        if(b[i] != 0xff) { return false; }
+      }
+      return debug::tracer::print_binary(b, clog), true;
 		}
 
 		element& array2d::to_element() const

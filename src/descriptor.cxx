@@ -1,5 +1,6 @@
 #include "rpg2k/debug.hxx"
 #include "rpg2k/descriptor.hxx"
+#include "rpg2k/model.hxx"
 #include "rpg2k/stream.hxx"
 #include "rpg2k/structure.hxx"
 
@@ -20,8 +21,15 @@ namespace rpg2k
 		element_type::type element_type::to_enum(string const& name) const
 		{
 			table::right_map::const_iterator it = table_.right.find(name);
-			rpg2k_assert(it != table_.right.end());
-			return it->second;
+			if(it != table_.right.end()) { return it->second; }
+      else {
+        if(model::define_loader::instance().is_array(name)) {
+          return array1d_;
+        } else {
+          assert(false);
+          return binary_;
+        }
+      }
 		}
 		string const& element_type::to_string(element_type::type const e) const
 		{
@@ -93,10 +101,10 @@ namespace rpg2k
 				case element_type::array2d_:
 					delete impl_.array_define;
 					break;
-				#define PP_enum(r, data, elem) \
+#define PP_enum(r, data, elem) \
 					case element_type::BOOST_PP_CAT(elem, data):
 				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
-				#undef PP_enum
+#undef PP_enum
 					break;
 				default: rpg2k_assert(false); break;
 			}

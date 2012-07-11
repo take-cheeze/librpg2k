@@ -21,7 +21,7 @@
 
 // demangling header
 #if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
-	#include <cxxabi.h>
+#  include <cxxabi.h>
 #elif RPG2K_IS_MSVC
 	extern "C"
 	char * unDName(
@@ -33,7 +33,7 @@
 		unsigned short disable_flags
 	);
 #else
-	#error "Demangle not supported"
+#  error "Demangle not supported"
 #endif
 
 
@@ -58,7 +58,7 @@ namespace rpg2k
 
 		std::string demangle_typeInfo(std::type_info const& info)
 		{
-			#if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
+#if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
 				int status;
 				char* const readable = abi::__cxa_demangle(info.name(), NULL, NULL, &status);
 
@@ -71,12 +71,12 @@ namespace rpg2k
 				}
 				std::string ret = readable; // char* to string
 				std::free(readable);
-			#elif RPG2K_IS_MSVC
+#elif RPG2K_IS_MSVC
 				char* const readable = unDName(0, info.name(), 0, std::malloc, std::free, 0x2800);
 				rpg2k_assert(readable);
 				std::string ret = readable; // char* to string
 				std::free(readabl);
-			#endif
+#endif
 
 			return ret;
 		}
@@ -97,10 +97,11 @@ namespace rpg2k
 				element_type::type const owner_type = top.owner().definition().type;
 
 				ostrm << std::dec << std::setfill(' ');
-				if(owner_type == element_type::array2d_) ostrm
-					<< "[" << std::setw(4) << top.index_of_array2d() << "]";
-				ostrm << element_type::instance().to_string(owner_type)
-					<< "[" << std::setw(4) << top.index_of_array1d() << "]";
+				ostrm << element_type::instance().to_string(owner_type);
+				if(owner_type == element_type::array2d_) {
+          ostrm << "[" << std::setw(4) << top.index_of_array2d() << "]";
+        }
+        ostrm << "[" << std::setw(4) << top.index_of_array1d() << "]";
 				ostrm << ": ";
 			}
 
@@ -120,7 +121,16 @@ namespace rpg2k
 		BOOST_PP_CAT(print_, elem)(e.BOOST_PP_CAT(to_, elem)(), ostrm); break;
 					BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (binary)(event)(string)(bool)(double)(int))
 #undef PP_enum
-					default: break;
+
+        case element_type::array1d_:
+          ostrm << endl;
+          print_array1d(e.to_array1d(), ostrm);
+          break;
+        case element_type::array2d_:
+          ostrm << endl;
+          print_array2d(e.to_array2d(), ostrm);
+          break;
+        default: break;
 				}
 			} else {
 				binary const bin = e.serialize();
@@ -128,39 +138,39 @@ namespace rpg2k
 					ostrm << "This data is empty." << endl;
 					return ostrm;
 				}
-			// binary
-				ostrm << endl << "binary: ";
+        // binary
+				ostrm << "undefined" << endl << "binary: ";
 				print_binary(bin, ostrm);
-			// event
+        // event
 				try {
 					event event(bin);
 					ostrm << endl << "event: ";
 					print_event(event, ostrm);
 				} catch(...) {}
-			// BER number
+        // BER number
 				if(bin.is_ber()) {
 					ostrm << endl << "BER: ";
 					print_int(bin, ostrm);
 				}
-			// string
+        // string
 				if(bin.is_string()) {
 					ostrm << endl << "string: ";
 					print_string(static_cast<string>(bin), ostrm);
 				}
-			// array1d
+        // array1d
 				try {
 					unique_ptr<element>::type p(new element(descriptor(element_type::array1d_
-					, unique_ptr<array_define_type>::type(new array_define_type)
-					, unique_ptr<array_table_type>::type(new array_table_type())), bin));
+                                                             , unique_ptr<array_define_type>::type(new array_define_type)
+                                                             , unique_ptr<array_table_type>::type(new array_table_type())), bin));
 					ostrm << endl << "---array1d check start---" << endl;
 					p.reset(); // trigger element's destructor
 					ostrm << "---array1d check end  ---";
 				} catch(...) {}
-			// array2d
+        // array2d
 				try {
 					unique_ptr<element>::type p(new element(descriptor(element_type::array2d_
-					, unique_ptr<array_define_type>::type(new array_define_type)
-					, unique_ptr<array_table_type>::type(new array_table_type())), bin));
+                                                             , unique_ptr<array_define_type>::type(new array_define_type)
+                                                             , unique_ptr<array_table_type>::type(new array_table_type())), bin));
 					ostrm << endl << "---array2d check start---" << endl;
 					p.reset(); // trigger element's destructor
 					ostrm << "---array2d check end  ---";

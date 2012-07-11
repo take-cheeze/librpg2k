@@ -20,19 +20,19 @@ namespace rpg2k {
 
 			virtual char const* header() const { return "LcfMapUnit"; }
 			virtual char const* default_filename() const { return "Map0000.lmu"; }
+      virtual string analyze_prefix() const;
 		public:
 			map_unit();
-			map_unit(system_string const& dir, system_string const& name);
-			map_unit(system_string const& dir, unsigned id);
-			virtual ~map_unit();
+			map_unit(boost::filesystem::path const& p);
+			map_unit(boost::filesystem::path const& p, unsigned id);
 
 
 			unsigned id() const { return id_; }
 
 			int chip_id_lower(unsigned x, unsigned y) const;
 			int chip_id_upper(unsigned x, unsigned y) const;
-			int chip_id_lower(ivec2 const& pos) const { return chip_id_lower(pos.x(), pos.y()); }
-			int chip_id_upper(ivec2 const& pos) const { return chip_id_upper(pos.x(), pos.y()); }
+			int chip_id_lower(ivec2 const& pos) const { return chip_id_lower(pos.x, pos.y); }
+			int chip_id_upper(ivec2 const& pos) const { return chip_id_upper(pos.x, pos.y); }
 
 			unsigned width, height;
 

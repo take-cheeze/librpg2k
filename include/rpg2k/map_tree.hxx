@@ -18,9 +18,7 @@ namespace rpg2k
 		protected:
 			using base::operator []; // since LMT's first element is array2d
 		public:
-			map_tree(system_string const& dir);
-			map_tree(system_string const& dir, system_string const& name);
-			virtual ~map_tree();
+			map_tree(boost::filesystem::path const& p);
 
 			structure::array1d const& operator [](unsigned map_id) const;
 			structure::array1d& operator [](unsigned map_id);

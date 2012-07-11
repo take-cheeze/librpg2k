@@ -54,10 +54,11 @@ using rpg2k::structure::event_state;
 
 namespace rpg2k {
 namespace model {
-project::project(system_string dir)
+project::project(boost::filesystem::path const& dir)
     : base_dir_(dir)
     , ldb(dir), lmt(dir)
 {
+  assert(boost::filesystem::is_directory(dir));
   init();
 }
 
@@ -401,10 +402,10 @@ project::character_type::character_type(unsigned const char_id
                                         , structure::array1d& lsd)
     : char_id_(char_id), ldb_(ldb), lsd_(lsd)
     , basic_param_(ldb[31].to_binary().to_vector<uint16_t>())
-    , skill(lsd_[52].to_binary().to_set<uint16_t>())
-    , condition(lsd_[84].to_binary().to_vector<uint8_t>())
     , condition_step_(lsd_[82].to_binary().to_vector<uint16_t>())
     , equip(lsd_[61].to_binary().to_array<uint16_t, int(rpg2k::equip::END)>())
+    , skill(lsd_[52].to_binary().to_set<uint16_t>())
+    , condition(lsd_[84].to_binary().to_vector<uint8_t>())
 {
 }
 void project::character_type::sync() {

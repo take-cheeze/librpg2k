@@ -6,22 +6,10 @@ namespace rpg2k
 {
 	namespace model
 	{
-		map_tree::map_tree(system_string const& dir)
-		: base(dir)
+    map_tree::map_tree(boost::filesystem::path const& p)
+		: base(p)
 		{
 			load();
-		}
-		map_tree::map_tree(system_string const& dir, system_string const& name)
-		: base(dir, name)
-		{
-			load();
-		}
-
-		map_tree::~map_tree()
-		{
-#if RPG2K_DEBUG
-			debug::ANALYZE_RESULT << header() << ":" << endl;
-#endif
 		}
 
 		void map_tree::load_impl()

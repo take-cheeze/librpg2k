@@ -1,0 +1,58 @@
+# sets value
+# - ${RPG2k_DEFINITIONS}  - use it like "ADD_DEFINITIONS(${RPG2k_DEFINITIONS})"
+# - ${RPG2k_INCLUDE_DIRS} - use it like "INCLUDE_DIRECTORIES(${RPG2k_INCLUDE_DIRS})"
+# - ${RPG2k_LIBRARIES}    - use it like "TARGET_LINK_LIBRARIES(${TARGET} ${RPG2k_LIBRARIES})"
+# - ${RPG2k_LIBRARY_DIRS} - use it like "LINK_DIRECTORIES(${RPG2k_LIBRARY_DIRS})"
+
+if(NOT RPG2k_PATH)
+  set(RPG2k_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libRPG2k)
+endif()
+
+# DEBUG define
+IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+  LIST(APPEND RPG2k_DEFINITIONS -DRPG2K_DEBUG=1)
+ELSE()
+  LIST(APPEND RPG2k_DEFINITIONS -DRPG2K_DEBUG=0)
+ENDIF()
+
+# set endianness
+include(TestBigEndian)
+test_big_endian(is_big_endian)
+if(is_big_endian)
+  LIST(APPEND RPG2k_DEFINITIONS
+    -DRPG2K_IS_BIG_ENDIAN=1  -DRPG2K_IS_LITTLE_ENDIAN=0)
+else()
+  LIST(APPEND RPG2k_DEFINITIONS
+    -DRPG2K_IS_BIG_ENDIAN=0  -DRPG2K_IS_LITTLE_ENDIAN=1)
+endif()
+
+find_path(RPG2k_INCLUDE_DIRS rpg2k.hxx
+  ${CMAKE_CURRENT_SOURCE_DIR}/include)
+list(APPEND RPG2k_LIBRARIES rpg2k)
+list(APPEND RPG2k_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/lib)
+
+if(NOT ${RPG2k_INCLUDE_DIR})
+  set(RPG2k_FOUND FALSE)
+endif()
+
+# iconv
+find_package(Iconv)
+if(NOT Iconv_FOUND)
+  set(RPG2k_FOUND FALSE)
+else()
+  list(APPEND RPG2k_INCLUDE_DIRS ${ICONV_INCLUDE_DIR})
+  list(APPEND RPG2k_LIBRARIES ${ICONV_LIBRARY})
+endif()
+
+# boost
+find_package(Boost COMPONENTS filesystem system)
+if(NOT Boost_FOUND)
+  set(RPG2k_FOUND FALSE)
+else()
+  list(APPEND RPG2k_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+  list(APPEND RPG2k_LIBRARIES ${Boost_LIBRARIES})
+endif()
+
+if(NOT DEFINED RPG2k_FOUND)
+  set(RPG2k_FOUND TRUE)
+endif()

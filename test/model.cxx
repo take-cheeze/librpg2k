@@ -29,6 +29,22 @@ bool compare_file(rpg2k::system_string const& l, rpg2k::system_string const& r)
 	return(lIt == end);
 }
 
+TEST(Database, OpenAndClose)
+{
+	char const* const LDB_TEST_FILE = "./RPG_RT.ldb.test";
+	boost::scoped_ptr<database> ldb;
+
+	ldb.reset(new database("./TestGame"));
+	ldb->save_as(LDB_TEST_FILE);
+
+	ldb.reset(new database(LDB_TEST_FILE));
+	ldb.reset();
+
+	ASSERT_TRUE(compare_file("./TestGame/RPG_RT.ldb", LDB_TEST_FILE));
+
+	std::remove(LDB_TEST_FILE);
+}
+
 TEST(MapUnit, OpenAndClose)
 {
 	char const* const LMU_TEST_FILE = "./Map0001.lmu.test";
@@ -37,13 +53,14 @@ TEST(MapUnit, OpenAndClose)
 	lmu.reset(new map_unit("./TestGame", 1));
 	lmu->save_as(LMU_TEST_FILE);
 
-	lmu.reset(new map_unit(".", "Map0001.lmu.test"));
+	lmu.reset(new map_unit(LMU_TEST_FILE));
 	lmu.reset();
 
 	ASSERT_TRUE(compare_file("./TestGame/Map0001.lmu", LMU_TEST_FILE));
 
 	std::remove(LMU_TEST_FILE);
 }
+
 TEST(MapTree, OpenAndClose)
 {
 	char const* const LMT_TEST_FILE = "./RPG_RT.lmt.test";
@@ -52,13 +69,14 @@ TEST(MapTree, OpenAndClose)
 	lmt.reset(new map_tree("./TestGame"));
 	lmt->save_as(LMT_TEST_FILE);
 
-	lmt.reset(new map_tree(".", "RPG_RT.lmt.test"));
+	lmt.reset(new map_tree(LMT_TEST_FILE));
 	lmt.reset();
 
 	ASSERT_TRUE(compare_file("./TestGame/RPG_RT.lmt", LMT_TEST_FILE));
 
 	std::remove(LMT_TEST_FILE);
 }
+
 /*
 TEST(SaveData, OpenAndClose)
 {
@@ -76,12 +94,6 @@ TEST(SaveData, OpenAndClose)
 	std::remove(LSD_TEST_FILE);
 }
 */
-/*
-TEST(DataBase, OpenAndClose)
-{
-	DataBase("./TestGame");
-}
-*/
 
 TEST(DefineLoader, CheckDefines)
 {
@@ -94,9 +106,7 @@ TEST(DefineLoader, CheckDefines)
 #undef PP_elem
 }
 
-/*
 TEST(Project, OpenAndClose)
 {
-	Project("./TestGame");
+	project("./TestGame");
 }
-*/

@@ -35,11 +35,11 @@ namespace rpg2k
 
 			virtual char const* header() const { return "LcfSaveData"; }
 			virtual char const* default_filename() const { return "Save00.lsd"; }
+      virtual string analyze_prefix() const;
 		public:
 			save_data();
-			save_data(system_string const& dir, system_string const& name);
-			save_data(system_string const& dir, unsigned d);
-			virtual ~save_data();
+			save_data(boost::filesystem::path const& p);
+			save_data(boost::filesystem::path const& dir, unsigned id);
 
 			save_data const& operator =(save_data const& src);
 
