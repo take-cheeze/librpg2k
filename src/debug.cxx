@@ -236,8 +236,9 @@ namespace rpg2k
 		std::ostream& tracer::print_instruction(instruction const& inst
 		, std::ostream& ostrm, bool const indent)
 		{
-			if(indent)
+			if(indent) {
 				BOOST_FOREACH(int const i, boost::irange(0, int(inst.nest))) { (void) i; ostrm << "\t"; }
+      }
 			ostrm << "{ "
 				<< "nest: " << std::setw(4) << std::dec << inst.nest << ", "
 				<< "code: " << std::setw(5) << std::dec << inst.code << ", "
