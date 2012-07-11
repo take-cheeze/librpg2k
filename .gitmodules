@@ -1,9 +1,0 @@
-[submodule "pugixml"]
-	path = pugixml
-	url = git@github.com:take-cheeze/pugixml.git
-[submodule "ntfmt"]
-	path = ntfmt
-	url = https://github.com/kikairoya/ntfmt.git
-[submodule "glsl_type"]
-	path = glsl_type
-	url = git@github.com:take-cheeze/glsl_type.git
