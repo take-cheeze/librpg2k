@@ -7,6 +7,8 @@
 #include "rpg2k/save_data.hxx"
 #include "rpg2k/database.hxx"
 
+#include "picojson.h"
+
 #include <algorithm>
 #include <fstream>
 #include <stack>
@@ -129,6 +131,15 @@ void base::analyze() const
   BOOST_FOREACH(element const& i, data_) {
     debug::tracer::print_trace(i, true);
   }
+}
+
+picojson::value base::to_json() const
+{
+  picojson::array ret;
+  BOOST_FOREACH(element const& i, data_) {
+    ret.push_back(i.to_json());
+  }
+  return picojson::value(ret);
 }
 
 define_loader::define_loader()

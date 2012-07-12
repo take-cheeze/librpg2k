@@ -19,6 +19,11 @@ ADD_LIBRARY(${PROJECT_NAME} STATIC ${SRCS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${RPG2k_LIBRARIES})
 ADD_DEPENDENCIES(${PROJECT_NAME} "pugixml")
 
+# picojson
+file(
+  DOWNLOAD "https://github.com/take-cheeze/picojson/raw/master/picojson.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/picojson.h")
+
 # test
 enable_testing()
 

@@ -7,6 +7,10 @@
 #include "structure.hxx"
 
 
+namespace picojson {
+  class value;
+} // namespace picojson
+
 namespace rpg2k
 {
 	namespace structure
@@ -29,7 +33,7 @@ namespace rpg2k
 
 			union {
 #define PP_types(r, data, elem) elem* BOOST_PP_CAT(elem, data);
-				BOOST_PP_SEQ_FOR_EACH(PP_types, _, PP_rpg2k_types)
+				BOOST_PP_SEQ_FOR_EACH(PP_types, _, PP_rpg2k_types PP_array_types)
 #undef PP_types
 #define PP_types(r, data, elem) elem BOOST_PP_CAT(elem, data);
 				BOOST_PP_SEQ_FOR_EACH(PP_types, _, PP_basic_types)
@@ -115,7 +119,9 @@ namespace rpg2k
 				rpg2k_assert(index_of_array2d_ != NOT_ARRAY);
 				return index_of_array2d_;
 			}
-		}; // class element
+
+      picojson::value to_json() const;
+    }; // class element
 
 		template<> inline
 		unsigned const& element::operator =(unsigned const& num) { (*this) = int(num); return *this; }

@@ -1,15 +1,12 @@
 #include <cstdlib>
 #include <iterator>
 #include <memory>
+#include <sstream>
 #include <stack>
 #include <vector>
 
 #include <boost/lambda/lambda.hpp>
-#include <boost/range/algorithm/count_if.hpp>
-#include <boost/range/algorithm/for_each.hpp>
-#include <boost/range/algorithm/remove_copy_if.hpp>
 #include <boost/range/algorithm/sort.hpp>
-#include <boost/range/algorithm/transform.hpp>
 #include <boost/range/irange.hpp>
 
 #include "rpg2k/array1d.hxx"
@@ -86,24 +83,33 @@ namespace rpg2k
 		std::ostream& tracer::print_trace(element const& e, bool const detail, std::ostream& ostrm)
 		{
 			std::stack<element const*> st;
+      std::ostringstream oss;
 
 			for(element const* buf = &e; buf->has_owner(); buf = &(buf->owner())) {
 				st.push(buf);
 			}
 
+      ostrm << std::dec << std::setfill(' ');
 			for(; !st.empty(); st.pop()) {
 				element const& top = *st.top();
 
 				element_type::type const owner_type = top.owner().definition().type;
 
-				ostrm << std::dec << std::setfill(' ');
-				ostrm << element_type::instance().to_string(owner_type);
+				// oss << element_type::instance().to_string(owner_type);
+				if(owner_type == element_type::array2d_) {
+          oss << "[" << std::setw(4) << top.index_of_array2d() << "]";
+        }
+        oss << "[" << std::setw(4) << top.index_of_array1d() << "]";
+				oss << ": ";
+
 				if(owner_type == element_type::array2d_) {
           ostrm << "[" << std::setw(4) << top.index_of_array2d() << "]";
         }
-        ostrm << "[" << std::setw(4) << top.index_of_array1d() << "]";
+        ostrm << "[" << std::setw(4) << 
+          top.definition().index_to_name(top.index_of_array1d()) << "]";
 				ostrm << ": ";
-			}
+      }
+      ostrm << endl << oss.str();
 
 			if(detail) { tracer::print_detail(e, ostrm); }
 

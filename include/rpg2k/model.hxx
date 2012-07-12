@@ -16,6 +16,10 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 
+namespace picojson {
+  class value;
+} // namespace picojson
+
 namespace rpg2k {
 namespace model {
 
@@ -64,6 +68,7 @@ class base
   void save() { save_as(path()); }
 
   void analyze() const;
+  picojson::value to_json() const;
 
   void serialize(std::ostream& s);
 }; // class base

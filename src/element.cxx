@@ -6,14 +6,81 @@
 #include "rpg2k/event.hxx"
 #include "rpg2k/stream.hxx"
 
+#include "picojson.h"
+
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 
 #include <stdexcept>
 
 
 namespace rpg2k {
 	namespace structure {
-		template<class T>
+    static picojson::value array1d_to_json(array1d const& ary) {
+      picojson::object ret;
+      descriptor const& def = ary.to_element().definition();
+      for(array1d::const_iterator i = ary.begin(); i != ary.end(); ++i) {
+        ret[def.index_to_name(i->first).to_system()] = i->second->to_json();
+      }
+      return picojson::value(ret);
+    }
+
+    picojson::value element::to_json() const {
+      switch(definition().type) {
+
+      case element_type::string_:
+        return picojson::value(to_string().to_system());
+      case element_type::int_:
+        return picojson::value(double(to_int()));
+      case element_type::double_:
+        return picojson::value(to_double());
+      case element_type::bool_:
+        return picojson::value(to_bool());
+
+      case element_type::array1d_:
+        return array1d_to_json(to_array1d());
+      case element_type::array2d_: {
+        picojson::object ret;
+        array2d const& ary = to_array2d();
+        for(array2d::const_iterator i = ary.begin(); i != ary.end(); ++i) {
+          ret[(boost::format("%d") % i->first).str()] = array1d_to_json(*(i->second));
+        }
+        return picojson::value(ret);
+      }
+
+      case element_type::event_: {
+        picojson::array ret;
+        BOOST_FOREACH(instruction const& i, to_event()) {
+          picojson::object inst;
+          picojson::array args;
+          BOOST_FOREACH(int a, i) { args.push_back(picojson::value(double(a))); }
+
+          inst["code"] = picojson::value(double(i.code));
+          inst["nest"] = picojson::value(double(i.nest));
+          inst["string_argument"] = picojson::value(i.string_argument.to_system());
+          inst["arguments"] = picojson::value(args);
+
+          ret.push_back(picojson::value(inst));
+        }
+        return picojson::value(ret);
+      }
+
+#define PP_enum(r, data, elem) \
+  case element_type::BOOST_PP_CAT(elem, data): { \
+    picojson::array ret; \
+    BOOST_FOREACH(int i, BOOST_PP_CAT(to_, elem)()) \
+      { ret.push_back(picojson::value(double(i))); } \
+    return picojson::value(ret);    \
+  }
+        BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (ber_enum)(binary) PP_array_types)
+#undef PP_enum
+
+      }
+      rpg2k_assert(false);
+      return picojson::value();
+    }
+
+    template<class T>
 		bool check_serialize(T const& result, binary const& src)
 		{
 			binary serialized = serialize(result);
@@ -73,6 +140,13 @@ namespace rpg2k {
 				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
 #undef PP_enum
 
+          
+#define PP_enum(r, data, elem) \
+					case element_type::BOOST_PP_CAT(elem, data): \
+						return (binary().assign(*impl_.BOOST_PP_CAT(elem, data))).serialize(s);
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_array_types)
+#undef PP_enum
+
 				default: rpg2k_assert(false); return s;
 			} else { return impl_.binary_->serialize(s); }
 		}
@@ -92,6 +166,12 @@ namespace rpg2k {
 						return bin.size(); \
 					}
 				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
+#undef PP_enum
+
+#define PP_enum(r, data, elem) \
+					case element_type::BOOST_PP_CAT(elem, data): \
+						return sizeof(elem::value_type) * impl_.BOOST_PP_CAT(elem, data)->size();
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_array_types)
 #undef PP_enum
 
 				default: rpg2k_assert(false); return 0;
@@ -125,7 +205,7 @@ namespace rpg2k {
 
 				default: rpg2k_analyze_assert(false); break;
 			} else switch(descriptor_->type) {
-				BOOST_PP_SEQ_FOR_EACH(PP_enum_no_default, _, (ber_enum)(binary)(event)(string))
+          BOOST_PP_SEQ_FOR_EACH(PP_enum_no_default, _, (ber_enum)(binary)(event)(string) PP_array_types)
 #undef PP_enum_no_default
 
 #define PP_enum(r, data, elem) \
@@ -138,6 +218,7 @@ namespace rpg2k {
 				default: rpg2k_analyze_assert(false); break;
 			}
 		}
+
 		void element::init(binary const& b)
 		{
 			exists_ = true;
@@ -163,7 +244,16 @@ namespace rpg2k {
 		break;
 				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (ber_enum)(binary)(event)(string))
 #undef PP_enum
-			} else { impl_.binary_ = new binary(b); }
+
+#define PP_enum(r, data, elem) \
+  case element_type::BOOST_PP_CAT(elem, BOOST_PP_CAT(_array, data)): \
+    impl_.BOOST_PP_CAT(elem, BOOST_PP_CAT(_array, data)) = new BOOST_PP_CAT(elem, _array) \
+      (b.to_vector<BOOST_PP_CAT(elem, _t)>()); \
+		break;
+          BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (int32)(int16)(int8))
+#undef PP_enum
+
+      } else { impl_.binary_ = new binary(b); }
 		}
 		void element::init(std::istream& s)
 		{
@@ -200,7 +290,7 @@ namespace rpg2k {
 	case element_type::BOOST_PP_CAT(elem, data): \
 		impl_.BOOST_PP_CAT(elem, data) = new elem(*e.impl_.BOOST_PP_CAT(elem, data)); \
 		break;
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types PP_array_types)
 #undef PP_enum
 
 #define PP_enum(r, data, elem) \
@@ -261,7 +351,7 @@ namespace rpg2k {
 	case element_type::BOOST_PP_CAT(elem, data): \
 		delete impl_.BOOST_PP_CAT(elem, data); \
 		break;
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types PP_array_types)
 #undef PP_enum
 #define PP_enum(r, data, elem) case element_type::BOOST_PP_CAT(elem, data):
 				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
@@ -278,7 +368,7 @@ namespace rpg2k {
 					case element_type::BOOST_PP_CAT(elem, data): \
 						(*impl_.BOOST_PP_CAT(elem, data)) = (*src.impl_.BOOST_PP_CAT(elem, data)); \
 						break;
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types PP_array_types)
 #undef PP_enum
 
 #define PP_enum(r, data, elem) \
@@ -323,7 +413,7 @@ namespace rpg2k {
 #undef PP_enum
 
 #define PP_enum(r, data, elem) case element_type::BOOST_PP_CAT(elem, data):
-				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types)
+				BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types PP_array_types)
 #undef PP_enum
 					break;
 				default: rpg2k_assert(false);
@@ -361,7 +451,7 @@ namespace rpg2k {
 		rpg2k_assert(impl_.BOOST_PP_CAT(elem, data)); \
 		return *impl_.BOOST_PP_CAT(elem, data); \
 	}
-		BOOST_PP_SEQ_FOR_EACH(PP_cast_operator, _, PP_rpg2k_types)
+		BOOST_PP_SEQ_FOR_EACH(PP_cast_operator, _, PP_rpg2k_types PP_array_types)
 #undef PP_cast_operator
 
 #define PP_cast_operator(r, data, elem) \

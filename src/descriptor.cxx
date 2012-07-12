@@ -4,7 +4,9 @@
 #include "rpg2k/stream.hxx"
 #include "rpg2k/structure.hxx"
 
+#include <boost/bind.hpp>
 #include <boost/preprocessor/stringize.hpp>
+#include <boost/range/algorithm/find_if.hpp>
 
 
 namespace rpg2k
@@ -135,5 +137,16 @@ namespace rpg2k
 		{
 			return element_type::instance().to_string(type);
 		}
-	} // namespace structure
+
+    static bool is_value(std::pair<string, int> const& p, int v) {
+      return(p.second == v);
+    }
+
+    string const& descriptor::index_to_name(int idx) const {
+      array_table_type::const_iterator it =
+        boost::find_if(array_table(), boost::bind(is_value, _1, idx));
+      rpg2k_assert(it != array_table().end());
+      return it->first;
+    }
+  } // namespace structure
 } // namespace rpg2k

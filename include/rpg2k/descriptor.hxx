@@ -26,6 +26,10 @@ namespace rpg2k
 		class element;
 		class event;
 
+    typedef std::vector<int32_t> int32_array;
+    typedef std::vector<int16_t> int16_array;
+    typedef std::vector<int8_t> int8_array;
+
 		class descriptor;
 		typedef boost::ptr_unordered_map<unsigned, descriptor> array_define_type;
 		typedef boost::unordered_map<string, int> array_table_type;
@@ -43,7 +47,12 @@ namespace rpg2k
 	(event) \
 	(string) \
 
-#define PP_all_types PP_basic_types PP_rpg2k_types
+#define PP_array_types \
+  (int32_array) \
+	(int16_array) \
+	(int8_array) \
+
+#define PP_all_types PP_basic_types PP_rpg2k_types PP_array_types
 
 		class element_type : public singleton<element_type const>
 		{
@@ -84,6 +93,7 @@ namespace rpg2k
 			}
 			array_define_type const& array_define() const;
 			array_table_type const& array_table() const { return *array_table_; }
+      string const& index_to_name(int idx) const;
 
 			string const& type_name() const;
 			element_type::type const type;

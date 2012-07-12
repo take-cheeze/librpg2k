@@ -30,24 +30,24 @@ namespace rpg2k {
 		void add_at_exit_function(void (*func)(void));
 
 		std::string demangle_type_info(std::type_info const& info);
-		#if RPG2K_USE_RTTI
+#if RPG2K_USE_RTTI
 			template<typename T>
 			inline std::string demangle() { return demangle_type_info(typeid(T)); }
 			template<typename T>
 			inline std::string demangle(T& src) { return demangle_type_info(typeid(src)); }
-		#endif
+#endif
 
 		extern std::ofstream ANALYZE_RESULT; // default is analyze.txt
 
 		class analyze_exception : public std::exception {};
 #if RPG2K_DEBUG
-#	define rpg2k_analyze_assert(EXP) if(!(EXP)) throw debug::analyze_exception()
+#  define rpg2k_analyze_assert(EXP) if(!(EXP)) throw debug::analyze_exception()
 #else
-#	define rpg2k_analyze_assert(EXP) rpg2k_assert(EXP)
+#  define rpg2k_analyze_assert(EXP) rpg2k_assert(EXP)
 #endif
 
 		struct tracer {
-			#define PP_default_output std::ostream& ostrm = ANALYZE_RESULT
+#define PP_default_output std::ostream& ostrm = ANALYZE_RESULT
 
 			typedef structure::array1d array1d;
 			typedef structure::array2d array2d;
@@ -55,6 +55,9 @@ namespace rpg2k {
 			typedef structure::element element;
 			typedef structure::event event;
 			typedef structure::instruction instruction;
+			typedef structure::int32_array int32_array;
+			typedef structure::int16_array int16_array;
+			typedef structure::int8_array int8_array;
 
 			static std::ostream& print_trace(element const& e, bool detail = false, PP_default_output);
 			static std::ostream& print_detail(element const& e, PP_default_output);
