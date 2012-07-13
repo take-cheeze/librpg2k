@@ -16,23 +16,6 @@
 #include "rpg2k/event.hxx"
 #include "rpg2k/stream.hxx"
 
-// demangling header
-#if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
-#  include <cxxabi.h>
-#elif RPG2K_IS_MSVC
-	extern "C"
-	char * unDName(
-		char * outputstring,
-		const char * name,
-		int maxstringLength,
-		void * (* pAlloc)(size_t),
-		void (* pFree)(void *),
-		unsigned short disable_flags
-	);
-#else
-#  error "Demangle not supported"
-#endif
-
 
 namespace rpg2k
 {
@@ -51,31 +34,6 @@ namespace rpg2k
 		void addAtExitFunction(void (*func)(void))
 		{
 			if(atexit(func) != 0) rpg2k_assert(false);
-		}
-
-		std::string demangle_typeInfo(std::type_info const& info)
-		{
-#if(RPG2K_IS_GCC || RPG2K_IS_CLANG)
-				int status;
-				char* const readable = abi::__cxa_demangle(info.name(), NULL, NULL, &status);
-
-				rpg2k_assert(readable);
-				switch(status) {
-					case -1: rpg2k_assert(!"Memory error.");
-					case -2: rpg2k_assert(!"Invalid name.");
-					case -3: rpg2k_assert(!"Argument was invalid");
-					default: break;
-				}
-				std::string ret = readable; // char* to string
-				std::free(readable);
-#elif RPG2K_IS_MSVC
-				char* const readable = unDName(0, info.name(), 0, std::malloc, std::free, 0x2800);
-				rpg2k_assert(readable);
-				std::string ret = readable; // char* to string
-				std::free(readabl);
-#endif
-
-			return ret;
 		}
 
 		std::ofstream ANALYZE_RESULT("analyze.txt");

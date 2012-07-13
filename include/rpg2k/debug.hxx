@@ -29,14 +29,6 @@ namespace rpg2k {
 		std::string error(int err_no);
 		void add_at_exit_function(void (*func)(void));
 
-		std::string demangle_type_info(std::type_info const& info);
-#if RPG2K_USE_RTTI
-			template<typename T>
-			inline std::string demangle() { return demangle_type_info(typeid(T)); }
-			template<typename T>
-			inline std::string demangle(T& src) { return demangle_type_info(typeid(src)); }
-#endif
-
 		extern std::ofstream ANALYZE_RESULT; // default is analyze.txt
 
 		class analyze_exception : public std::exception {};
