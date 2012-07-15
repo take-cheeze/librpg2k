@@ -16,6 +16,10 @@
 
 namespace rpg2k {
 	namespace structure {
+    /*
+      element(descriptor const& info, picojson::value const& v);
+     */
+
     static picojson::value array1d_to_json(array1d const& ary) {
       picojson::object ret;
       descriptor const& def = ary.to_element().definition();
@@ -26,8 +30,7 @@ namespace rpg2k {
     }
 
     picojson::value element::to_json() const {
-      switch(definition().type) {
-
+      if(is_defined()) switch(definition().type) {
       case element_type::string_:
         return picojson::value(to_string().to_system());
       case element_type::int_:
@@ -75,7 +78,13 @@ namespace rpg2k {
         BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (ber_enum)(binary) PP_array_types)
 #undef PP_enum
 
+      } else {
+        picojson::array ret;
+        BOOST_FOREACH(int i, *impl_.binary_)
+          { ret.push_back(picojson::value(double(i))); }
+        return picojson::value(ret);
       }
+
       rpg2k_assert(false);
       return picojson::value();
     }
