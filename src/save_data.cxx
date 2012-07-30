@@ -14,7 +14,7 @@ namespace rpg2k
 	namespace model
 	{
 		save_data::save_data()
-		: base(""), id_(-1)
+        : base("", "LcfSaveData"), id_(-1)
 		{
 			base::reset();
 
@@ -22,12 +22,12 @@ namespace rpg2k
 			reset_replace();
 		}
 		save_data::save_data(boost::filesystem::path const& p)
-		: base(p), id_(0)
+        : base(p, "LcfSaveData"), id_(0)
 		{
 			load();
 		}
 		save_data::save_data(boost::filesystem::path const& dir, unsigned const id)
-		: base(dir), id_(id)
+        : base(dir, "LcfSaveData"), id_(id)
 		{
 			set_path(dir /(boost::format("Save%02d.lsd") % this->id_).str());
 			check_exists();
@@ -38,7 +38,7 @@ namespace rpg2k
 		}
     string save_data::analyze_prefix() const
 		{
-			return string(header()).append((boost::format(" %02d:") % int(id_)).str());
+			return string("LcfSaveData").append((boost::format(" %02d:") % int(id_)).str());
 		}
 
 		save_data const& save_data::operator =(save_data const& src)

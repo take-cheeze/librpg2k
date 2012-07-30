@@ -33,7 +33,6 @@ namespace rpg2k
 			virtual void load_impl();
 			virtual void save_impl();
 
-			virtual char const* header() const { return "LcfSaveData"; }
 			virtual char const* default_filename() const { return "Save00.lsd"; }
       virtual string analyze_prefix() const;
 		public:

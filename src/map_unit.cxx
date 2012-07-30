@@ -9,17 +9,17 @@ namespace rpg2k
 	namespace model
 	{
 		map_unit::map_unit()
-			: base(""), id_(0)
+        : base("", "LcfMapUnit"), id_(0)
 		{
 			base::reset();
 		}
 		map_unit::map_unit(boost::filesystem::path const& p)
-		: base(p), id_(0)
+		: base(p, "LcfMapUnit"), id_(0)
 		{
 			load();
 		}
 		map_unit::map_unit(boost::filesystem::path const& dir, unsigned const id)
-		: base(dir), id_(id)
+		: base(dir, "LcfMapUnit"), id_(id)
 		{
 			set_path(dir / (boost::format("Map%04d.lmu") % id_).str());
 			check_exists();
@@ -39,7 +39,7 @@ namespace rpg2k
 
 		string map_unit::analyze_prefix() const
 		{
-			return string(header()).append((boost::format(" %04d:") % int(id_)).str());
+			return string("LcfMapUnit").append((boost::format(" %04d:") % int(id_)).str());
 		}
 
 		void map_unit::save_impl()

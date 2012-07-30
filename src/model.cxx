@@ -55,8 +55,8 @@ unique_ptr<base>::type load_lcf(fs::path const& p)
   }
 }
 
-base::base(fs::path const& p)
-		: path_(p)
+base::base(fs::path const& p, string const& h)
+		: path_(p), header_(h)
 {
   check_exists();
 }
@@ -80,7 +80,7 @@ element const& base::operator [](unsigned index) const
 
 boost::ptr_vector<descriptor> const& base::definition() const
 {
-  return define_loader::instance().get(header());
+  return define_loader::instance().get(header_);
 }
 
 void base::check_exists()
@@ -95,7 +95,7 @@ void base::load()
 
   std::ifstream ifs(path_.c_str(), stream::INPUT_FLAG);
 
-  if(!stream::check_header(ifs, this->header())) rpg2k_assert(false);
+  if(!stream::check_header(ifs, header_)) rpg2k_assert(false);
   /*
     if(this->header() == std::string("LcfMapTree")) {
     // TODO
@@ -115,13 +115,13 @@ void base::save_as(fs::path const& filename)
   save_impl();
   std::ofstream ofs(filename.c_str(), stream::OUTPUT_FLAG);
   serialize(ofs);
-  if(this->header() == string("LcfMapUnit")) {
+  if(header_ == "LcfMapUnit") {
     stream::write_ber(ofs, structure::array1d::END_OF_ARRAY1D);
   }
 }
 void base::serialize(std::ostream& s)
 {
-  stream::write_header(s, this->header());
+  stream::write_header(s, header_);
   BOOST_FOREACH(element const& i, data_) { i.serialize(s); }
 }
 
@@ -135,10 +135,15 @@ void base::analyze() const
 
 picojson::value base::to_json() const
 {
-  picojson::array ret;
+  picojson::object ret;
+  ret["signature"] = picojson::value(header_.to_system());
+
+  picojson::array ary;
   BOOST_FOREACH(element const& i, data_) {
-    ret.push_back(i.to_json());
+    ary.push_back(i.to_json());
   }
+  ret["root"] = picojson::value(ary);
+
   return picojson::value(ret);
 }
 

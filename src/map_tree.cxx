@@ -7,7 +7,7 @@ namespace rpg2k
 	namespace model
 	{
     map_tree::map_tree(boost::filesystem::path const& p)
-		: base(p)
+        : base(p, "LcfMapTree")
 		{
 			load();
 		}

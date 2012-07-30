@@ -22,7 +22,6 @@ class database : public base
   void load_impl();
   void save_impl();
 
-  char const* header() const { return "LcfDataBase"; }
   char const* default_filename() const { return "RPG_RT.ldb"; }
  public:
   database(boost::filesystem::path const& p);

@@ -18,7 +18,6 @@ namespace rpg2k {
 			virtual void save_impl();
 			virtual void load_impl();
 
-			virtual char const* header() const { return "LcfMapUnit"; }
 			virtual char const* default_filename() const { return "Map0000.lmu"; }
       virtual string analyze_prefix() const;
 		public:

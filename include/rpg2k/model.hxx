@@ -28,14 +28,14 @@ class base
  private:
   boost::filesystem::path path_;
   boost::ptr_vector<structure::element> data_;
+  string const header_;
 
-  virtual void load_impl() = 0;
-  virtual void save_impl() = 0;
+  virtual void load_impl() {}
+  virtual void save_impl() {}
 
-  virtual char const* header() const = 0;
-  virtual char const* default_filename() const = 0;
+  virtual char const* default_filename() const { return ""; }
   virtual string analyze_prefix() const {
-    return string(header()).append(":");
+    return string(header_).append(":");
   }
  protected:
   boost::ptr_vector<structure::element>& data() { return data_; }
@@ -45,7 +45,7 @@ class base
 
   boost::ptr_vector<structure::descriptor> const& definition() const;
 
-  base(boost::filesystem::path const& p);
+  base(boost::filesystem::path const& p, string const& h);
 
   base(base const& src);
   base const& operator =(base const& src);

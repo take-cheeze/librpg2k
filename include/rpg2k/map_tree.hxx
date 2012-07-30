@@ -13,7 +13,6 @@ namespace rpg2k
 			virtual void load_impl();
 			virtual void save_impl();
 
-			virtual char const* header() const { return "LcfMapTree"; }
 			virtual char const* default_filename() const { return "RPG_RT.lmt"; }
 		protected:
 			using base::operator []; // since LMT's first element is array2d

@@ -8,7 +8,7 @@
 namespace rpg2k {
 	namespace model {
   database::database(boost::filesystem::path const& p)
-		: base(p)
+      : base(p, "LcfDataBase")
 		{
 			load();
 		}

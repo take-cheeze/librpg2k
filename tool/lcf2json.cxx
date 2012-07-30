@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     ost.open(argv[2]);
   } else {
     std::cout
-        << "usage> to_json INPUT_FILE [OUTPUT_FILE]" << std::endl
+        << "usage> lcf2json INPUT_FILE [OUTPUT_FILE]" << std::endl
         << std::endl
         << "- If OUTPUT_FILE is unspecified it will be outputed to stdout." << std::endl
         ;
