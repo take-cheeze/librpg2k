@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  ost << rpg2k::model::load_lcf(argv[1])->to_json();
+  ost << rpg2k::model::load(argv[1])->to_json();
 
   return EXIT_SUCCESS;
 }

@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  rpg2k::model::load_lcf(argv[1])->analyze();
+  rpg2k::model::load(argv[1])->analyze();
 
   return EXIT_SUCCESS;
 }

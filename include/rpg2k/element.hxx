@@ -107,6 +107,8 @@ namespace rpg2k
 				this->substantiate();
 				static_cast<T&>(*this) = src;
 			}
+      void assign(picojson::value const& v);
+
 			template<typename T>
 			T const& operator =(T const& src) { this->assign(src); return static_cast<T&>(*this); }
 			element& operator =(element const& src);

@@ -28,6 +28,7 @@ TEST(BER, ReadWrite)
 	boost::array<uint8_t, (sizeof(unsigned) * 8) / rpg2k::stream::BER_BIT + 1> buf;
 	BOOST_FOREACH(unsigned const& i, boost::irange(0, 10)) {
 		unsigned const target = std::rand();
+    (void)i;
 
 		io::stream<io::array_sink> os(io::array_sink(reinterpret_cast<char*>(buf.data()), buf.size()));
 		rpg2k::stream::write_ber(os, target);

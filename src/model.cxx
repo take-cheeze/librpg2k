@@ -7,7 +7,7 @@
 #include "rpg2k/save_data.hxx"
 #include "rpg2k/database.hxx"
 
-#include "picojson.h"
+#include <picojson.h>
 
 #include <algorithm>
 #include <fstream>
@@ -40,11 +40,22 @@ extern const char* sound;
 namespace model
 {
 
-unique_ptr<base>::type load_lcf(fs::path const& p)
-{
-  std::ifstream is(p.c_str(), std::ios::binary | std::ios::in);
-  assert(is);
-  string head = stream::read_header(is);
+unique_ptr<base>::type load(fs::path const& p) {
+  std::ifstream is(p.c_str(), stream::INPUT_FLAG);
+  rpg2k_assert(is);
+
+  string head;
+
+  picojson::value v;
+  std::string err = picojson::parse(v, is);
+  is.seekg(0);
+
+  if(err.empty()) {
+    head = v.get<picojson::object>()["signature"].get<std::string>();
+  } else {
+    head = stream::read_header(is);
+  }
+
   if(head == "LcfMapTree") { return unique_ptr<base>::type(new map_tree(p)); }
   else if(head == "LcfMapUnit") { return unique_ptr<base>::type(new map_unit(p)); }
   else if(head == "LcfDataBase") { return unique_ptr<base>::type(new database(p)); }
@@ -94,16 +105,28 @@ void base::load()
   rpg2k_assert(exists());
 
   std::ifstream ifs(path_.c_str(), stream::INPUT_FLAG);
+  
+  picojson::value v;
+  std::string err = picojson::parse(v, ifs);
+  ifs.seekg(0);
 
-  if(!stream::check_header(ifs, header_)) rpg2k_assert(false);
-  /*
-    if(this->header() == std::string("LcfMapTree")) {
-    // TODO
+  if(err.empty()) {
+    std::string const& h = v.get<picojson::object>()["signature"].get<std::string>();
+    rpg2k_assert(h == header_);
+    picojson::array const& ary = v.get<picojson::object>()["root"].get<picojson::array>();
+
+    rpg2k_assert(definition().size() == ary.size());
+
+    BOOST_FOREACH(descriptor const& i, this->definition()) {
+      data_.push_back(new element(i));
+      data_.back().assign(ary[data_.size() - 1]);
     }
-  */
+  } else {
+    if(!stream::check_header(ifs, header_)) { rpg2k_assert(false); }
 
-  BOOST_FOREACH(descriptor const& i, this->definition()) {
-    data_.push_back(new element(i, ifs));
+    BOOST_FOREACH(descriptor const& i, this->definition()) {
+      data_.push_back(new element(i, ifs));
+    }
   }
 
   rpg2k_assert(stream::is_eof(ifs));

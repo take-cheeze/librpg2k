@@ -46,6 +46,7 @@ class base
   boost::ptr_vector<structure::descriptor> const& definition() const;
 
   base(boost::filesystem::path const& p, string const& h);
+  base(picojson::value const& v);
 
   base(base const& src);
   base const& operator =(base const& src);
@@ -73,7 +74,8 @@ class base
   void serialize(std::ostream& s);
 }; // class base
 
-unique_ptr<base>::type load_lcf(boost::filesystem::path const& filename);
+unique_ptr<base>::type load(boost::filesystem::path const& filename);
+// unique_ptr<base>::type load(std::istream& ist);
 
 class define_loader : public singleton<define_loader>
 {
