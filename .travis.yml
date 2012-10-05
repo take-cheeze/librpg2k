@@ -1,0 +1,28 @@
+language: cpp
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libboost-filesystem-dev libboost-system-dev
+  - wget http://googletest.googlecode.com/files/gtest-1.6.0.zip
+  - unzip -q gtest-1.6.0.zip
+  - cd gtest-1.6.0
+  - cmake . && make
+  - cd ..
+  - mkdir lib
+  - mv gtest-1.6.0/libg* lib
+  - cmake -D CMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE .
+script: make
+after_script: make test
+branches:
+  only:
+    - master
+compiler:
+  - clang
+  - gcc
+env:
+  matrix:
+    - CMAKE_BUILD_TYPE=DEBUG
+    - CMAKE_BUILD_TYPE=RELEASE
+notifications:
+  email:
+    on_success: always
+    on_failure: always
