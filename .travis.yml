@@ -12,9 +12,6 @@ before_script:
   - cmake -D CMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE .
 script: make
 after_script: make test
-branches:
-  only:
-    - master
 compiler:
   - clang
   - gcc
