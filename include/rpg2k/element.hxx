@@ -102,7 +102,7 @@ namespace rpg2k
 			operator unsigned const&() const { return reinterpret_cast<unsigned const&>(to<int>()); }
 
 			template<typename T>
-			void assign(T const& src) 
+			void assign(T const& src)
 			{
 				this->substantiate();
 				static_cast<T&>(*this) = src;
