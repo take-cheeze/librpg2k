@@ -8,8 +8,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_module)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
-include_directories(${LIBRARY_OUTPUT_PATH})
-
 find_package(RPG2k REQUIRED)
 
 add_definitions(${RPG2k_DEFINITIONS})
