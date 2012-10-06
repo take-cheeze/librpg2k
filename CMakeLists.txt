@@ -20,9 +20,7 @@ target_link_libraries(${PROJECT_NAME} ${RPG2k_LIBRARIES})
 add_dependencies(${PROJECT_NAME} "pugixml")
 
 # picojson
-file(
-  DOWNLOAD "https://github.com/take-cheeze/picojson/raw/master/picojson.h"
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/picojson.h")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/picojson)
 
 # test
 enable_testing()
