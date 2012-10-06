@@ -41,7 +41,7 @@ void element::assign(picojson::value const& v) {
     case element_type::array1d_: {
       array1d& self = to_array1d();
       BOOST_FOREACH(picojson::object::value_type const& i, v.get<picojson::object>()) {
-        self[i.first.c_str()].assign(i.second);
+        self[i.first.get.c_str()].assign(i.second);
       }
     } break;
 
@@ -51,7 +51,7 @@ void element::assign(picojson::value const& v) {
         BOOST_FOREACH(picojson::object::value_type const& name,
                       i.second.get<picojson::object>())
         {
-          self[boost::lexical_cast<int>(i.first)][name.first.c_str()].assign(name.second);
+          self[boost::lexical_cast<int>(i.first.get())][name.first.get().c_str()].assign(name.second);
         }
       }
     } break;
@@ -225,7 +225,7 @@ std::ostream& element::serialize(std::ostream& s) const
           BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
 #undef PP_enum
 
-          
+
 #define PP_enum(r, data, elem)                                          \
               case element_type::BOOST_PP_CAT(elem, data):              \
                 return (binary().assign(*impl_.BOOST_PP_CAT(elem, data))).serialize(s);
