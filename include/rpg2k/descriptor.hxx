@@ -4,6 +4,8 @@
 #include "define.hxx"
 #include "singleton.hxx"
 
+#include <vector>
+
 #include <boost/bimap.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/preprocessor/cat.hpp>
