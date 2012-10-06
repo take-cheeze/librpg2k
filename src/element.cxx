@@ -41,7 +41,7 @@ void element::assign(picojson::value const& v) {
     case element_type::array1d_: {
       array1d& self = to_array1d();
       BOOST_FOREACH(picojson::object::value_type const& i, v.get<picojson::object>()) {
-        self[i.first.get.c_str()].assign(i.second);
+        self[i.first.get().c_str()].assign(i.second);
       }
     } break;
 
@@ -60,15 +60,14 @@ void element::assign(picojson::value const& v) {
       picojson::array const& in = v.get<picojson::array>();
       event out;
       BOOST_FOREACH(picojson::value const& i, in) {
-        picojson::object const& inst_in = i.get<picojson::object>();
         instruction inst_out;
 
-        inst_out.nest = inst_in.find("nest")->second.get<double>();
-        inst_out.code = inst_in.find("code")->second.get<double>();
-        inst_out.string_argument = string(inst_in.find("string_argument")->second.get<std::string>());
+        inst_out.nest = i.get("nest").get<double>();
+        inst_out.code = i.get("code").get<double>();
+        inst_out.string_argument = string(i.get("string_argument").get<std::string>());
 
         BOOST_FOREACH(picojson::value const& inst_arg,
-                      inst_in.find("arguments")->second.get<picojson::array>())
+                      i.get("arguments").get<picojson::array>())
         {
           inst_out.push_back(inst_arg.get<double>());
         }
@@ -100,7 +99,7 @@ static picojson::value array1d_to_json(array1d const& ary) {
   picojson::object ret;
   descriptor const& def = ary.to_element().definition();
   for(array1d::const_iterator i = ary.begin(); i != ary.end(); ++i) {
-    ret[def.index_to_name(i->first).to_system()] = i->second->to_json();
+    ret[picojson::object_key(def.index_to_name(i->first).to_system())] = i->second->to_json();
   }
   return picojson::value(ret);
 }
@@ -122,7 +121,7 @@ picojson::value element::to_json() const {
         picojson::object ret;
         array2d const& ary = to_array2d();
         for(array2d::const_iterator i = ary.begin(); i != ary.end(); ++i) {
-          ret[(boost::format("%d") % i->first).str()] = array1d_to_json(*(i->second));
+          ret[picojson::object_key((boost::format("%d") % i->first).str())] = array1d_to_json(*(i->second));
         }
         return picojson::value(ret);
       }
@@ -134,10 +133,10 @@ picojson::value element::to_json() const {
           picojson::array args;
           BOOST_FOREACH(int a, i) { args.push_back(picojson::value(double(a))); }
 
-          inst["code"] = picojson::value(double(i.code));
-          inst["nest"] = picojson::value(double(i.nest));
-          inst["string_argument"] = picojson::value(i.string_argument.to_system());
-          inst["arguments"] = picojson::value(args);
+          inst[picojson::object_key("code")] = picojson::value(double(i.code));
+          inst[picojson::object_key("nest")] = picojson::value(double(i.nest));
+          inst[picojson::object_key("string_argument")] = picojson::value(i.string_argument.to_system());
+          inst[picojson::object_key("arguments")] = picojson::value(args);
 
           ret.push_back(picojson::value(inst));
         }

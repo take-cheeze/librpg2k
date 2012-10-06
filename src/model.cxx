@@ -111,8 +111,7 @@ void base::load()
   ifs.seekg(0);
 
   if(err.empty()) {
-    std::string const& h = v.get("signature").get<std::string>();
-    rpg2k_assert(h == header_);
+    rpg2k_assert(v.get("signature").get<std::string>() == header_);
     picojson::array const& ary = v.get("root").get<picojson::array>();
 
     rpg2k_assert(definition().size() == ary.size());
@@ -158,16 +157,16 @@ void base::analyze() const
 
 picojson::value base::to_json() const
 {
-  picojson::value ret(picojson::object_type, bool());
-  ret.get("signature") = picojson::value(header_.to_system());
+  picojson::object ret;
+  ret[picojson::object_key("signature")] = picojson::value(header_.to_system());
 
   picojson::array ary;
   BOOST_FOREACH(element const& i, data_) {
     ary.push_back(i.to_json());
   }
-  ret.get("root") = picojson::value(ary);
+  ret[picojson::object_key("root")] = picojson::value(ary);
 
-  return ret;
+  return picojson::value(ret);
 }
 
 define_loader::define_loader()
