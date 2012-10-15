@@ -1,7 +1,7 @@
 language: cpp
 before_script:
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libboost-filesystem-dev libboost-system-dev
+  - sudo apt-get install -qq libboost-filesystem1.48-dev libboost-system1.48-dev
   - wget http://googletest.googlecode.com/files/gtest-1.6.0.zip
   - unzip -q gtest-1.6.0.zip
   - cd gtest-1.6.0
