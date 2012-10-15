@@ -1,5 +1,4 @@
 #include "rpg2k/array1d.hxx"
-#include "rpg2k/array1d_wrapper.hxx"
 #include "rpg2k/array2d.hxx"
 #include "rpg2k/debug.hxx"
 #include "rpg2k/element.hxx"
@@ -11,6 +10,7 @@
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 #include <stdexcept>
 
@@ -41,7 +41,11 @@ void element::assign(picojson::value const& v) {
     case element_type::array1d_: {
       array1d& self = to_array1d();
       BOOST_FOREACH(picojson::object::value_type const& i, v.get<picojson::object>()) {
-        self[i.first.get().c_str()].assign(i.second);
+        if(boost::regex_match(i.first.get(), boost::regex("^\\d+$"))) {
+          self[boost::lexical_cast<unsigned>(i.first.get())].assign(i.second);
+        } else {
+          self[i.first.get().c_str()].assign(i.second);
+        }
       }
     } break;
 
@@ -99,7 +103,10 @@ static picojson::value array1d_to_json(array1d const& ary) {
   picojson::object ret;
   descriptor const& def = ary.to_element().definition();
   for(array1d::const_iterator i = ary.begin(); i != ary.end(); ++i) {
-    ret[picojson::object_key(def.index_to_name(i->first).to_system())] = i->second->to_json();
+    ret[picojson::object_key(i->second->is_defined()
+                             ? def.index_to_name(i->first).to_system()
+                             : (boost::format("%d") % i->first).str())]
+    = i->second->to_json();
   }
   return picojson::value(ret);
 }
@@ -118,10 +125,10 @@ picojson::value element::to_json() const {
       case element_type::array1d_:
         return array1d_to_json(to_array1d());
       case element_type::array2d_: {
-        picojson::object ret;
         array2d const& ary = to_array2d();
+        picojson::array ret(ary.rbegin()->first + 1);
         for(array2d::const_iterator i = ary.begin(); i != ary.end(); ++i) {
-          ret[picojson::object_key((boost::format("%d") % i->first).str())] = array1d_to_json(*(i->second));
+          ret[i->first] = array1d_to_json(*(i->second));
         }
         return picojson::value(ret);
       }
@@ -153,15 +160,15 @@ picojson::value element::to_json() const {
         BOOST_PP_SEQ_FOR_EACH(PP_enum, _, (ber_enum)(binary) PP_array_types)
 #undef PP_enum
 
-            } else {
+    default:
+          rpg2k_assert(false);
+        return picojson::value();
+    } else {
     picojson::array ret;
     BOOST_FOREACH(int i, *impl_.binary_)
     { ret.push_back(picojson::value(double(i))); }
     return picojson::value(ret);
   }
-
-  rpg2k_assert(false);
-  return picojson::value();
 }
 
 template<class T>
@@ -265,6 +272,11 @@ size_t element::serialized_size() const
 void element::init()
 {
   exists_ = false;
+
+  if(!is_defined()) {
+    impl_.binary_ = NULL;
+    return;
+  }
 
   if(descriptor_->has_default()) switch(descriptor_->type) {
 #define PP_enum(r, data, elem)                                \
@@ -485,24 +497,6 @@ element& element::owner()
 
 void element::substantiate()
 {
-  if(descriptor_ && descriptor_->has_default()) switch(descriptor_->type) {
-#define PP_enum(r, data, elem)                                          \
-      case element_type::BOOST_PP_CAT(elem, data):                      \
-        if((impl_.BOOST_PP_CAT(elem, data)) == static_cast<elem const&>(*descriptor_)) { \
-          exists_ = false;                                              \
-          return;                                                       \
-        }                                                               \
-        break;
-      BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_basic_types)
-#undef PP_enum
-
-#define PP_enum(r, data, elem) case element_type::BOOST_PP_CAT(elem, data):
-          BOOST_PP_SEQ_FOR_EACH(PP_enum, _, PP_rpg2k_types PP_array_types)
-#undef PP_enum
-					break;
-      default: rpg2k_assert(false);
-    }
-
   exists_ = true;
 
   if(has_owner()) {

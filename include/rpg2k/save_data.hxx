@@ -86,21 +86,12 @@ namespace rpg2k
 			void set_current_event_id(unsigned const id) { current_event_id_ = id; }
 			unsigned current_event_id() const { return current_event_id_; }
 
-			structure::event_state& party()
-			{
-				return reinterpret_cast<structure::event_state&>((*this)[104].to_array1d());
-			}
-			structure::event_state const& party() const
-			{
-				return reinterpret_cast<structure::event_state const&>((*this)[104].to_array1d());
-			}
-
 			structure::array2d& character() { return (*this)[108]; }
 			structure::array2d const& character() const { return (*this)[108]; }
 
 			structure::array2d& event_state() { return (*this)[111].to_array1d()[11]; }
 			structure::array2d const& event_state() const { return (*this)[111].to_array1d()[11]; }
-			structure::event_state& event_state(unsigned id);
+			structure::array1d& event_state(unsigned id);
 		};
 	} // namespace model
 } // namespace rpg2k

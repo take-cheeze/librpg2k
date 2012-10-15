@@ -4,7 +4,6 @@
 #include "rpg2k/config.hxx"
 
 #include "rpg2k/array1d.hxx"
-#include "rpg2k/array1d_wrapper.hxx"
 #include "rpg2k/array2d.hxx"
 #include "rpg2k/command.hxx"
 #include "rpg2k/command_table.hxx"

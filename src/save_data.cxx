@@ -212,16 +212,14 @@ namespace rpg2k
 			return member_[index];
 		}
 
-		structure::event_state& save_data::event_state(unsigned id)
+		structure::array1d& save_data::event_state(unsigned id)
 		{
 			switch(id) {
 				case ID_PARTY: case ID_BOAT: case ID_SHIP: case ID_AIRSHIP:
-					return reinterpret_cast<structure::event_state&>(
-						(*this)[104 + (id-ID_PARTY)]);
+					return  (*this)[104 + (id-ID_PARTY)];
 				case ID_THIS: id = current_event_id(); // TODO
 				default:
-					return reinterpret_cast<structure::event_state&>(
-						(*this)[111].to_array1d()[11].to_array2d()[id]);
+					return  (*this)[111].to_array1d()[11].to_array2d()[id];
 			}
 		}
 

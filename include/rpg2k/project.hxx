@@ -1,7 +1,6 @@
 #ifndef _INC_RPG2K__PROJECT_HXX_
 #define _INC_RPG2K__PROJECT_HXX_
 
-#include "array1d_wrapper.hxx"
 #include "database.hxx"
 #include "map_tree.hxx"
 #include "map_unit.hxx"
@@ -163,7 +162,7 @@ class project::character_type
   equip_type equip;
   std::set<uint16_t> skill;
   std::vector<uint8_t> condition;
-  
+
   void sync();
   unsigned index() const {
     rpg2k_assert(lsd_.index() == ldb_.index());

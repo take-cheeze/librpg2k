@@ -4,6 +4,8 @@ project("rpg2k" CXX C)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_module)
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/picojson)
+
 # output path
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
@@ -17,7 +19,6 @@ link_directories(${RPG2k_LIBRARY_DIRS})
 file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx)
 add_library(${PROJECT_NAME} STATIC ${SRCS})
 target_link_libraries(${PROJECT_NAME} ${RPG2k_LIBRARIES})
-add_dependencies(${PROJECT_NAME} "pugixml")
 
 # picojson
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/picojson)
@@ -40,7 +41,7 @@ foreach(i ${CXX_TEST_SOURCES} ${NTFMT_TEST_SOURCES} ${NTFMT_SAMPLE_SOURCES})
     ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   add_test(
     NAME ${exe}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/TestGame
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND ${EXECUTABLE_OUTPUT_PATH}/test_${exe}
     --gtest_output=xml:${EXECUTABLE_OUTPUT_PATH}/test_${target}.xml
     --gtest_color=yes)
@@ -51,6 +52,7 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/tool TOOLS)
 foreach(i ${TOOLS})
   get_filename_component(exe ${i} NAME_WE)
   add_executable(${exe} ${i})
-  target_link_libraries(${exe} ${RPG2k_LIBRARIES} ${libs})
+  target_link_libraries(${exe}
+    ${RPG2k_LIBRARIES} ${libs} ${CMAKE_THREAD_LIBS_INIT})
   add_dependencies(${exe} ${PROJECT_NAME})
 endforeach()

@@ -6,7 +6,6 @@
 #include <vector>
 
 #include <boost/lambda/lambda.hpp>
-#include <boost/range/algorithm/sort.hpp>
 #include <boost/range/irange.hpp>
 
 #include "rpg2k/array1d.hxx"
@@ -63,7 +62,7 @@ namespace rpg2k
 				if(owner_type == element_type::array2d_) {
           ostrm << "[" << std::setw(4) << top.index_of_array2d() << "]";
         }
-        ostrm << "[" << std::setw(4) << 
+        ostrm << "[" << std::setw(4) <<
           top.definition().index_to_name(top.index_of_array1d()) << "]";
 				ostrm << ": ";
       }
@@ -148,12 +147,9 @@ namespace rpg2k
 
 		std::ostream& tracer::print_array1d(array1d const& val, std::ostream& ostrm)
 		{
-			std::vector<element const*> buf;
 			for(array1d::const_iterator i = val.begin(); i != val.end(); ++i) {
-				buf.push_back(i->second);
+				print_trace(*i->second, true, ostrm);
 			}
-			boost::sort(buf, array1d::sort_function);
-			BOOST_FOREACH(element const* i, buf) { print_trace(*i, true, ostrm); }
 			return ostrm;
 		}
 		std::ostream& tracer::print_array2d(array2d const& val, std::ostream& ostrm)

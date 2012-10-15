@@ -111,9 +111,7 @@ namespace rpg2k
 		}
 		array1d const& array2d::operator [](unsigned const index) const
 		{
-			const_iterator it = this->find(index);
-			rpg2k_assert(it != this->end());
-			return *it->second;
+      return const_cast<array2d&>(*this)[index];
 		}
 
 		unsigned array2d::count() const
