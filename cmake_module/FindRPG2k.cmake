@@ -45,7 +45,7 @@ else()
 endif()
 
 # boost
-find_package(Boost COMPONENTS filesystem system)
+find_package(Boost COMPONENTS filesystem system thread regex)
 if(NOT Boost_FOUND)
   set(RPG2k_FOUND FALSE)
 else()

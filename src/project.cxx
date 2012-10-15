@@ -91,7 +91,7 @@ save_data& project::lsd(unsigned const id) {
 }
 
 unsigned project::current_map_id() {
-  return lsd().event_state(ID_PARTY).map_id();
+  return lsd().event_state(ID_PARTY)[11].to<int>();
 }
 
 map_unit& project::lmu(unsigned id) {
@@ -291,8 +291,8 @@ void project::new_game() {
   // set party, boat, ship and airShip start point
   array1d const& start_lmt = lmt.start_point();
   array1d const& sys_ldb = ldb[22];
-  BOOST_FOREACH(int const i, boost::irange(1, ID_AIRSHIP - ID_PARTY)) {
-    event_state& dst = lsd().event_state(i + ID_PARTY);
+  BOOST_FOREACH(int const i, boost::irange(1, ID_AIRSHIP - ID_PARTY + 1)) {
+    array1d& dst = lsd().event_state(ID_PARTY + i);
 
     dst[11] = start_lmt[10*i + 1].to<int>();
     dst[12] = start_lmt[10*i + 2].to<int>();
@@ -300,7 +300,9 @@ void project::new_game() {
     dst[21] = int(char_set_dir::DOWN);
     dst[22] = int(char_set_dir::DOWN);
     dst[73] = sys_ldb[10+i].to_string();
-    if(sys_ldb[10+i + 3].exists()) dst[74] = sys_ldb[10+i + 3].to<int>();
+    if(sys_ldb[10+i + 3].exists()) {
+      dst[74] = sys_ldb[10+i + 3].to<int>();
+    }
   }
   // move to start point
   move(start_lmt[1], start_lmt[2], start_lmt[3]);
@@ -338,7 +340,7 @@ void project::new_game() {
   // set party's char graphic
   if(!lsd().member().empty()) {
     character_type const& front_char = this->character(lsd().member().front());
-    event_state& party = lsd().event_state(ID_PARTY);
+    array1d& party = lsd().event_state(ID_PARTY);
     party[21] = int(char_set_dir::DOWN);
     party[22] = int(char_set_dir::DOWN);
     party[73] = front_char.char_set();
@@ -349,7 +351,7 @@ void project::new_game() {
 void project::move(unsigned const map_id, int const x, int const y) {
   rpg2k_assert(map_id >= ID_MIN);
   // set party position
-  event_state& party = lsd().event_state(ID_PARTY);
+  array1d& party = lsd().event_state(ID_PARTY);
   party[11] = map_id; party[12] = x; party[13] = y;
 
   /*
@@ -398,8 +400,8 @@ int project::chip_set_id() {
 }
 
 project::character_type::character_type(unsigned const char_id
-                                        , structure::array1d const& ldb
-                                        , structure::array1d& lsd)
+                                        , array1d const& ldb
+                                        , array1d& lsd)
     : char_id_(char_id), ldb_(ldb), lsd_(lsd)
     , basic_param_(ldb[31].to_binary().to_vector<uint16_t>())
     , condition_step_(lsd_[82].to_binary().to_vector<uint16_t>())
@@ -443,7 +445,7 @@ unsigned project::equip_num(unsigned const item_id) const {
   return ret;
 }
 
-bool project::valid_page_map(structure::array1d const& term) const {
+bool project::valid_page_map(array1d const& term) const {
   int flags = term[1];
 
   member_type const& mem = lsd().member();
@@ -457,7 +459,7 @@ bool project::valid_page_map(structure::array1d const& term) const {
        (boost::find(mem, term[7].to<unsigned>()) == mem.end())) ||
       ((flags & (0x01 << 5)) && (lsd().timer_left() > term[8].to<unsigned>())));
 }
-bool project::valid_page_battle(structure::array1d const& term) const {
+bool project::valid_page_battle(array1d const& term) const {
   int flags = term[1];
 
   return (
@@ -565,7 +567,7 @@ int project::param_with_equip(unsigned char_id, param::type t) const {
   return ret;
 }
 bool project::process_action(unsigned const event_id, action::type const act, std::istream& s) {
-  event_state& ev = lsd().event_state(event_id);
+  array1d& ev = lsd().event_state(event_id);
 
   switch(act) {
     case action::move::UP   : ev[13] = ev[13].to<int>() - 1; break;
@@ -589,13 +591,11 @@ bool project::process_action(unsigned const event_id, action::type const act, st
       ev[13] = ev[13].to<int>() - 1;
       break;
     case action::move::RANDOM:
-      return process_action(event_id, random(action::move::UP, action::move::LEFT + 1), s);
     case action::move::TO_PARTY:
       break;
     case action::move::FROM_PARTY:
       break;
     case action::move::A_STEP:
-      return process_action(event_id, int(action::move::UP) + int(ev.event_dir()), s);
     case action::face::UP   :
     case action::face::RIGHT:
     case action::face::DOWN :
@@ -604,13 +604,10 @@ bool project::process_action(unsigned const event_id, action::type const act, st
       ev[22] = int(act - action::face::UP);
       break;
     case action::turn::RIGHT_90:
-      ev[21] = int(char_set_dir::type(int(ev.event_dir()) / int(char_set_dir::END)));
       break;
     case action::turn::LEFT_90:
-      ev[21] = int(char_set_dir::type((int(ev.event_dir()) + int(char_set_dir::END) - 1) / int(char_set_dir::END)));
       break;
     case action::turn::OPPOSITE:
-      ev[21] = int(int(ev.event_dir()) + 1 / int(char_set_dir::END));
       break;
     case action::turn::RIGHT_OR_LEFT_90:
       return process_action(event_id,

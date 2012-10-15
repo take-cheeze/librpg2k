@@ -51,7 +51,7 @@ unique_ptr<base>::type load(fs::path const& p) {
   is.seekg(0);
 
   if(err.empty()) {
-    head = v.get<picojson::object>()["signature"].get<std::string>();
+    head = v.get("signature").get<std::string>();
   } else {
     head = stream::read_header(is);
   }
@@ -105,15 +105,14 @@ void base::load()
   rpg2k_assert(exists());
 
   std::ifstream ifs(path_.c_str(), stream::INPUT_FLAG);
-  
+
   picojson::value v;
   std::string err = picojson::parse(v, ifs);
   ifs.seekg(0);
 
   if(err.empty()) {
-    std::string const& h = v.get<picojson::object>()["signature"].get<std::string>();
-    rpg2k_assert(h == header_);
-    picojson::array const& ary = v.get<picojson::object>()["root"].get<picojson::array>();
+    rpg2k_assert(v.get("signature").get<std::string>() == header_);
+    picojson::array const& ary = v.get("root").get<picojson::array>();
 
     rpg2k_assert(definition().size() == ary.size());
 
@@ -159,13 +158,13 @@ void base::analyze() const
 picojson::value base::to_json() const
 {
   picojson::object ret;
-  ret["signature"] = picojson::value(header_.to_system());
+  ret[picojson::object_key("signature")] = picojson::value(header_.to_system());
 
   picojson::array ary;
   BOOST_FOREACH(element const& i, data_) {
     ary.push_back(i.to_json());
   }
-  ret["root"] = picojson::value(ary);
+  ret[picojson::object_key("root")] = picojson::value(ary);
 
   return picojson::value(ret);
 }
@@ -181,7 +180,7 @@ define_loader::define_loader()
 
 #define PP_insert(r, data, elem)                                        \
 	define_text_.insert(std::make_pair(string(BOOST_PP_STRINGIZE(elem)), define::elem));
-  BOOST_PP_SEQ_FOR_EACH(PP_insert, , 
+  BOOST_PP_SEQ_FOR_EACH(PP_insert, ,
                         (LcfDataBase)(LcfMapTree)(LcfMapUnit)(LcfSaveData)
                         (event_state)(music)(sound))
 #undef PP_insert

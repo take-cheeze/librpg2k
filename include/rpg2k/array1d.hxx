@@ -2,7 +2,7 @@
 #define _INC_RPG2K__ARRAY1D_HXX_
 
 #include <map>
-#include <boost/ptr_container/ptr_unordered_map.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 #include "descriptor.hxx"
 #include "structure.hxx"
 
@@ -14,7 +14,7 @@ namespace rpg2k
 		class array2d;
 		class element;
 
-		typedef boost::ptr_unordered_map<unsigned, element> base_of_array1d;
+		typedef boost::ptr_map<unsigned, element> base_of_array1d;
 
 		class array1d : public base_of_array1d
 		{
@@ -27,6 +27,7 @@ namespace rpg2k
 		protected:
 			array1d();
 
+      void init();
 			void init(std::istream& s);
 		public:
 			enum { END_OF_ARRAY1D = 0, };
@@ -67,8 +68,6 @@ namespace rpg2k
 			bool is_element() const;
 			element& to_element();
 			element const& to_element() const;
-
-			static bool sort_function(element const* l, element const* r);
 		}; // class array1d
 	} // namespace structure
 } // namespace rpg2k

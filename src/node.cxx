@@ -5,7 +5,7 @@
 
 namespace rpg2k
 {
-	void node::add_child(node::priority const& p, node& child) 
+	void node::add_child(node::priority const& p, node& child)
 	{
 		this->children->insert(children_type::value_type(p, &child));
 		child.parent_ = this;
@@ -20,16 +20,20 @@ namespace rpg2k
 	{
 		this->update_this();
 
-		if(children) BOOST_FOREACH(children_type::left_value_type& i, children->left) { i.second->update(); }
+		if(children) {
+      BOOST_FOREACH(children_type::left_value_type& i, children->left) { i.second->update(); }
+    }
 	}
 	void node::draw(graphics2d& g) const
 	{
 		this->draw(g);
 
-		if(children) BOOST_FOREACH(children_type::left_value_type& i, children->left) { i.second->draw(g); }
+		if(children) {
+      BOOST_FOREACH(children_type::left_value_type& i, children->left) { i.second->draw(g); }
+    }
 	}
 
-	void node_switcher::add_child(node_switcher::key const& k, node& child) 
+	void node_switcher::add_child(node_switcher::key const& k, node& child)
 	{
 		this->switch_list_.insert(switch_list_type::value_type(k, &child));
 		child.parent_ = this;

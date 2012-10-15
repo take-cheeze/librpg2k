@@ -27,6 +27,8 @@ namespace rpg2k {
 		// copying vocabulary
 			structure::array1d const& voc_src = (*this)[21];
 			for(structure::array1d::const_iterator i = voc_src.begin(); i != voc_src.end(); ++i) {
+				if(!i->second->exists()) continue;
+
 				if(i->first >= vocabulary_.size()) {
 					vocabulary_.resize(i->first + 1);
 				}

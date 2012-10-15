@@ -1,3 +1,6 @@
 [submodule "TestGame"]
 	path = TestGame
 	url = https://github.com/EasyRPG/TestGame.git
+[submodule "picojson"]
+	path = picojson
+	url = git://github.com/take-cheeze/picojson.git

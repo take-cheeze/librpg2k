@@ -1,4 +1,3 @@
-#include "rpg2k/array1d_wrapper.hxx"
 #include "rpg2k/debug.hxx"
 #include "rpg2k/element.hxx"
 #include "rpg2k/encode.hxx"
@@ -7,7 +6,7 @@
 #include <boost/foreach.hpp>
 
 
-namespace 
+namespace
 {
 	typedef int32_t rpg2k_integer;
 } // namespace
