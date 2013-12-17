@@ -25,6 +25,7 @@ class database : public base
   char const* default_filename() const { return "RPG_RT.ldb"; }
  public:
   database(boost::filesystem::path const& p);
+  database(picojson::value const& p);
 
   structure::array2d& character() { return (*this)[11]; }
   structure::array2d& skill() { return (*this)[12]; }

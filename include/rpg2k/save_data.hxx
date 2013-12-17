@@ -39,6 +39,7 @@ namespace rpg2k
 			save_data();
 			save_data(boost::filesystem::path const& p);
 			save_data(boost::filesystem::path const& dir, unsigned id);
+      save_data(picojson::value const& p);
 
 			save_data const& operator =(save_data const& src);
 

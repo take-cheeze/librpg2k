@@ -45,8 +45,8 @@ class base
 
   boost::ptr_vector<structure::descriptor> const& definition() const;
 
-  base(boost::filesystem::path const& p, string const& h);
-  base(picojson::value const& v);
+  base(boost::filesystem::path const& p, char const* h);
+  base(picojson::value const& v, char const* h);
 
   base(base const& src);
   base const& operator =(base const& src);

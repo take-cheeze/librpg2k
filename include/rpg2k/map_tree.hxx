@@ -18,6 +18,7 @@ namespace rpg2k
 			using base::operator []; // since LMT's first element is array2d
 		public:
 			map_tree(boost::filesystem::path const& p);
+      map_tree(picojson::value const& p);
 
 			structure::array1d const& operator [](unsigned map_id) const;
 			structure::array1d& operator [](unsigned map_id);

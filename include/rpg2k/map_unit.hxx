@@ -24,7 +24,7 @@ namespace rpg2k {
 			map_unit();
 			map_unit(boost::filesystem::path const& p);
 			map_unit(boost::filesystem::path const& p, unsigned id);
-
+      map_unit(picojson::value const& p);
 
 			unsigned id() const { return id_; }
 

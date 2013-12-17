@@ -37,8 +37,7 @@ extern const char* music;
 extern const char* sound;
 }
 
-namespace model
-{
+namespace model {
 
 unique_ptr<base>::type load(fs::path const& p) {
   std::ifstream is(p.c_str(), stream::INPUT_FLAG);
@@ -66,10 +65,24 @@ unique_ptr<base>::type load(fs::path const& p) {
   }
 }
 
-base::base(fs::path const& p, string const& h)
+base::base(fs::path const& p, char const* const h)
 		: path_(p), header_(h)
 {
   check_exists();
+}
+
+base::base(picojson::value const& p, char const* const h)
+		: header_(h)
+{
+  assert(p.get("signature").to_str() == header_);
+
+  picojson::array const& ary = p.get("root").get<picojson::array>();
+  assert(ary.size() == definition().size());
+
+  for(size_t i = 0; i < ary.size(); ++i) {
+    data_.push_back(new element(definition()[i]));
+    data_.back().assign(ary[i]);
+  }
 }
 
 void base::reset()

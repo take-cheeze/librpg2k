@@ -10,6 +10,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/picojson)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
+# picojson
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/picojson)
+
 find_package(RPG2k REQUIRED)
 
 add_definitions(${RPG2k_DEFINITIONS})
@@ -18,16 +21,13 @@ link_directories(${RPG2k_LIBRARY_DIRS})
 
 file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx)
 add_library(${PROJECT_NAME} STATIC ${SRCS})
-target_link_libraries(${PROJECT_NAME} ${RPG2k_LIBRARIES})
-
-# picojson
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/picojson)
 
 # test
 enable_testing()
 
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
+add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=1)
 find_package(Threads)
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/test CXX_TEST_SOURCES)

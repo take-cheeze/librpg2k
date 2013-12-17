@@ -31,8 +31,16 @@ find_path(RPG2k_INCLUDE_DIRS rpg2k.hxx
 list(APPEND RPG2k_LIBRARIES rpg2k)
 list(APPEND RPG2k_LIBRARY_DIRS ${CMAKE_BINARY_DIR}/lib)
 
-if(NOT ${RPG2k_INCLUDE_DIR})
+if(NOT ${RPG2k_INCLUDE_DIRS})
   set(RPG2k_FOUND FALSE)
+endif()
+
+find_path(PICOJSON_INCLUDE_DIR picojson.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include)
+if(NOT ${PICOJSON_INCLUDE_DIR})
+  set(RPG2k_FOUND FALSE)
+else()
+  list(APPEND RPG2k_INCLUDE_DIRS ${PICOJSON_INCLUDE_DIR})
 endif()
 
 # iconv
